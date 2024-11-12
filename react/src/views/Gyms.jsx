@@ -17,11 +17,12 @@ export default function Gyms() {
         axiosClient.get('cities/1/gyms')
             .then(({ data }) => {
                 setGyms(data);
-                setLoading(false); // Stop loading once data is fetched
+                // debugger;
+                setLoading(false);
             })
             .catch(error => {
                 console.error("Error fetching gyms:", error);
-                setLoading(false); // Stop loading if there’s an error
+                setLoading(false);
             });
     }, []);
 
@@ -44,8 +45,13 @@ export default function Gyms() {
                     {/* </div> */}
                 </div>
             ) : (
+                // <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3">
+                //     {gyms.slice(0, 3).map(gym => ( // pasirenkam kiek norime isvesti gym is array
+                //         <GymListItem gym={gym} key={gym.id} onDeleteClick={onDeleteClick} />
+                //     ))}
+                // </div>
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3">
-                    {gyms.map(gym => (
+                    {gyms.map(gym => ( // pasirenkam kiek norime isvesti gym is array
                         <GymListItem gym={gym} key={gym.id} onDeleteClick={onDeleteClick} />
                     ))}
                 </div>

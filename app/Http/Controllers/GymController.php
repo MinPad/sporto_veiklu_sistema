@@ -23,7 +23,7 @@ class GymController extends Controller
     //     return response()->json(GymResource::collection($city->gyms()->with('city')->get()), 200);
     // }
     public function index($cityId, User $manager = null)
-{
+    {
     $city = City::find($cityId);
 
     if (!$city) {
@@ -31,7 +31,7 @@ class GymController extends Controller
     }
 
     return response()->json(GymResource::collection($city->gyms()->with('city')->get()), 200);
-}
+    }
 
 
     public function show($cityId, Gym $gym)

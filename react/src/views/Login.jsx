@@ -29,8 +29,10 @@ export default function Login() {
                 password,
             })
             .then(({ data }) => {
+                // debugger;
                 setCurrentUser(data.user);
                 setUserToken(data.token);
+                localStorage.setItem('TOKEN', data.token)
             })
             .catch((error) => {
                 if (error.response) {

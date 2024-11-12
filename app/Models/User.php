@@ -14,12 +14,15 @@ class User extends Authenticatable implements JWTSubject
     use HasFactory, Notifiable;
     public function getJWTIdentifier()
     {
+        // Refresh token(1h) + 3 roles + cloud
         return $this->getKey();
     }
 
     public function getJWTCustomClaims()
     {
-        return [];
+        return [
+            'role' => $this->role,  // Adds the user's role to the JWT token
+        ];
     }
     /**
      * The attributes that are mass assignable.
@@ -54,4 +57,9 @@ class User extends Authenticatable implements JWTSubject
             'password' => 'hashed',
         ];
     }
+    public function refreshTokens()
+    {
+    return $this->hasMany(RefreshToken::class);
+    }
+
 }

@@ -20,7 +20,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:api'
 
 // Route::get('/users/{user}', [UserController::class, 'show'])->middleware('auth:api');
 
-Route::get('/users/{id}', [UserController::class, 'show']);
+Route::get('/users/{id}', [UserController::class, 'show'])->middleware('auth:api');;
 
 // Route::patch('/users/{user}', [UserController::class, 'update'])->middleware('auth:api', 'valid.json');
 Route::patch('/users/{user}', [UserController::class, 'update'])->middleware('auth:api');

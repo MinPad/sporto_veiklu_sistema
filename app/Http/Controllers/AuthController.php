@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Exception;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -118,25 +120,56 @@ class AuthController extends Controller
     // }
     public function login(LoginRequest $request)
     {
-        $credentials = $request->validated();
-        // \Log::info('Login attempt with credentials: ', $credentials);
- 
-        if (!$token = auth()->attempt($credentials)) {
-            // \Log::info('Login failed for credentials: ', $credentials);
+    $credentials = $request->validated();
+
+    // Attempt to authenticate the user with the given credentials
+    if (!$token = auth()->attempt($credentials)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Unauthorized',
+        ], 401);
+    }
+
+    // Generate a unique refresh token
+    $refreshToken = Str::random(60);
+
+    auth()->user()->refreshTokens()->create([
+        'token' => $refreshToken,
+        'expires_at' => now()->addMinutes(config('jwt.refresh_ttl')), 
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Login successful',
+        'accessToken' => $token, 
+        'tokenType' => 'bearer',
+        'expiresIn' => auth()->factory()->getTTL() * 60, // Time in seconds until token expiration
+    ])->cookie('refreshToken', $refreshToken, config('jwt.refresh_ttl') * 60, null, null, true, true);
+    }
+
+
+
+    
+    
+    
+
+    public function refresh()
+    {
+        try {
+            $newAccessToken = auth()->refresh();
+    
             return response()->json([
-                'success' => false,
-                'message' => 'Unauthorized',
+                'message' => 'Token successfully refreshed',
+                'accessToken' => $newAccessToken,
+                'tokenType' => 'bearer',
+                'expiresIn' => auth()->factory()->getTTL() * 60,
+            ], 200);
+        } catch (JWTException $e) {
+            return response()->json([
+                'message' => 'Invalid or expired refresh token'
             ], 401);
         }
- 
-        // \Log::info('Token generated: ', [$token]);
-        return response()->json([
-            'success' => true,
-            'message' => 'Login successful',
-            'token' => $token,
-        ]);
     }
-    
     
     
 
