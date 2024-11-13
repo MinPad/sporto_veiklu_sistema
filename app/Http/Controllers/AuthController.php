@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\SignupRequest;
 use App\Http\Requests\LoginRequest;
 use App\Models\User;
+use App\Models\RefreshToken;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
@@ -13,6 +14,7 @@ use Illuminate\Http\Request;
 use Exception;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class AuthController extends Controller
 {
@@ -130,7 +132,7 @@ class AuthController extends Controller
         ], 401);
     }
 
-    // Generate a unique refresh token
+    
     $refreshToken = Str::random(60);
 
     auth()->user()->refreshTokens()->create([
@@ -143,26 +145,26 @@ class AuthController extends Controller
         'message' => 'Login successful',
         'accessToken' => $token, 
         'tokenType' => 'bearer',
-        'expiresIn' => auth()->factory()->getTTL() * 60, // Time in seconds until token expiration
+        'refreshToken' => $refreshToken,
+        'expiresIn' => auth()->factory()->getTTL() * 60, 
     ])->cookie('refreshToken', $refreshToken, config('jwt.refresh_ttl') * 60, null, null, true, true);
     }
 
 
-
-    
-    
-    
-
     public function refresh()
     {
+        // Delete expired refresh tokens from the database (if you're storing them)
+        RefreshToken::where('expires_at', '<', Carbon::now())->delete();
+    
         try {
+            // Generate a new access token using the current refresh token
             $newAccessToken = auth()->refresh();
     
             return response()->json([
                 'message' => 'Token successfully refreshed',
                 'accessToken' => $newAccessToken,
                 'tokenType' => 'bearer',
-                'expiresIn' => auth()->factory()->getTTL() * 60,
+                'expiresIn' => auth()->factory()->getTTL() * 60, // Set expiration time
             ], 200);
         } catch (JWTException $e) {
             return response()->json([
@@ -170,6 +172,7 @@ class AuthController extends Controller
             ], 401);
         }
     }
+    
     
     
 
@@ -180,3 +183,5 @@ class AuthController extends Controller
     }
     
 }
+
+

@@ -15,6 +15,10 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:api');
 
+// Route::post('/refresh-token', [AuthController::class, 'refresh']);
+Route::middleware(['cors'])->post('/refresh-token', [AuthController::class, 'refresh']);
+
+
 // Route::get('/users/{user}', [UserController::class, 'show'])->middleware('auth:api', 'can:view,user');
 // Route::middleware('auth:api')->get('/users/{user}', [UserController::class, 'show']);
 
@@ -37,7 +41,7 @@ Route::prefix('/cities/{city}')->group(function ()
         Route::get('/gyms', [GymController::class, 'index']);
         Route::get('/gyms/{gym}', [GymController::class, 'show']);
         // Route::post('/hair-salons', [GymController::class, 'store'])->middleware('auth:api', 'can:create,App\Models\Gym', 'valid.json');
-        Route::post('/gyms', [GymController::class, 'store'])->middleware('auth:api');
+        Route::post('/gyms', [GymController::class, 'store'])->middleware('auth:api', 'can:create,App\Models\Gym');
 
         // Route::put('/gyms/{gym}', [GymController::class, 'update'])->middleware('auth:api', 'can:update,salon', 'valid.json');
         Route::put('/gyms/{gym}', [GymController::class, 'update'])->middleware('auth:api');

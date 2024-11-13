@@ -11,9 +11,13 @@ use Illuminate\Http\Request;
 use Illuminate\Database\QueryException;
 use App\Http\Resources\GymResource;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
+use App\Policies\UserPolicy;
 class GymController extends Controller
 {
+    use AuthorizesRequests;
     // public function index(City $city = null, User $manager = null)
     // {
     //     if (is_null($city) || !$city->exists) {
@@ -58,6 +62,14 @@ class GymController extends Controller
     // }
     public function store($cityId, CreateGymRequest $request)
     {
+        // Check if the user is authorized to create a gym
+        try {
+            $this->authorize('create', Gym::class);  // Using the policy method
+        } catch (AccessDeniedHttpException $e) {
+            return response()->json(['message' => 'You are not authorized to create a gym.'], 403);
+        }
+    
+        // Check if JSON is valid
         try {
             json_decode($request->getContent(), true);
             if (json_last_error() !== JSON_ERROR_NONE) {
@@ -66,6 +78,7 @@ class GymController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => 'Invalid JSON format'], 422);
         }
+    
         // Fetch city manually
         try {
             $city = City::findOrFail($cityId);
@@ -79,6 +92,7 @@ class GymController extends Controller
         // Return response
         return response()->json(new GymResource($gym), 201);
     }
+    
     
     
 

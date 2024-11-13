@@ -34,10 +34,17 @@ class Handler extends ExceptionHandler
     {
         Log::error('Exception caught: ' . $exception->getMessage());
         
+        // Custom handling for expired JWT token
         if ($exception instanceof TokenExpiredException) {
             return response()->json(['error' => 'Token expired.'], 401);
         }
 
+        // Handle AccessDeniedHttpException (unauthorized actions)
+        if ($exception instanceof AccessDeniedHttpException) {
+            return response()->json(['message' => 'You are not authorized to perform this action.'], 403);
+        }
+
+        // General error handling
         return parent::render($request, $exception);
     }
 

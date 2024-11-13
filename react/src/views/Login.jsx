@@ -32,7 +32,7 @@ export default function Login() {
                 // debugger;
                 setCurrentUser(data.user);
                 setUserToken(data.token);
-                localStorage.setItem('TOKEN', data.token)
+                localStorage.setItem('TOKEN', data.accessToken)
             })
             .catch((error) => {
                 if (error.response) {
