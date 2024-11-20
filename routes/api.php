@@ -20,13 +20,13 @@ Route::middleware(['cors'])->post('/refresh-token', [AuthController::class, 'ref
 
 
 // Route::get('/users/{user}', [UserController::class, 'show'])->middleware('auth:api', 'can:view,user');
-// Route::middleware('auth:api')->get('/users/{user}', [UserController::class, 'show']);
 
-// Route::get('/users/{user}', [UserController::class, 'show'])->middleware('auth:api');
+Route::get('/users', [UserController::class, 'index'])->middleware('auth:api', 'can:viewAny,App\Models\User');
 
-Route::get('/users/{id}', [UserController::class, 'show'])->middleware('auth:api');;
+Route::get('/users/{id}', [UserController::class, 'show'])->middleware('auth:api');
+// Route::get('/users/{id}', [UserController::class, 'show'])->middleware(['auth:api', 'can:view,user']);
 
-// Route::patch('/users/{user}', [UserController::class, 'update'])->middleware('auth:api', 'valid.json');
+// Route::patch('/users/{user}', [UserController::class, 'update'])->middleware('auth:api','can:update,user');
 Route::patch('/users/{user}', [UserController::class, 'update'])->middleware('auth:api');
 
 // Route::delete('/users/{user}', [UserController::class, 'delete'])->middleware('auth:api', 'can:delete,user');
@@ -41,6 +41,7 @@ Route::prefix('/cities/{city}')->group(function ()
         Route::get('/gyms', [GymController::class, 'index']);
         Route::get('/gyms/{gym}', [GymController::class, 'show']);
         // Route::post('/hair-salons', [GymController::class, 'store'])->middleware('auth:api', 'can:create,App\Models\Gym', 'valid.json');
+
         Route::post('/gyms', [GymController::class, 'store'])->middleware('auth:api', 'can:create,App\Models\Gym');
 
         // Route::put('/gyms/{gym}', [GymController::class, 'update'])->middleware('auth:api', 'can:update,salon', 'valid.json');
@@ -55,8 +56,10 @@ Route::prefix('/cities/{city}')->group(function ()
 
             // Route::get('/coaches/{coach}', [CoachesController::class, 'show'])->middleware('can:view,coach');
             Route::get('/coaches/{coach}', [CoachesController::class, 'show']);
+
             // Route::post('/coaches', [CoachesController::class, 'store'])->middleware('auth:api', 'can:create,App\Models\Coach', 'valid.json');
             Route::post('/coaches', [CoachesController::class, 'store'])->middleware('auth:api');
+            
             // Route::delete('/coaches/{coach}', [CoachesController::class, 'delete'])->middleware('auth:api', 'can:delete,coach');
             Route::delete('/coaches/{coach}', [CoachesController::class, 'delete'])->middleware('auth:api');
             // Route::put('/coaches/{coach}', [CoachesController::class, 'update'])->middleware('auth:api', 'can:update,coach', 'valid.json');

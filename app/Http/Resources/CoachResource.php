@@ -16,7 +16,7 @@ class CoachResource extends JsonResource
     {
         return [
             // 'id' => $this->id,
-            'id' => $this->id,
+            // 'id' => $this->id,
             // 'name' => $this->user ? $this->user->name : null, // Safely access user name
             // 'surname' => $this->user ? $this->user->surname : null, // Safely access user surname
             'name' => $this->name,  // Potentially null

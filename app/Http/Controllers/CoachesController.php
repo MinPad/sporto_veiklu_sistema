@@ -14,9 +14,11 @@ use App\Http\Requests\CreateCoachRequest;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class CoachesController extends Controller
 {
+    use AuthorizesRequests;
     public function index($cityId, $gymId)
     {
         // Find the city based on the passed city ID
@@ -91,16 +93,16 @@ class CoachesController extends Controller
 
     public function store(City $city, Gym $gym, CreateCoachRequest $request)
     {
-    if ($city->id !== $gym->city_id) {
+        $this->authorize('create', Coach::class);
+        if ($city->id !== $gym->city_id) {
         return response()->json(['message' => 'Resource not found'], 404);
-    }
+        }
 
-    // Create the coach without user_id
-    $coach = Coach::create($request->validated() + [
+        $coach = Coach::create($request->validated() + [
         'gym_id' => $gym->id,
-    ]);
+        ]);
 
-    return response()->json(new CoachResource($coach), 201);
+        return response()->json(new CoachResource($coach), 201);
     }
 
 
@@ -145,6 +147,7 @@ class CoachesController extends Controller
 
     public function update($cityId, $gymId, $coachId, UpdateCoachRequest $request)
     {
+        $this->authorize('update', Coach::class);
         // Check if the request is JSON and decode it
         try {
             $data = json_decode($request->getContent(), true);
@@ -181,6 +184,7 @@ class CoachesController extends Controller
     
     public function delete(City $city, Gym $gym, Coach $coach)
     {
+        $this->authorize('delete', Coach::class);
         if ($city->id != $gym->city_id || $gym->id != $coach->gym_id) {
             return response()->json(['message' => 'Resource not found'], 404);
         }

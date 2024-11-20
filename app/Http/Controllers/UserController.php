@@ -12,17 +12,27 @@ use App\Http\Requests\UpdateUserRequest;
 use App\Http\Requests\AuthenticateUserRequest;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 class UserController extends Controller
-{
-    // public function show(User $user)
-    // {
-    //     return new UserResource($user);
-    // }
+{   
+    use AuthorizesRequests;
+    public function index()
+    {
+        $this->authorize('viewAny', User::class);
+
+        return response()->json(UserResource::collection(User::all()), 200);
+    }
     public function show($id)
     {
     try {
         $user = User::findOrFail($id);
+
+        // error_log('Authorization check: ' . json_encode([
+        //     'loggedInUser' => auth()->user(),
+        //     'targetUser' => $user,
+        // ]));
+
+        $this->authorize('view', $user);
         return new UserResource($user);
     } catch (ModelNotFoundException $e) {
         return response()->json(['message' => 'A user with this id doesn\'t exist'], 404);
@@ -30,7 +40,7 @@ class UserController extends Controller
     }
     public function update($id, Request $request)
     {
-        // Check if the request is JSON and decode it
+        
         try {
             $data = json_decode($request->getContent(), true);
             if (json_last_error() !== JSON_ERROR_NONE) {
@@ -43,7 +53,8 @@ class UserController extends Controller
         try {
             // Find the user by ID
             $user = User::findOrFail($id);
-    
+            $this->authorize('update', $user);
+
             // Hash password if it's in the request
             if (isset($data['password'])) {
                 $data['password'] = Hash::make($data['password']);
@@ -64,9 +75,17 @@ class UserController extends Controller
     
     public function delete(User $user)
     {
-        $user->delete();
+        $this->authorize('delete', $user);
+        try {
+            $user->delete();
+            return response('', 204);
+
+        } catch (ModelNotFoundException $e) {
+            // If the user is not found, return a 404 error message
+            return response()->json(['message' => 'A user with this id doesn\'t exist'], 404);
+        }
+       
         // auth()->invalidate();
-        return response('', 204);
         // return response()->json(['message' => 'User deleted successfully.'], 200);
     }
 }

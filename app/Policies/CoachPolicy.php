@@ -2,11 +2,11 @@
 
 namespace App\Policies;
 
-use App\Models\Gym;
+use App\Models\Coach;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
-class GymPolicy
+class CoachPolicy
 {
     /**
      * Determine whether the user can view any models.
@@ -19,7 +19,7 @@ class GymPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Gym $gym): bool
+    public function view(User $user, Coach $coach): bool
     {
         //
     }
@@ -35,7 +35,7 @@ class GymPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Gym $gym): bool
+    public function update(User $user)
     {
         return $user->role === 'Admin'; 
     }
@@ -43,15 +43,15 @@ class GymPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Gym $gym): bool
+    public function delete(User $user)
     {
-        //
+        return $user->role === 'Admin'; 
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Gym $gym): bool
+    public function restore(User $user, Coach $coach): bool
     {
         //
     }
@@ -59,7 +59,7 @@ class GymPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Gym $gym): bool
+    public function forceDelete(User $user, Coach $coach): bool
     {
         //
     }

@@ -100,6 +100,7 @@ class GymController extends Controller
     {
         // Validate JSON input
         try {
+
             $data = json_decode($request->getContent(), true);
             if (json_last_error() !== JSON_ERROR_NONE) {
                 return response()->json(['message' => 'Invalid JSON'], 422);
@@ -110,7 +111,7 @@ class GymController extends Controller
     
         // Manually find the gym to prevent automatic 404 exception
         $gym = Gym::find($gymId);
-    
+        $this->authorize('update', $gym); 
         // Check if the gym exists
         if (!$gym) {
             return response()->json(['message' => 'Gym not found'], 404);

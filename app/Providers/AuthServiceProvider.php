@@ -6,6 +6,8 @@ use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvid
 use Illuminate\Support\Facades\Gate;
 use App\Models\Gym;
 use App\Policies\GymPolicy;
+use App\Policies\UserPolicy;
+use App\Policies\CoachPolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -16,6 +18,8 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         Gym::class => GymPolicy::class,  // Ensure Gym model is mapped to its policy
+        User::class => UserPolicy::class,
+        Coach::class => CoachPolicy::class,
     ];
 
     /**
