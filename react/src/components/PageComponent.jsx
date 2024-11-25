@@ -1,8 +1,9 @@
 import Header from './Header';
+import Footer from './Footer';
 
 const PageComponent = ({ title, buttons, children }) => {
     return (
-        <div className="min-h-full">
+        <div className="min-h-screen flex flex-col">
             <Header />
             <header className="bg-white shadow">
                 <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 flex items-center justify-between">
@@ -10,11 +11,12 @@ const PageComponent = ({ title, buttons, children }) => {
                     {buttons} {/* Render the buttons here */}
                 </div>
             </header>
-            <main>
+            <main className="flex-grow">
                 <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
                     {children}
                 </div>
             </main>
+            <Footer />
         </div>
     );
 };

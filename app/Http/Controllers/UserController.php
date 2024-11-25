@@ -46,7 +46,7 @@ class UserController extends Controller
             if (json_last_error() !== JSON_ERROR_NONE) {
                 return response()->json(['message' => 'Invalid JSON'], 422);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['message' => 'Invalid JSON format'], 422);
         }
     

@@ -17,7 +17,7 @@ export default function GymListItem({ gym, onDeleteClick }) {
             />
             <h4 className="mt-4 text-lg font-bold">{gym.name}</h4>
             <div className="overflow-hidden flex-1">
-                <div
+                {/* <div
                     dangerouslySetInnerHTML={{
                         __html: showFullDescription ? gym.description : `${gym.description.substring(0, 25)}...`,
                     }}
@@ -26,8 +26,15 @@ export default function GymListItem({ gym, onDeleteClick }) {
                     <button onClick={toggleDescription} className="text-blue-500 underline mt-2">
                         {showFullDescription ? 'Show less' : 'Show more'}
                     </button>
-                )}
+                )} */}
+
+                <div
+                    dangerouslySetInnerHTML={{ __html: gym.description }}
+                    className="overflow-hidden flex-1"
+                > </div>
+
             </div>
+
             <div className="mt-4">
                 <div className="font-semibold mb-2">
                     <span>Address: </span>

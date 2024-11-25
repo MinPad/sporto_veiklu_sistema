@@ -32,8 +32,9 @@ class Handler extends ExceptionHandler
 
     public function render($request, Throwable $exception)  // Change Exception to Throwable
     {
-        Log::error('Exception caught: ' . $exception->getMessage());
-        
+        // Log::error('Exception caught: ' . $exception->getMessage());
+        // dump('Exception occurred: ', $exception);
+
         // Custom handling for expired JWT token
         if ($exception instanceof TokenExpiredException) {
             return response()->json(['error' => 'Token expired.'], 401);
@@ -43,7 +44,9 @@ class Handler extends ExceptionHandler
         if ($exception instanceof AccessDeniedHttpException) {
             return response()->json(['message' => 'You are not authorized to perform this action.'], 403);
         }
-
+        if ($exception instanceof AuthorizationException) {
+            return response()->json(['message' => 'You are not authorized to create a gym.'], 403);
+        }
         // General error handling
         return parent::render($request, $exception);
     }

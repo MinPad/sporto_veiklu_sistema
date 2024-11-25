@@ -13,6 +13,8 @@ use App\Http\Resources\GymResource;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\Gate;
 
 use App\Policies\UserPolicy;
 class GymController extends Controller
@@ -63,12 +65,14 @@ class GymController extends Controller
     public function store($cityId, CreateGymRequest $request)
     {
         // Check if the user is authorized to create a gym
-        try {
+        // try {
             $this->authorize('create', Gym::class);  // Using the policy method
-        } catch (AccessDeniedHttpException $e) {
-            return response()->json(['message' => 'You are not authorized to create a gym.'], 403);
-        }
-    
+        // } catch (AuthorizationException $e) {
+            // return response()->json(['message' => 'You are not authorized to create a gym.'], 403);
+        // }
+        // if (Gate::denies('create', Gym::class)) {
+        //     return response()->json(['message' => 'You are not authorized to create a gym.'], 403);
+        // }
         // Check if JSON is valid
         try {
             json_decode($request->getContent(), true);
