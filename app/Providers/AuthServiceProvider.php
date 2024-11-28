@@ -8,6 +8,7 @@ use App\Models\Gym;
 use App\Policies\GymPolicy;
 use App\Policies\UserPolicy;
 use App\Policies\CoachPolicy;
+use App\Policies\CityPolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -20,6 +21,7 @@ class AuthServiceProvider extends ServiceProvider
         Gym::class => GymPolicy::class,  // Ensure Gym model is mapped to its policy
         User::class => UserPolicy::class,
         Coach::class => CoachPolicy::class,
+        City::class => CityPolicy::class,
     ];
 
     /**

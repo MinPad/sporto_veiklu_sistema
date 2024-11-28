@@ -1,11 +1,35 @@
 import { ArrowTopRightOnSquareIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import React, { useState } from 'react';
 import TButton from './core/TButton';
-
-export default function GymListItem({ gym, onDeleteClick }) {
+import { jwtDecode } from "jwt-decode";
+import ConfirmationDialog from "../components/core/ConfirmationDialog";
+import axiosClient from "../axios";
+export default function GymListItem({ gym, onDeleteClick, isAdmin, cityId }) {
     const [showFullDescription, setShowFullDescription] = useState(false);
+    const [isDialogOpen, setIsDialogOpen] = useState(false); // For confirmation dialog
+    const [gymToDelete, setGymToDelete] = useState(null);
+
     const toggleDescription = () => {
         setShowFullDescription(!showFullDescription);
+    };
+
+    const handleDeleteClick = () => {
+        setGymToDelete(gym.id); // Set the gym ID to delete
+        setIsDialogOpen(true); // Open confirmation dialog
+    };
+
+    // Confirm the deletion
+    const confirmDelete = () => {
+        axiosClient.delete(`cities/${cityId}/gyms/${gym.id}`)
+            .then(() => {
+                onDeleteClick(gym.id);
+                setIsDialogOpen(false);
+                setGymToDelete(null);
+            })
+            .catch((error) => {
+                console.error("Error deleting gym:", error);
+                setIsDialogOpen(false);
+            });
     };
 
     return (
@@ -42,22 +66,30 @@ export default function GymListItem({ gym, onDeleteClick }) {
                     <span>, {gym.cityName}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                    <TButton to={`gyms/${gym.id}`}>
-                        <PencilIcon className="w-5 h-5 mr-2" />
-                        Edit
-                    </TButton>
+                    {isAdmin && (
+                        <TButton to={`/cities/${cityId}/gyms/${gym.id}/update`}>
+                            <PencilIcon className="w-5 h-5 mr-2" />
+                            Edit
+                        </TButton>)}
                     <div className="flex items-center">
-                        <TButton href={`/view/gyms/${gym.slug}`} circle link>
+                        {/* <TButton href={`/view/gyms/${gym.slug}`} circle link>
                             <ArrowTopRightOnSquareIcon className="w-5 h-5" />
-                        </TButton>
-                        {gym.id && (
-                            <TButton onClick={onDeleteClick} circle link color="red">
+                        </TButton> */}
+                        {gym.id && isAdmin && (
+                            <TButton onClick={handleDeleteClick} circle link color="red">
                                 <TrashIcon className="w-5 h-5" />
                             </TButton>
                         )}
                     </div>
                 </div>
             </div>
+            <ConfirmationDialog
+                isOpen={isDialogOpen}
+                onClose={() => setIsDialogOpen(false)}
+                title="Delete Gym"
+                message="Are you sure you want to delete this gym? This action cannot be undone."
+                onConfirm={confirmDelete}
+            />
         </div>
     );
 }

@@ -2,11 +2,9 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Gym;
-use App\Rules\ExistingCity;
 use Illuminate\Foundation\Http\FormRequest;
-
-class UpdateGymRequest extends FormRequest
+use Illuminate\Validation\Rule; 
+class CreateCityRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,17 +24,22 @@ class UpdateGymRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => ['required', 'string' ,'min:5', 'max:255', 'regex:/^[\pL\d\- ]*$/u'],
-            'address' => ['required', 'string' ,'min:5', 'max:50', 'regex:/^[\pL\d\.\- ]*$/u'],
-            'description' => ['required', 'string' ,'min:10', 'max:150']
+            'name' => [
+                'required', 
+                'string', 
+                'min:5', 
+                'max:255', 
+                'regex:/^[\pL\d\- ]*$/u', 
+                Rule::unique('cities'),
+            ],
         ];
     }
+
 
     public function messages()
     {
         return [
-            'name.regex' => 'Detected not allowed symbols in the name field',
-            'address.regex' => 'Detected not allowed symbols in the address field'
+            'name.unique' => 'A city with this name already exists',
         ];
     }
 }

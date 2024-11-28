@@ -21,7 +21,7 @@ Route::middleware(['cors'])->post('/refresh-token', [AuthController::class, 'ref
 
 // Route::get('/users/{user}', [UserController::class, 'show'])->middleware('auth:api', 'can:view,user');
 
-Route::get('/users', [UserController::class, 'index'])->middleware('auth:api', 'can:viewAny,App\Models\User');
+Route::get('/users', [UserController::class, 'index'])->middleware('auth:api');
 
 Route::get('/users/{id}', [UserController::class, 'show'])->middleware('auth:api');
 // Route::get('/users/{id}', [UserController::class, 'show'])->middleware(['auth:api', 'can:view,user']);
@@ -34,7 +34,10 @@ Route::delete('/users/{user}', [UserController::class, 'delete'])->middleware('a
 
 Route::get('/cities', [CityController::class, 'index']);
 Route::get('/cities/{id}', [CityController::class, 'show']);
+Route::delete('/cities/{city}',[CityController::class, 'delete'])->middleware('auth:api');
+Route::post('/cities',[CityController::class, 'store'])->middleware('auth:api');
 
+// Route::get('/gyms', [GymController::class, 'index']);
 
 Route::prefix('/cities/{city}')->group(function ()
     {
@@ -42,7 +45,7 @@ Route::prefix('/cities/{city}')->group(function ()
         Route::get('/gyms/{gym}', [GymController::class, 'show']);
         // Route::post('/hair-salons', [GymController::class, 'store'])->middleware('auth:api', 'can:create,App\Models\Gym', 'valid.json');
 
-        Route::post('/gyms', [GymController::class, 'store'])->middleware('auth:api', 'can:create,App\Models\Gym');
+        Route::post('/gyms', [GymController::class, 'store'])->middleware('auth:api');
 
         // Route::put('/gyms/{gym}', [GymController::class, 'update'])->middleware('auth:api', 'can:update,salon', 'valid.json');
         Route::put('/gyms/{gym}', [GymController::class, 'update'])->middleware('auth:api');

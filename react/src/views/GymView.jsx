@@ -2,37 +2,80 @@ import { LinkIcon, PhotoIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useState } from 'react';
 import PageComponent from '../components/PageComponent';
 import TButton from '../components/core/TButton';
+import axiosClient from "../axios";
+import { useParams, useNavigate } from 'react-router-dom';
 
 export default function GymView() {
+    const { cityId } = useParams();
+    const [error, setError] = useState(null);
+    const navigate = useNavigate();
+
     const [gym, setGym] = useState({
-        title: "",
+        name: "",
         slug: "",
         status: false,
         description: "",
         image: null,
         image_URL: null,
-        expire_date: "",
+        address: "",
+        openingHoursStart: "",
+        openingHoursEnd: "",
+        opening_hours: "",
         questions: [],
     });
 
-    const onSubmit = (ev) => {
+    const onSubmit = async (ev) => {
         ev.preventDefault();
-        console.log(ev);
-    }
-    const onImageChoose = (ev) => {
-        const file = ev.target.files[0];
+        setError(null);
 
-        const reader = new FileReader();
-        reader.onload = () => {
-            setGym({
-                ...gym,
-                image: file,
-                image_url: reader.result,
-            });
+        const formData = new FormData();
 
-            ev.target.value = "";
-        };
-        reader.readAsDataURL(file);
+        // If image is selected, append it, otherwise append image_url
+        if (gym.image) {
+            formData.append("image", gym.image);
+            console.log("Image selected:", gym.image);
+        } else if (gym.image_URL) {
+            formData.append("image_url", gym.image_URL);
+            console.log("Image URL selected:", gym.image_URL);
+        }
+
+        // Append the other gym data
+        formData.append("name", gym.name);
+        formData.append("description", gym.description);
+        formData.append("address", gym.address);
+
+        // Append the opening hours directly
+        const openingHours = `${gym.openingHoursStart} - ${gym.openingHoursEnd}`;
+        formData.append("opening_hours", openingHours);
+
+        // Log formData for debugging
+        formData.forEach((value, key) => {
+            console.log(`${key}: ${value}`);
+        });
+
+        try {
+            // Sending the data
+            await axiosClient.post(`/cities/${cityId}/gyms`, formData);
+            navigate(`/cities/${cityId}/gyms`);
+        } catch (error) {
+            // Error handling
+            if (error.response) {
+                setError(error.response.data.message || 'Error creating gym');
+            } else if (error.request) {
+                setError('No response from server. Check your network or backend server.');
+            } else {
+                setError('Unexpected error occurred. Please try again.');
+            }
+            console.error('Error:', error);
+        }
+    };
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        setGym({ ...gym, image: file, image_URL: null });
+    };
+
+    const handleImageUrlChange = (e) => {
+        setGym({ ...gym, image: null, image_URL: e.target.value });
     };
 
     return (
@@ -40,60 +83,68 @@ export default function GymView() {
             <form action="#" method="POST" onSubmit={onSubmit}>
                 <div className="shadow sm:overflow-hidden sm:rounded-md">
                     <div className="space-y-6 bg-white px-4 py-5 sm:p-6">
-                        {/* {Image} */}
+                        {/* Image Upload */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700">
                                 Photo
                             </label>
                             <div className="mt-1 flex items-center">
-                                {gym.image_url && (
+                                {gym.image_URL && (
                                     <img
-                                        src={gym.image_url}
-                                        alt=""
+                                        src={gym.image_URL}
+                                        alt="Gym"
                                         className="w-32 h-32 object-cover"
                                     />
                                 )}
-                                {!gym.image_url && (
-                                    <span className="flex justify-center  items-center text-gray-400 h-12 w-12 overflow-hidden rounded-full bg-gray-100">
+                                {!gym.image_URL && (
+                                    <span className="flex justify-center items-center text-gray-400 h-12 w-12 overflow-hidden rounded-full bg-gray-100">
                                         <PhotoIcon className="w-8 h-8" />
                                     </span>
                                 )}
-                                <button
+                                {/* <button
                                     type="button"
                                     className="relative ml-5 rounded-md border border-gray-300 bg-white py-2 px-3 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                                 >
                                     <input
                                         type="file"
                                         className="absolute left-0 top-0 right-0 bottom-0 opacity-0"
-                                        onChange={onImageChoose}
+                                        onChange={handleImageChange}
                                     />
                                     Change
-                                </button>
+                                </button> */}
+                            </div>
+                            <div className="mt-2">
+                                <input
+                                    type="url"
+                                    placeholder="Enter an image URL"
+                                    value={gym.image_URL || ''}
+                                    onChange={handleImageUrlChange}
+                                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
                             </div>
                         </div>
-                        {/* {Image} */}
-                        {/*Title*/}
+                        {/* Image Upload */}
+                        {/* Title */}
                         <div className="col-span-6 sm:col-span-3">
                             <label
-                                htmlFor="title"
+                                htmlFor="name"
                                 className="block text-sm font-medium text-gray-700"
                             >
                                 Gym Title
                             </label>
                             <input
                                 type="text"
-                                name="title"
-                                id="title"
-                                value={gym.title}
+                                name="name"
+                                id="name"
+                                value={gym.name}
                                 onChange={(ev) =>
-                                    setGym({ ...gym, title: ev.target.value })
+                                    setGym({ ...gym, name: ev.target.value })
                                 }
                                 placeholder="Gym Title"
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                             />
                         </div>
-                        {/*Title*/}
-                        {/*Description*/}
+                        {/* Description */}
                         <div className="col-span-6 sm:col-span-3">
                             <label
                                 htmlFor="description"
@@ -101,66 +152,66 @@ export default function GymView() {
                             >
                                 Description
                             </label>
-                            {/* <pre>{ JSON.stringify(gym, undefined, 2) }</pre> */}
                             <textarea
                                 name="description"
                                 id="description"
-                                value={gym.description || ""}
+                                value={gym.description}
                                 onChange={(ev) =>
                                     setGym({ ...gym, description: ev.target.value })
                                 }
                                 placeholder="Describe your gym"
+                                maxLength={150}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                             ></textarea>
+                            <div className="pl-1 text-sm text-gray-500">{gym.description.length}/150</div>
                         </div>
-                        {/*Description*/}
-                        {/*Expire Date*/}
+                        {/* Address */}
                         <div className="col-span-6 sm:col-span-3">
                             <label
-                                htmlFor="expire_date"
+                                htmlFor="address"
                                 className="block text-sm font-medium text-gray-700"
                             >
-                                Expire Date
+                                Address
                             </label>
                             <input
-                                type="date"
-                                name="expire_date"
-                                id="expire_date"
-                                value={gym.expire_date}
+                                type="text"
+                                name="address"
+                                id="address"
+                                value={gym.address}
                                 onChange={(ev) =>
-                                    setGym({ ...gym, expire_date: ev.target.value })
+                                    setGym({ ...gym, address: ev.target.value })
                                 }
+                                placeholder="Gym address"
+                                maxLength={50}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                             />
+                            <div className="text-sm text-gray-500 pl-1">{gym.address.length}/50</div>
                         </div>
-                        {/*Expire Date*/}
-                        {/*Active*/}
-                        <div className="flex items-start">
-                            <div className="flex h-5 items-center">
+                        {/* Opening Hours */}
+                        <div className="col-span-6 sm:col-span-3">
+                            <label className="block text-sm font-medium text-gray-700">
+                                Opening Hours
+                            </label>
+                            <div className="flex space-x-2">
                                 <input
-                                    id="status"
-                                    name="status"
-                                    type="checkbox"
-                                    checked={gym.status}
-                                    onChange={(ev) =>
-                                        setGym({ ...gym, status: ev.target.checked })
-                                    }
-                                    className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                    type="time"
+                                    name="openingHoursStart"
+                                    id="openingHoursStart"
+                                    value={gym.openingHoursStart}
+                                    onChange={(ev) => setGym({ ...gym, openingHoursStart: ev.target.value })}
+                                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
+                                <span className="self-center text-gray-500">-</span>
+                                <input
+                                    type="time"
+                                    name="openingHoursEnd"
+                                    id="openingHoursEnd"
+                                    value={gym.openingHoursEnd}
+                                    onChange={(ev) => setGym({ ...gym, openingHoursEnd: ev.target.value })}
+                                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                 />
                             </div>
-                            <div className="ml-3 text-sm">
-                                <label
-                                    htmlFor="comments"
-                                    className="font-medium text-gray-700"
-                                >
-                                    Active
-                                </label>
-                                <p className="text-gray-500">
-                                    Whether to make gym publicly available
-                                </p>
-                            </div>
                         </div>
-                        {/*Active*/}
                     </div>
                     <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
                         <TButton>Save</TButton>

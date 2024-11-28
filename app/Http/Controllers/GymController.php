@@ -15,6 +15,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 
 use App\Policies\UserPolicy;
 class GymController extends Controller
@@ -65,34 +66,42 @@ class GymController extends Controller
     public function store($cityId, CreateGymRequest $request)
     {
         // Check if the user is authorized to create a gym
-        // try {
-            $this->authorize('create', Gym::class);  // Using the policy method
-        // } catch (AuthorizationException $e) {
-            // return response()->json(['message' => 'You are not authorized to create a gym.'], 403);
-        // }
-        // if (Gate::denies('create', Gym::class)) {
-        //     return response()->json(['message' => 'You are not authorized to create a gym.'], 403);
-        // }
+        $this->authorize('create', Gym::class);  // Using the policy method
+
         // Check if JSON is valid
-        try {
-            json_decode($request->getContent(), true);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                return response()->json(['message' => 'Invalid JSON'], 422);
-            }
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Invalid JSON format'], 422);
-        }
-    
+        // try {
+        //     json_decode($request->getContent(), true);
+        //     dump($request);
+        //     if (json_last_error() !== JSON_ERROR_NONE) {
+        //         return response()->json(['message' => 'Invalid JSON'], 422);
+        //     }
+        // } catch (\Exception $e) {
+        //     return response()->json(['message' => 'Invalid JSON format'], 422);
+        // }
+
         // Fetch city manually
         try {
             $city = City::findOrFail($cityId);
         } catch (ModelNotFoundException $e) {
             return response()->json(['message' => 'City not found'], 404);
         }
-    
+
+        $data = $request->validated();
+        
+
+        if ($request->hasFile('image')) {
+            $filePath = $request->file('image')->store('gym-images', 'public');
+            $data['image_url'] = Storage::url($filePath);
+            // dump("kazkas",$data);
+        } elseif ($request->filled('image_url')) {
+            // Handle external URL
+            $data['image_url'] = $request->input('image_url');
+            // dump("kazkas du",$data);
+        }
+
         // Create gym
-        $gym = Gym::create($request->validated() + ['city_id' => $city->id]);
-    
+        // dump("kazkas galas",$data);
+        $gym = Gym::create($data + ['city_id' => $city->id]);
         // Return response
         return response()->json(new GymResource($gym), 201);
     }

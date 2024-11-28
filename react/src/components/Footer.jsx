@@ -7,8 +7,15 @@ export default function Footer() {
             <div className="flex flex-col md:flex-row justify-between items-stretch md:divide-x md:divide-gray-600">
                 {/* Left Section: Logo and Copyright */}
                 <div className="flex flex-col items-start md:items-start px-4">
-                    <p className="text-sm">&copy; {new Date().getFullYear()} System of Sports Activities. All rights reserved.</p>
+                    <p className="text-sm">
+                        &copy; {new Date().getFullYear()} System of Sports Activities. All rights reserved.
+                    </p>
+                    {/* Semi-transparent Name, Surname, and Current Year */}
+                    <p className="text-sm text-gray-400 mt-2">
+                        Mindaugas Padegimas IFF-1/6
+                    </p>
                 </div>
+                {/* vertical line in mobile */}
                 <div className="mb-2 border-b border-gray-600 pb-1 md:border-none" />
                 {/* Center Section: Navigation Links */}
                 <div className="flex flex-col items-start px-4">

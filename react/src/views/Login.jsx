@@ -1,6 +1,6 @@
 import { LockClosedIcon } from '@heroicons/react/20/solid'
 import Header from '../components/Header'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react';
 import axiosClient from '../axios';
 import { useStateContext } from '../contexts/ContexProvider';
@@ -10,6 +10,8 @@ export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState({ __html: "" });
+
+    const navigate = useNavigate();
     // const [isButtonVisible, setButtonVisible] = useState(true);
 
     // useEffect(() => {
@@ -19,6 +21,34 @@ export default function Login() {
 
     //     return () => clearTimeout(timer);
     // }, []);
+    // const onSubmit = (ev) => {
+    //     ev.preventDefault();
+    //     setError({ __html: "" });
+
+    //     axiosClient
+    //         .post("/login", {
+    //             email,
+    //             password,
+    //         })
+    //         .then(({ data }) => {
+    //             // debugger;
+    //             setCurrentUser(data.user);
+    //             setUserToken(data.token);
+    //             localStorage.setItem('TOKEN', data.accessToken)
+    //             navigate(`/`);
+
+    //         })
+    //         .catch((error) => {
+    //             if (error.response) {
+    //                 const finalErrors = Object.values(error.response.data.errors).reduce(
+    //                     (accum, next) => [...accum, ...next],
+    //                     []
+    //                 );
+    //                 setError({ __html: finalErrors.join("<br>") });
+    //             }
+    //             console.error(error);
+    //         });
+    // };
     const onSubmit = (ev) => {
         ev.preventDefault();
         setError({ __html: "" });
@@ -29,10 +59,30 @@ export default function Login() {
                 password,
             })
             .then(({ data }) => {
-                // debugger;
-                setCurrentUser(data.user);
-                setUserToken(data.token);
-                localStorage.setItem('TOKEN', data.accessToken)
+                const token = data.token || data.accessToken;  // Ensure we handle both possible keys
+                if (token) {
+                    // console.log("Backend Response:", data);
+                    // console.log("data user:", data.user);
+                    setCurrentUser(data.user);
+                    setUserToken(token); // Updates context and localStorage via setUserToken
+                    localStorage.setItem('TOKEN', token); // Set it in localStorage
+                    // console.log("data id:", data.user.id);
+                    // debugger;
+                    // axiosClient
+                    //     .get(`/users/${data.user.id}`)
+                    //     .then(({ data }) => {
+                    //         // console.log("data:", data);
+                    //         // console.log("data:", data.data);
+                    //         setCurrentUser(data.data); // Assuming `data.data` is the user object
+                    //     })
+                    //     .catch((error) => {
+                    //         console.error("Error fetching user data:", error);
+                    //     });
+
+                    navigate(`/`);
+                } else {
+                    console.error("No token received from API");
+                }
             })
             .catch((error) => {
                 if (error.response) {
@@ -45,6 +95,8 @@ export default function Login() {
                 console.error(error);
             });
     };
+
+
 
     return (
         <>
