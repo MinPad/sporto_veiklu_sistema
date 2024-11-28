@@ -1,4 +1,4 @@
-import { ArrowTopRightOnSquareIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { ArrowTopRightOnSquareIcon, PencilIcon, TrashIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 import React, { useState } from 'react';
 import TButton from './core/TButton';
 import { jwtDecode } from "jwt-decode";
@@ -33,7 +33,7 @@ export default function GymListItem({ gym, onDeleteClick, isAdmin, cityId }) {
     };
 
     return (
-        <div className="flex flex-col py-4 px-6 shadow-md bg-white hover:bg-gray-50 h-[470px]">
+        <div className="flex flex-col py-4 px-6 shadow-lg bg-white hover:bg-gray-50 h-[470px]">
             <img
                 src={gym.image_url}
                 alt={`${gym.name} Gym`}
@@ -71,6 +71,10 @@ export default function GymListItem({ gym, onDeleteClick, isAdmin, cityId }) {
                             <PencilIcon className="w-5 h-5 mr-2" />
                             Edit
                         </TButton>)}
+                    <TButton to={`/cities/${cityId}/gyms/${gym.id}/coaches`}>
+                        <UserGroupIcon className="w-5 h-5 mr-2" />
+                        Coaches
+                    </TButton>
                     <div className="flex items-center">
                         {/* <TButton href={`/view/gyms/${gym.slug}`} circle link>
                             <ArrowTopRightOnSquareIcon className="w-5 h-5" />

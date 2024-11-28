@@ -18,7 +18,7 @@ export default function GymUpdate() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        console.log('useEffect fired');
+        // console.log('useEffect fired');
         axiosClient.get(`cities/${cityId}/gyms/${gymId}`)
             .then(({ data }) => {
                 setGym(data);

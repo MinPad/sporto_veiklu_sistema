@@ -6,7 +6,7 @@ import { useNavigate, Navigate, Link, NavLink, Outlet } from 'react-router-dom';
 import { jwtDecode } from "jwt-decode";
 
 import axiosClient from "../axios";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Toast from "./Toast";
 import { useStateContext } from '../contexts/ContexProvider';
 
@@ -28,20 +28,22 @@ function classNames(...classes) {
 
 export default function Header() {
 
-    const { currentUser, userToken, setCurrentUser, setUserToken } =
-        useStateContext();
-
-
-    // if (!userToken) {
-    //     return <Navigate to="/" />;
-    // }
+    const { currentUser, userToken, setCurrentUser, setUserToken } = useStateContext();
     const navigate = useNavigate();
+    const [isAdmin, setIsAdmin] = useState(false);
 
+    useEffect(() => {
+        const token = localStorage.getItem("TOKEN");
+        if (token) {
+            const decodedToken = jwtDecode(token);
+            if (decodedToken.role === "Admin") {
+                setIsAdmin(true);
+            }
+        }
 
-    let decodedToken;
-    if (userToken) {
-        decodedToken = jwtDecode(userToken);
-    }
+    }, []);
+
+    // console.log(isAdmin)
     // console.log("header ", currentUser.name);
     // console.log('Current userToken in Header:', userToken); // Debugging
 
@@ -99,6 +101,18 @@ export default function Header() {
                                         {item.name}
                                     </NavLink>
                                 ))}
+                                {/* Add Users button visible only to Admins */}
+                                {isAdmin && (
+                                    <NavLink
+                                        to="/users"
+                                        className={({ isActive }) => classNames(
+                                            isActive ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
+                                            'rounded-md px-3 py-2 text-sm font-medium',
+                                        )}
+                                    >
+                                        Users
+                                    </NavLink>
+                                )}
                             </div>
                         </div>
 
@@ -199,6 +213,18 @@ export default function Header() {
                             {item.name}
                         </NavLink>
                     ))}
+                    {/* Add Users button visible only to Admins */}
+                    {isAdmin && (
+                        <NavLink
+                            to="/users"
+                            className={({ isActive }) => classNames(
+                                isActive ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
+                                'block rounded-md px-3 py-2 text-base font-medium',
+                            )}
+                        >
+                            Users
+                        </NavLink>
+                    )}
                 </div>
 
                 <div className="border-t border-gray-700 pb-3 pt-4">
@@ -211,32 +237,39 @@ export default function Header() {
                             <div className="text-sm font-medium leading-none text-gray-400">{user.email}</div>
                         </div>
                     </div> */}
-                    <div className="mt-3 space-y-1 px-2">
-                        {userNavigation.map((item) => (
-                            <NavLink
-                                key={item.name}
-                                to={item.to}
-                                className={({ isActive }) =>
-                                    classNames(
-                                        'block rounded-md px-3 py-2 text-base font-medium',
-                                        // isActive ? 'text-white' : 'text-gray-400 hover:bg-gray-700 hover:text-white'
-                                        isActive ? 'bg-gray-900 text-white' : 'text-gray-400 hover:bg-gray-700 hover:text-white',
-                                    )}
-                            >
-                                {item.name}
-                            </NavLink>
-                        ))}
-                    </div>
-                    <div className="mt-3 space-y-1 px-2">
-                        <Disclosure.Button
-                            as="a"
-                            href="#"
-                            onClick={(ev) => logout(ev)}
-                            className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
-                        >
-                            Sign out
-                        </Disclosure.Button>
-                    </div>
+                    {!userToken ? (
+                        <>
+                            <div className="mt-3 space-y-1 px-2">
+                                {userNavigation.map((item) => (
+                                    <NavLink
+                                        key={item.name}
+                                        to={item.to}
+                                        className={({ isActive }) =>
+                                            classNames(
+                                                'block rounded-md px-3 py-2 text-base font-medium',
+                                                // isActive ? 'text-white' : 'text-gray-400 hover:bg-gray-700 hover:text-white'
+                                                isActive ? 'bg-gray-900 text-white' : 'text-gray-400 hover:bg-gray-700 hover:text-white',
+                                            )}
+                                    >
+                                        {item.name}
+                                    </NavLink>
+                                ))}
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <div className="mt-3 space-y-1 px-2">
+                                <Disclosure.Button
+                                    as="a"
+                                    href="#"
+                                    onClick={(ev) => logout(ev)}
+                                    className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
+                                >
+                                    Sign out
+                                </Disclosure.Button>
+                            </div>
+                        </>
+                    )}
                 </div>
             </DisclosurePanel>
         </Disclosure>

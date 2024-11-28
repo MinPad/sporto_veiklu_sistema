@@ -9,10 +9,11 @@ import ConfirmationDialog from "../components/core/ConfirmationDialog";
 
 export default function Cities() {
     const [cities, setCities] = useState([]); // Original cities from the API
-    const [filteredCities, setFilteredCities] = useState([]); // Filtered cities based on search
     const [loading, setLoading] = useState(true);
     const [isAdmin, setIsAdmin] = useState(false);
+
     const [searchQuery, setSearchQuery] = useState(""); // State to store the search query
+    const [filteredCities, setFilteredCities] = useState([]);
 
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [cityToDelete, setCityToDelete] = useState(null);
@@ -32,7 +33,7 @@ export default function Cities() {
     // Fetch cities from the API
     const fetchCities = () => {
         setLoading(true);
-        axiosClient.get("cities")
+        axiosClient.get("/cities")
             .then(({ data }) => {
                 setCities(data);
                 setFilteredCities(data); // Set filteredCities to all cities initially
@@ -96,7 +97,7 @@ export default function Cities() {
                 isAdmin && (
                     <TButton color="green" to="/cities/create">
                         <PlusCircleIcon className="h-6 w-6 mr-2" />
-                        Create new
+                        Create new City
                     </TButton>
                 )
             }

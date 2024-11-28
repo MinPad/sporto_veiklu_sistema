@@ -15,7 +15,7 @@ class CoachResource extends JsonResource
     public function toArray($request)
     {
         return [
-            // 'id' => $this->id,
+            'id' => $this->id,
             // 'id' => $this->id,
             // 'name' => $this->user ? $this->user->name : null, // Safely access user name
             // 'surname' => $this->user ? $this->user->surname : null, // Safely access user surname

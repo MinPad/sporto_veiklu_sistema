@@ -42,7 +42,7 @@ export default function Signup() {
                 <div className="w-full max-w-md p-4 bg-gray-100 border border-gray-300 rounded-lg shadow-lg sm:p-6 md:p-8 dark:bg-gray-800 dark:border-gray-700">
                     <div className="sm:mx-auto sm:w-full sm:max-w-sm">
                         <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
-                            Signup cia
+                            Signup
                         </h2>
                     </div>
 
@@ -54,7 +54,7 @@ export default function Signup() {
 
                         <form onSubmit={onSubmit} action="#" method="POST" className="space-y-6">
                             <div>
-                                <label htmlFor="full-name" className="block text-sm font-medium leading-6 text-gray-900">
+                                <label htmlFor="full-name" className="pl-1 block text-sm font-medium leading-6 text-gray-900">
                                     Full Name
                                 </label>
                                 {/* {fullName} */}
@@ -74,7 +74,7 @@ export default function Signup() {
                                 </div>
                             </div>
                             <div>
-                                <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
+                                <label htmlFor="email" className="pl-1 block text-sm font-medium leading-6 text-gray-900">
                                     Email address
                                 </label>
                                 <div className="mt-2">
@@ -96,7 +96,7 @@ export default function Signup() {
 
                             <div>
                                 <div className="flex items-center justify-between">
-                                    <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
+                                    <label htmlFor="password" className="pl-1 block text-sm font-medium leading-6 text-gray-900">
                                         Password
                                     </label>
                                 </div>
@@ -118,7 +118,7 @@ export default function Signup() {
                             </div>
                             <div>
                                 <div className="flex items-center justify-between">
-                                    <label htmlFor="password-confirmation" className="block text-sm font-medium leading-6 text-gray-900">
+                                    <label htmlFor="password-confirmation" className="pl-1 block text-sm font-medium leading-6 text-gray-900">
                                         Password Confirmation
                                     </label>
                                 </div>

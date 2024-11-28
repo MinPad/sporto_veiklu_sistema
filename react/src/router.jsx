@@ -3,10 +3,15 @@ import App from './App';
 import Login from "./views/Login";
 import Signup from "./views/signup";
 import Cities from "./views/Cities";
+import Users from "./views/Users";
 import Gyms from "./views/Gyms";
+import Coaches from "./views/Coaches";
+import CoachView from "./views/CoachView";
 import GymView from "./views/GymView";
 import GymUpdate from "./views/GymUpdate";
+import CoachUpdate from "./views/CoachUpdate";
 import CityCreateView from "./views/CityCreateView";
+import CoachCreateView from "./views/CoachCreateView";
 // import GuestLayout from "./components/guestLayout";
 
 const router = createBrowserRouter([
@@ -37,17 +42,39 @@ const router = createBrowserRouter([
         element: <Gyms />
     },
     {
-        path: '/cities/:cityId/gyms', // Dynamic route for gyms by city
+        path: '/cities/:cityId/gyms',
         element: <Gyms />
     },
     {
-        path: '/cities/:cityId/gyms/create', // Dynamic route for creating gyms in a city
+        path: '/cities/:cityId/gyms/create',
         element: <GymView />
     },
     {
-        path: '/cities/:cityId/gyms/:gymId/update', // Dynamic route for creating gyms in a city
+        path: '/cities/:cityId/gyms/:gymId/update',
         element: <GymUpdate />
     },
+    // -----------------------------
+    {
+        path: '/users',
+        element: <Users />
+    },
+    // -----------------------------
+    {
+        path: '/cities/:cityId/gyms/:gymId/coaches',
+        element: <Coaches />
+    },
+    {
+        path: '/cities/:cityId/gyms/:gymId/coaches/create',
+        element: <CoachCreateView />
+    },
+    {
+        path: '/cities/:cityId/gyms/:gymId/coaches/:coachId/update',
+        element: <CoachUpdate />
+    },
+    // {
+    //     path: '/cities/:cityId/gyms/:gymId/coaches:coach', 
+    //     element: <CoachView />
+    // },
     // {
     //     path: '/',
     //     element: <GuestLayout />,
