@@ -60,25 +60,14 @@ export default function Login() {
             })
             .then(({ data }) => {
                 const token = data.token || data.accessToken;  // Ensure we handle both possible keys
+                const refreshToken = data.refreshToken;  // Add this line
                 if (token) {
                     // console.log("Backend Response:", data);
                     // console.log("data user:", data.user);
                     setCurrentUser(data.user);
                     setUserToken(token); // Updates context and localStorage via setUserToken
                     localStorage.setItem('TOKEN', token); // Set it in localStorage
-                    // console.log("data id:", data.user.id);
-                    // debugger;
-                    // axiosClient
-                    //     .get(`/users/${data.user.id}`)
-                    //     .then(({ data }) => {
-                    //         // console.log("data:", data);
-                    //         // console.log("data:", data.data);
-                    //         setCurrentUser(data.data); // Assuming `data.data` is the user object
-                    //     })
-                    //     .catch((error) => {
-                    //         console.error("Error fetching user data:", error);
-                    //     });
-
+                    localStorage.setItem('REFRESH_TOKEN', refreshToken);  // Add this line
                     navigate(`/`);
                 } else {
                     console.error("No token received from API");

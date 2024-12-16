@@ -132,46 +132,85 @@ class AuthController extends Controller
         ], 401);
     }
 
-    
-    $refreshToken = Str::random(60);
-
-    auth()->user()->refreshTokens()->create([
-        'token' => $refreshToken,
-        'expires_at' => now()->addMinutes(config('jwt.refresh_ttl')), 
-    ]);
-
+    $refreshToken = auth()->setTTL(config('jwt.refresh_ttl'))->attempt($credentials);
     return response()->json([
         'success' => true,
         'message' => 'Login successful',
         'accessToken' => $token, 
-        'tokenType' => 'bearer',
         'refreshToken' => $refreshToken,
-        'expiresIn' => auth()->factory()->getTTL() * 60, 
-    ])->cookie('refreshToken', $refreshToken, config('jwt.refresh_ttl') * 60, null, null, true, true);
+        'tokenType' => 'bearer',
+        'accessExpiresIn' => auth()->factory()->getTTL() * 60,
+        'refreshExpiresIn' => config('jwt.refresh_ttl') * 60, 
+    ]);
+    
     }
+    
+    // public function refresh()
+    // {
+    // try {
+        
+    //     $newAccessToken = auth()->refresh();
 
-
+    //     return response()->json([
+    //         'message' => 'Token successfully refreshed',
+    //         'accessToken' => $newAccessToken,
+    //         'tokenType' => 'bearer',
+    //         'expiresIn' => auth()->factory()->getTTL() * 60,
+    //     ], 200);
+    // } catch (JWTException $e) {
+    //     return response()->json([
+    //         'message' => 'Invalid or expired refresh token'
+    //     ], 401);
+    // }
+    // }
+    // public function refresh()
+    // {
+    //     try {
+    //         $newAccessToken = auth()->refresh();
+    
+    //         return response()->json([
+    //             'message' => 'Token successfully refreshed',
+    //             'accessToken' => $newAccessToken,
+    //             'tokenType' => 'bearer',
+    //             'expiresIn' => auth()->factory()->getTTL() * 60,
+    //         ])->header('Access-Control-Allow-Origin', 'http://localhost:3000')
+    //           ->header('Access-Control-Allow-Credentials', 'true');
+    //     } catch (JWTException $e) {
+    //         return response()->json([
+    //             'message' => 'Invalid or expired refresh token',
+    //             'debug' => [
+    //                 'error' => $e->getMessage(),
+    //                 'token' => request()->bearerToken(),
+    //             ]
+    //         ], 401)->header('Access-Control-Allow-Origin', 'http://localhost:3000')
+    //                ->header('Access-Control-Allow-Credentials', 'true');
+    //     }
+    // }
     public function refresh()
     {
-        // Delete expired refresh tokens from the database (if you're storing them)
-        RefreshToken::where('expires_at', '<', Carbon::now())->delete();
-    
-        try {
-            // Generate a new access token using the current refresh token
-            $newAccessToken = auth()->refresh();
-    
-            return response()->json([
-                'message' => 'Token successfully refreshed',
-                'accessToken' => $newAccessToken,
-                'tokenType' => 'bearer',
-                'expiresIn' => auth()->factory()->getTTL() * 60, // Set expiration time
-            ], 200);
-        } catch (JWTException $e) {
-            return response()->json([
-                'message' => 'Invalid or expired refresh token'
-            ], 401);
+    try {
+        // Use the token from the Authorization header OR from the request body
+        $token = request()->bearerToken() ?? request('refreshToken');
+        
+        if (!$token) {
+            return response()->json(['message' => 'Refresh token is missing'], 400);
         }
+
+        // Manually set the token for refreshing
+        $newAccessToken = auth()->setToken($token)->refresh();
+
+        return response()->json([
+            'message' => 'Token successfully refreshed',
+            'accessToken' => $newAccessToken,
+            'tokenType' => 'bearer',
+            'expiresIn' => auth()->factory()->getTTL() * 60,
+        ]);
+    } catch (JWTException $e) {
+        return response()->json(['message' => 'Invalid or expired refresh token'], 401);
+        //naviaget to login
     }
+    }
+
     
     
     

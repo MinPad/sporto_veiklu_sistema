@@ -52,62 +52,41 @@ class GymController extends Controller
         return response()->json(new GymResource($gym), 200);
     }
 
-    // public function store(City $city, CreateGymRequest $request)
-    // {
-    //     $request->merge(['city_id' => $city->id]);
-
-    //     try {
-    //         $gym = Gym::create($request->all());
-    //         return response()->json(new GymResource($gym), 201);
-    //     } catch (QueryException $e) {
-    //         return response()->json(['message' => 'Error creating gym: ' . $e->getMessage()], 500);
-    //     }
-    // }
     public function store($cityId, CreateGymRequest $request)
     {
-        // Check if the user is authorized to create a gym
-        $this->authorize('create', Gym::class);  // Using the policy method
+    // Authorization: Ensures the user has the required permissions
+    $this->authorize('create', Gym::class);
 
-        // Check if JSON is valid
-        // try {
-        //     json_decode($request->getContent(), true);
-        //     dump($request);
-        //     if (json_last_error() !== JSON_ERROR_NONE) {
-        //         return response()->json(['message' => 'Invalid JSON'], 422);
-        //     }
-        // } catch (\Exception $e) {
-        //     return response()->json(['message' => 'Invalid JSON format'], 422);
-        // }
-
-        // Fetch city manually
-        try {
-            $city = City::findOrFail($cityId);
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['message' => 'City not found'], 404);
-        }
-
-        $data = $request->validated();
-        
-
-        if ($request->hasFile('image')) {
-            $filePath = $request->file('image')->store('gym-images', 'public');
-            $data['image_url'] = Storage::url($filePath);
-            // dump("kazkas",$data);
-        } elseif ($request->filled('image_url')) {
-            // Handle external URL
-            $data['image_url'] = $request->input('image_url');
-            // dump("kazkas du",$data);
-        }
-
-        // Create gym
-        // dump("kazkas galas",$data);
-        $gym = Gym::create($data + ['city_id' => $city->id]);
-        // Return response
-        return response()->json(new GymResource($gym), 201);
+    // Validate and find the city
+    try {
+        $city = City::findOrFail($cityId);
+    } catch (ModelNotFoundException $e) {
+        return response()->json(['message' => 'City not found'], 404);
     }
-    
-    
-    
+
+    // Retrieve validated input data from the request
+    $data = $request->validated();
+
+    // Handle the image file or URL
+    if ($request->hasFile('image')) {
+        // Store the uploaded file in the 'public/gym-images' directory
+        $filePath = $request->file('image')->store('gym-images', 'public');
+        // Generate a public URL for the stored file
+        $data['image_url'] = asset('storage/' . $filePath);
+    } elseif ($request->filled('image_url')) {
+        // Use the external image URL provided
+        $data['image_url'] = $request->input('image_url');
+    } else {
+        // If no image is provided, you can set a default placeholder (optional)
+        $data['image_url'] = null; // Replace with a default URL if needed
+    }
+
+    // Create a new gym record associated with the city
+    $gym = Gym::create($data + ['city_id' => $city->id]);
+
+    // Return a JSON response with the created gym resource
+    return response()->json(new GymResource($gym), 201);
+    }
 
     public function update(City $city, $gymId, UpdateGymRequest $request)
     {

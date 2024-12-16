@@ -1,6 +1,6 @@
 import { LockClosedIcon } from '@heroicons/react/20/solid'
 import Header from '../components/Header'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import axiosClient from '../axios.js';
 
@@ -11,7 +11,7 @@ export default function Signup() {
     const [passwordConfirmation, setpasswordConfirmation] = useState('');
 
     const [error, setError] = useState({ __html: "" });
-
+    const navigate = useNavigate();
     const onSubmit = (ev) => {
         ev.preventDefault();
         setError({ __html: "" })
@@ -24,15 +24,17 @@ export default function Signup() {
         })
             .then(({ data }) => {
                 console.log(data);
+                navigate(`/login`);
             })
             .catch((error) => {
                 if (error.response) {
+                    console.log(error)
                     const finalErrors = Object.values(error.response.data.errors).reduce((accum, next) =>
                         [...accum, ...next], [])
-                    console.log(finalErrors)
+                    // console.log(finalErrors)
                     setError({ __html: finalErrors.join('<br>') })
                 }
-                console.error(error)
+                // console.error(error)
             });
     };
     return (

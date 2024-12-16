@@ -14,6 +14,7 @@ export default function GymUpdate() {
     const [description, setDescription] = useState('');
     const [openingHours, setOpeningHours] = useState('');
     const [imageUrl, setImageUrl] = useState('');
+    const [image, setImage] = useState('');
     const [error, setError] = useState(null);
     const navigate = useNavigate();
 

@@ -70,6 +70,11 @@ import router from './router';
 
 const axiosClient = axios.create({
     baseURL: 'http://localhost:8000/api',
+    withCredentials: true,
+    // headers: {
+    //     'Content-Type': 'application/json',
+    //     'Accept': 'application/json',
+    // }
 });
 
 axiosClient.interceptors.request.use((config) => {
@@ -91,30 +96,33 @@ function onRefreshed(token) {
 function addRefreshSubscriber(callback) {
     refreshSubscribers.push(callback);
 }
-
 axiosClient.interceptors.response.use(
     (response) => response,
     (error) => {
         const { config, response } = error;
 
-        // Check for 401 and avoid infinite loops
         if (response && response.status === 401 && !config._retry) {
             config._retry = true;
 
             if (!isRefreshing) {
                 isRefreshing = true;
 
-                return axiosClient.post('/refresh-token')
+                return axiosClient.post('/refresh-token', {}, {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('REFRESH_TOKEN')}`
+                    }
+                })
                     .then(({ data }) => {
                         const newAccessToken = data.accessToken;
                         localStorage.setItem('TOKEN', newAccessToken);
                         axiosClient.defaults.headers.Authorization = `Bearer ${newAccessToken}`;
                         isRefreshing = false;
                         onRefreshed(newAccessToken);
-                        return axiosClient(config); // Retry the original request
+                        return axiosClient(config);
                     })
                     .catch(() => {
                         localStorage.removeItem('TOKEN');
+                        localStorage.removeItem('REFRESH_TOKEN');
                         router.navigate('/login');
                         return Promise.reject(error);
                     });
@@ -129,7 +137,6 @@ axiosClient.interceptors.response.use(
             });
         }
 
-        // Reject other errors
         return Promise.reject(error);
     }
 );

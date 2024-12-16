@@ -6,32 +6,26 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-// class CorsMiddleware
-// {
-//         public function handle($request, Closure $next)
-//     {
-//     if ($request->isMethod('options')) {
-//         return response()->json([], 200)
-//             // ->header('Access-Control-Allow-Origin', 'http://localhost:3000')
-//             ->header('Access-Control-Allow-Origin', '*')
-//             ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-//             ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-//     }
-
-//     return $next($request)
-//         ->header('Access-Control-Allow-Origin', 'http://localhost:3000')
-//         ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-//         ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-//     }
-// }
-
-class CorsMiddleware{
+class CorsMiddleware {
     public function handle(Request $request, Closure $next)
     {
+        // Handle preflight requests
+        if ($request->isMethod('OPTIONS')) {
+            return response('', 200, [
+                'Access-Control-Allow-Origin' => 'http://localhost:3000',
+                'Access-Control-Allow-Methods' => 'POST, GET, OPTIONS, PUT, DELETE, PATCH',
+                'Access-Control-Allow-Headers' => 'Content-Type, X-Auth-Token, Origin, Authorization, Accept',
+                'Access-Control-Allow-Credentials' => 'true',
+            ]);
+        }
+
+        // Handle actual requests
         $response = $next($request);
+        
         $response->headers->set('Access-Control-Allow-Origin', 'http://localhost:3000');
-        $response->headers->set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, PUT, DELETE');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, X-Auth-Token, Origin, Authorization');
+        $response->headers->set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, PUT, DELETE, PATCH');
+        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, X-Auth-Token, Origin, Authorization, Accept');
+        $response->headers->set('Access-Control-Allow-Credentials', 'true');
 
         return $response;
     }
