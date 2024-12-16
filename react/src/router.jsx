@@ -4,6 +4,7 @@ import Login from "./views/Login";
 import Signup from "./views/signup";
 import Cities from "./views/Cities";
 import Users from "./views/Users";
+import UserProfile from "./views/Profile";
 import Gyms from "./views/Gyms";
 import Coaches from "./views/Coaches";
 import CoachView from "./views/CoachView";
@@ -13,8 +14,19 @@ import CoachUpdate from "./views/CoachUpdate";
 import CityCreateView from "./views/CityCreateView";
 import CoachCreateView from "./views/CoachCreateView";
 // import GuestLayout from "./components/guestLayout";
+import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
 
 const router = createBrowserRouter([
+    {
+        path: '/forgot-password',
+        element: <ForgotPassword />
+    },
+    {
+        path: '/reset-password',
+        element: <ResetPassword />
+    },
+
     {
         path: '/',
         element: <App />
@@ -57,6 +69,10 @@ const router = createBrowserRouter([
     {
         path: '/users',
         element: <Users />
+    },
+    {
+        path: '/user/:userId/profile',
+        element: <UserProfile />
     },
     // -----------------------------
     {

@@ -38,10 +38,22 @@ class UserController extends Controller
         return response()->json(['message' => 'A user with this id doesn\'t exist'], 404);
     }
     }
+    public function current()
+    {
+    try {
+        $user = auth()->user(); // Automatically gets the currently authenticated user
+        return new UserResource($user);
+    } catch (Exception $e) {
+        return response()->json(['message' => 'Unable to fetch user data'], 500);
+    }
+    }
     public function update($id, Request $request)
     {
-        
+        // logger('Update method hit');
+        // logger($request->all());
         try {
+            
+
             $data = json_decode($request->getContent(), true);
             if (json_last_error() !== JSON_ERROR_NONE) {
                 return response()->json(['message' => 'Invalid JSON'], 422);
@@ -49,7 +61,7 @@ class UserController extends Controller
         } catch (Exception $e) {
             return response()->json(['message' => 'Invalid JSON format'], 422);
         }
-    
+        
         try {
             // Find the user by ID
             $user = User::findOrFail($id);

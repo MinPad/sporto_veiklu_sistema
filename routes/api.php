@@ -5,7 +5,13 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\GymController;
 use App\Http\Controllers\CoachesController;
+use App\Http\Controllers\PasswordResetController;
 use Illuminate\Support\Facades\Route;
+
+
+
+Route::post('/password/email', [PasswordResetController::class, 'sendResetLink']);
+Route::post('/password/reset', [PasswordResetController::class, 'resetPassword']);
 
 // Autherization
 // Route::post('/signup', [AuthController::class, 'signup']);
@@ -25,6 +31,8 @@ Route::get('/users', [UserController::class, 'index'])->middleware('auth:api');
 
 Route::get('/users/{id}', [UserController::class, 'show'])->middleware('auth:api');
 // Route::get('/users/{id}', [UserController::class, 'show'])->middleware(['auth:api', 'can:view,user']);
+
+Route::get('/user', [UserController::class, 'current'])->middleware('auth:api');
 
 // Route::patch('/users/{user}', [UserController::class, 'update'])->middleware('auth:api','can:update,user');
 Route::patch('/users/{user}', [UserController::class, 'update'])->middleware('auth:api');

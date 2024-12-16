@@ -31,18 +31,18 @@ export default function Header() {
     const { currentUser, userToken, setCurrentUser, setUserToken } = useStateContext();
     const navigate = useNavigate();
     const [isAdmin, setIsAdmin] = useState(false);
-
+    const [userId, setUserId] = useState(null);
     useEffect(() => {
         const token = localStorage.getItem("TOKEN");
         if (token) {
             const decodedToken = jwtDecode(token);
+            setUserId(decodedToken.sub);
             if (decodedToken.role === "Admin") {
                 setIsAdmin(true);
             }
         }
 
     }, []);
-
     // console.log(isAdmin)
     // console.log("header ", currentUser.name);
     // console.log('Current userToken in Header:', userToken); // Debugging
@@ -60,6 +60,10 @@ export default function Header() {
             setUserToken(null);
             navigate('/login');
         });
+    };
+    const profile = (ev) => {
+        ev.preventDefault();
+        navigate('/user/${userId}/profile');
     };
 
     // useEffect(() => {
@@ -159,30 +163,30 @@ export default function Header() {
                                                 leaveFrom="transform opacity-100 scale-100"
                                                 leaveTo="transform opacity-0 scale-95"
                                             >
-                                                <Menu className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                                                    <Menu>
-                                                        <a
-                                                            href="#"
-                                                            onClick={(ev) => logout(ev)}
-                                                            className={
-                                                                "block px-4 py-2 text-sm text-gray-700"
-                                                            }
-                                                        >
-                                                            Sign out
-                                                        </a>
-                                                    </Menu>
-                                                    <Menu>
-                                                        <a
-                                                            href="#"
-                                                            onClick={(ev) => logout(ev)}
-                                                            className={
-                                                                "block px-4 py-2 text-sm text-gray-700"
-                                                            }
-                                                        >
-                                                            Profile
-                                                        </a>
-                                                    </Menu>
-                                                </Menu>
+                                                <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                                                    <Menu.Item>
+                                                        {({ active }) => (
+                                                            <a
+                                                                href="#"
+                                                                onClick={(ev) => logout(ev)}
+                                                                className={`block px-4 py-2 text-sm ${active ? 'bg-gray-100' : 'text-gray-700'}`}
+                                                            >
+                                                                Sign out
+                                                            </a>
+                                                        )}
+                                                    </Menu.Item>
+                                                    <Menu.Item>
+                                                        {({ active }) => (
+                                                            <a
+                                                                href="#"
+                                                                onClick={(ev) => profile(ev)}
+                                                                className={`block px-4 py-2 text-sm ${active ? 'bg-gray-100' : 'text-gray-700'}`}
+                                                            >
+                                                                Profile
+                                                            </a>
+                                                        )}
+                                                    </Menu.Item>
+                                                </Menu.Items>
                                             </Transition>
                                         </Menu>
                                     </div>
@@ -281,7 +285,7 @@ export default function Header() {
                                 <Disclosure
                                     as="a"
                                     href="#"
-                                    onClick={(ev) => logout(ev)}
+                                    onClick={(ev) => profile(ev)}
                                     className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
                                 >
                                     Profile
