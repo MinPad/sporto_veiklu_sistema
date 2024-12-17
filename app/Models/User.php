@@ -59,7 +59,11 @@ class User extends Authenticatable implements JWTSubject
     }
     public function refreshTokens()
     {
-    return $this->hasMany(RefreshToken::class);
+        return $this->hasMany(RefreshToken::class);
+    }
+    public function sportsEvents()
+    {
+        return $this->belongsToMany(SportsEvent::class, 'sports_event_user')->withTimestamps();
     }
 
 }

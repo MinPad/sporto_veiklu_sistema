@@ -17,7 +17,15 @@ import CoachCreateView from "./views/CoachCreateView";
 import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
 
+import UnauthorizedPage from "./views/UnauthorizedPage";
+import ProtectedRoute from "./components/ProtectedRoute";
+
 const router = createBrowserRouter([
+    {
+        path: '/UnauthorizedPage',
+        element: <UnauthorizedPage />
+    },
+
     {
         path: '/forgot-password',
         element: <ForgotPassword />
@@ -46,7 +54,11 @@ const router = createBrowserRouter([
     },
     {
         path: '/cities/create',
-        element: <CityCreateView />
+        element: (
+            <ProtectedRoute requiredRole="Admin">
+                <CityCreateView />
+            </ProtectedRoute>
+        )
     },
     // -----------------------------
     {
@@ -59,16 +71,25 @@ const router = createBrowserRouter([
     },
     {
         path: '/cities/:cityId/gyms/create',
-        element: <GymView />
+        element: (
+            <ProtectedRoute requiredRole="Admin">
+                <GymView />
+            </ProtectedRoute>)
     },
     {
         path: '/cities/:cityId/gyms/:gymId/update',
-        element: <GymUpdate />
+        element: (
+            <ProtectedRoute requiredRole="Admin">
+                <GymUpdate />
+            </ProtectedRoute>)
     },
     // -----------------------------
     {
         path: '/users',
-        element: <Users />
+        element: (
+            <ProtectedRoute requiredRole="Admin">
+                <Users />
+            </ProtectedRoute>)
     },
     {
         path: '/user/:userId/profile',
@@ -81,11 +102,17 @@ const router = createBrowserRouter([
     },
     {
         path: '/cities/:cityId/gyms/:gymId/coaches/create',
-        element: <CoachCreateView />
+        element: (
+            <ProtectedRoute requiredRole="Admin">
+                <CoachCreateView />
+            </ProtectedRoute>)
     },
     {
         path: '/cities/:cityId/gyms/:gymId/coaches/:coachId/update',
-        element: <CoachUpdate />
+        element: (
+            <ProtectedRoute requiredRole="Admin">
+                <CoachUpdate />
+            </ProtectedRoute>)
     },
     // {
     //     path: '/cities/:cityId/gyms/:gymId/coaches:coach', 

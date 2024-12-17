@@ -4,8 +4,19 @@ module.exports = {
     "./index.html",
     "./src/**/*.{js,jsx,ts,tsx}", // This ensures that Tailwind scans your React components for classes
   ],
+  // theme: {
+  //   extend: {
+  //     fontFamily: {
+  //       custom: ['Dancing Script', 'cursive'],
+  //     },
+  //   },
+  // },
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        custom: ['Montserrat', 'sans-serif'],
+      },
+    },
   },
   plugins: [
     require("@tailwindcss/forms")

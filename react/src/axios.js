@@ -68,6 +68,7 @@
 import axios from 'axios';
 import router from './router';
 
+// Assuming this file is part of a component
 const axiosClient = axios.create({
     baseURL: 'http://localhost:8000/api',
     withCredentials: true,
@@ -106,7 +107,7 @@ axiosClient.interceptors.response.use(
 
             if (!isRefreshing) {
                 isRefreshing = true;
-
+                console.log('Sending Refresh Token:', localStorage.getItem('REFRESH_TOKEN'));
                 return axiosClient.post('/refresh-token', {}, {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem('REFRESH_TOKEN')}`
@@ -120,25 +121,33 @@ axiosClient.interceptors.response.use(
                         onRefreshed(newAccessToken);
                         return axiosClient(config);
                     })
-                    .catch(() => {
-                        localStorage.removeItem('TOKEN');
-                        localStorage.removeItem('REFRESH_TOKEN');
-                        router.navigate('/login');
+                    .catch((error) => {
+                        console.error('Error in refresh token request:', error.response || error);
+                        if (error.response && error.response.status === 401) {
+                            localStorage.removeItem('TOKEN');
+                            localStorage.removeItem('REFRESH_TOKEN');
+                            router.push('/login'); // Ensure proper redirection here
+                        }
                         return Promise.reject(error);
                     });
             }
 
-            // Queue the request while refreshing
             return new Promise((resolve) => {
                 addRefreshSubscriber((token) => {
                     config.headers.Authorization = `Bearer ${token}`;
                     resolve(axiosClient(config));
                 });
             });
-        }
 
+        }
+        // Handle 403 Forbidden error (Unauthorized access)
+        if (response && response.status === 403) {
+            console.log('Access Denied. Redirecting to Unauthorized page...');
+            window.location.href = '/UnauthorizedPage';
+        }
         return Promise.reject(error);
     }
 );
+
 
 export default axiosClient;

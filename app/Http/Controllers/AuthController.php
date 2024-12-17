@@ -195,7 +195,7 @@ class AuthController extends Controller
         if (!$token) {
             return response()->json(['message' => 'Refresh token is missing'], 400);
         }
-
+        // \Log::info('Received Token for Refresh:', ['token' => $token]);
         // Manually set the token for refreshing
         $newAccessToken = auth()->setToken($token)->refresh();
 
@@ -205,9 +205,12 @@ class AuthController extends Controller
             'tokenType' => 'bearer',
             'expiresIn' => auth()->factory()->getTTL() * 60,
         ]);
+    } catch (\Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
+        return response()->json(['message' => 'Refresh token expired'], 401);
+    } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
+        return response()->json(['message' => 'Invalid refresh token'], 401);
     } catch (JWTException $e) {
-        return response()->json(['message' => 'Invalid or expired refresh token'], 401);
-        //naviaget to login
+        return response()->json(['message' => 'Could not refresh token'], 500);
     }
     }
 
