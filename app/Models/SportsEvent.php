@@ -52,6 +52,7 @@ class SportsEvent extends Model
             $this->decrement('current_participants');
         }
     }
+    
 
     public function scopeUpcoming($query)
     {

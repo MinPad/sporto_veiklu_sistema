@@ -12,7 +12,7 @@ import { useStateContext } from '../contexts/ContexProvider';
 
 const navigation = [
     { name: 'Cities', to: '/cities' },
-    // { name: 'Gyms', to: '/gyms' },
+    { name: 'Sports Events', to: '/sports-events' },
     // { name: 'Projects', href: '#', current: false },
     // { name: 'Calendar', href: '#', current: false },
     // { name: 'Reports', href: '#', current: false },

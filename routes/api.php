@@ -6,12 +6,17 @@ use App\Http\Controllers\CityController;
 use App\Http\Controllers\GymController;
 use App\Http\Controllers\CoachesController;
 use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\SportEventController;
 use Illuminate\Support\Facades\Route;
 
 
 
 Route::post('/password/email', [PasswordResetController::class, 'sendResetLink']);
 Route::post('/password/reset', [PasswordResetController::class, 'resetPassword']);
+
+
+Route::get('/sports-events', [SportEventController::class, 'index']);
+Route::middleware('auth:api')->post('/sports-events/{id}/join', [SportEventController::class, 'join']);
 
 // Autherization
 // Route::post('/signup', [AuthController::class, 'signup']);

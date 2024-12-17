@@ -20,7 +20,14 @@ import ResetPassword from './components/ResetPassword';
 import UnauthorizedPage from "./views/UnauthorizedPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
+import SportsEventsPage from "./views/SportsEvents";
+
 const router = createBrowserRouter([
+    {
+        path: '/sports-events',
+        element: <SportsEventsPage />
+    },
+
     {
         path: '/UnauthorizedPage',
         element: <UnauthorizedPage />
