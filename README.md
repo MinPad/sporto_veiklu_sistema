@@ -51,147 +51,147 @@ Duomenų bazė – MySQL.
 
 ## 3. Front-end pages
 
-| ![Pagrindinis puslapis](storage/app/public/readme/HomePage.png) |
-| :-------------------------------------------------------------: |
-|                     _Pagrindinis puslapis_                      |
+| ![Pagrindinis puslapis](public/images/readme/HomePage.png) |
+| :--------------------------------------------------------: |
+|                   _Pagrindinis puslapis_                   |
 
 <br>
 
-| ![Registracijos puslapis](storage/app/public/readme/Signup.png) |
-| :-------------------------------------------------------------: |
-|                    _Registracijos puslapis_                     |
+| ![Registracijos puslapis](public/images/readme/Signup.png) |
+| :--------------------------------------------------------: |
+|                  _Registracijos puslapis_                  |
 
 <br>
 
-| ![Prisijungimo puslapis](storage/app/public/readme/Login.png) |
-| :-----------------------------------------------------------: |
-|                    _Prisijungimo puslapis_                    |
+| ![Prisijungimo puslapis](public/images/readme/Login.png) |
+| :------------------------------------------------------: |
+|                 _Prisijungimo puslapis_                  |
 
 <br>
 
-| ![Miestų sąrašo puslapis (naudotojas prisijungęs, arba svečias)](storage/app/public/readme/CitiesU.png) |
-| :-----------------------------------------------------------------------------------------------------: |
-|                     _Miestų sąrašo puslapis (naudotojas prisijungęs, arba svečias)_                     |
-
-<br>
-
-| ![Miestų sąrašo puslapis (naudotojas prisijungęs kaip administratorius)](storage/app/public/readme/CitiesA.png) |
-| :-------------------------------------------------------------------------------------------------------------: |
-|                     _Miestų sąrašo puslapis (naudotojas prisijungęs kaip administratorius)_                     |
-
-<br>
-
-| ![Sporto klubų sąrašo puslapis (naudotojas prisijungęs, arba svečias)](storage/app/public/readme/GymsU.png) |
-| :---------------------------------------------------------------------------------------------------------: |
-|                   _Sporto klubų sąrašo puslapiss (naudotojas prisijungęs, arba svečias)_                    |
-
-<br>
-
-| ![Sporto klubų sąrašo puslapis (naudotojas prisijungęs kaip administratorius)](storage/app/public/readme/GymsA.png) |
-| :-----------------------------------------------------------------------------------------------------------------: |
-|                    _Sporto klubų sąrašo puslapis (naudotojas prisijungęs kaip administratorius)_                    |
-
-<br>
-
-| ![Sporto klubo trenerių sąrašo puslapis (naudotojas prisijungęs, arba svečias)](storage/app/public/readme/CoachesU.png) |
-| :---------------------------------------------------------------------------------------------------------------------: |
-|                     _Sporto klubo trenerių sąrašo puslapis (naudotojas prisijungęs, arba svečias)_                      |
-
-<br>
-
-| ![Sporto klubo trenerių sąrašo puslapis (naudotojas prisijungęs kaip administratorius)](storage/app/public/readme/CoachesA.png) |
-| :-----------------------------------------------------------------------------------------------------------------------------: |
-|                     _Sporto klubo trenerių sąrašo puslapis (naudotojas prisijungęs kaip administratorius)_                      |
-
-<br>
-
-| ![Sporto renginių sąrašo puslapis (naudotojas prisijungęs kaip administratorius, arba svečias)](storage/app/public/readme/SportsEventsG.png) |
-| :------------------------------------------------------------------------------------------------------------------------------------------: |
-|                        _Sporto renginių sąrašo puslapis (naudotojas prisijungęs kaip administratorius, arba svečias)_                        |
-
-<br>
-
-| ![Sporto renginių sąrašo puslapis (naudotojas prisijungęs)](storage/app/public/readme/SportsEventsU.png) |
-| :------------------------------------------------------------------------------------------------------: |
-|                        _Sporto renginių sąrašo puslapis (naudotojas prisijungęs)_                        |
-
-<br>
-
-| ![Prisijungusio naudotojo informacijos peržiūros puslapis](storage/app/public/readme/ProfileV.png) |
+| ![Miestų sąrašo puslapis (naudotojas prisijungęs, arba svečias)](public/images/readme/CitiesU.png) |
 | :------------------------------------------------------------------------------------------------: |
-|                     _Prisijungusio naudotojo informacijos peržiūros puslapis_                      |
+|                  _Miestų sąrašo puslapis (naudotojas prisijungęs, arba svečias)_                   |
 
 <br>
 
-| ![Prisijungusio naudotojo informacijos redagavimo puslapis](storage/app/public/readme/ProfileE.png) |
-| :-------------------------------------------------------------------------------------------------: |
-|                     _Prisijungusio naudotojo informacijos redagavimo puslapis_                      |
+| ![Miestų sąrašo puslapis (naudotojas prisijungęs kaip administratorius)](public/images/readme/CitiesA.png) |
+| :--------------------------------------------------------------------------------------------------------: |
+|                  _Miestų sąrašo puslapis (naudotojas prisijungęs kaip administratorius)_                   |
 
 <br>
 
-| ![Paskyros šalinimo modalas](storage/app/public/readme/ProfileDel.png) |
-| :--------------------------------------------------------------------: |
-|                      _Paskyros šalinimo modalas_                       |
+| ![Sporto klubų sąrašo puslapis (naudotojas prisijungęs, arba svečias)](public/images/readme/GymsU.png) |
+| :----------------------------------------------------------------------------------------------------: |
+|                 _Sporto klubų sąrašo puslapiss (naudotojas prisijungęs, arba svečias)_                 |
 
 <br>
 
-| ![Miesto šalinimo modalas (naudotojas prisijungęs kaip administratorius)](storage/app/public/readme/CitiesDel.png) |
+| ![Sporto klubų sąrašo puslapis (naudotojas prisijungęs kaip administratorius)](public/images/readme/GymsA.png) |
+| :------------------------------------------------------------------------------------------------------------: |
+|                 _Sporto klubų sąrašo puslapis (naudotojas prisijungęs kaip administratorius)_                  |
+
+<br>
+
+| ![Sporto klubo trenerių sąrašo puslapis (naudotojas prisijungęs, arba svečias)](public/images/readme/CoachesU.png) |
 | :----------------------------------------------------------------------------------------------------------------: |
-|                      _Miesto šalinimo modalas (naudotojas prisijungęs kaip administratorius)_                      |
+|                   _Sporto klubo trenerių sąrašo puslapis (naudotojas prisijungęs, arba svečias)_                   |
 
 <br>
 
-| ![Miesto kūrimo puslapis (naudotojas prisijungęs kaip administratorius)](storage/app/public/readme/CitiesCre.png) |
+| ![Sporto klubo trenerių sąrašo puslapis (naudotojas prisijungęs kaip administratorius)](public/images/readme/CoachesA.png) |
+| :------------------------------------------------------------------------------------------------------------------------: |
+|                   _Sporto klubo trenerių sąrašo puslapis (naudotojas prisijungęs kaip administratorius)_                   |
+
+<br>
+
+| ![Sporto renginių sąrašo puslapis (naudotojas prisijungęs kaip administratorius, arba svečias)](public/images/readme/SportsEventsG.png) |
+| :-------------------------------------------------------------------------------------------------------------------------------------: |
+|                     _Sporto renginių sąrašo puslapis (naudotojas prisijungęs kaip administratorius, arba svečias)_                      |
+
+<br>
+
+| ![Sporto renginių sąrašo puslapis (naudotojas prisijungęs)](public/images/readme/SportsEventsU.png) |
+| :-------------------------------------------------------------------------------------------------: |
+|                     _Sporto renginių sąrašo puslapis (naudotojas prisijungęs)_                      |
+
+<br>
+
+| ![Prisijungusio naudotojo informacijos peržiūros puslapis](public/images/readme/ProfileV.png) |
+| :-------------------------------------------------------------------------------------------: |
+|                   _Prisijungusio naudotojo informacijos peržiūros puslapis_                   |
+
+<br>
+
+| ![Prisijungusio naudotojo informacijos redagavimo puslapis](public/images/readme/ProfileE.png) |
+| :--------------------------------------------------------------------------------------------: |
+|                   _Prisijungusio naudotojo informacijos redagavimo puslapis_                   |
+
+<br>
+
+| ![Paskyros šalinimo modalas](public/images/readme/ProfileDel.png) |
+| :---------------------------------------------------------------: |
+|                    _Paskyros šalinimo modalas_                    |
+
+<br>
+
+| ![Miesto šalinimo modalas (naudotojas prisijungęs kaip administratorius)](public/images/readme/CitiesDel.png) |
+| :-----------------------------------------------------------------------------------------------------------: |
+|                   _Miesto šalinimo modalas (naudotojas prisijungęs kaip administratorius)_                    |
+
+<br>
+
+| ![Miesto kūrimo puslapis (naudotojas prisijungęs kaip administratorius)](public/images/readme/CitiesCre.png) |
+| :----------------------------------------------------------------------------------------------------------: |
+|                   _Miesto kūrimo puslapis (naudotojas prisijungęs kaip administratorius)_                    |
+
+<br>
+
+| ![Sporto klubo šalinimo modalas (naudotojas prisijungęs kaip administratorius)](public/images/readme/GymsDel.png) |
 | :---------------------------------------------------------------------------------------------------------------: |
-|                      _Miesto kūrimo puslapis (naudotojas prisijungęs kaip administratorius)_                      |
+|                  _Sporto klubo šalinimo modalas (naudotojas prisijungęs kaip administratorius)_                   |
 
 <br>
 
-| ![Sporto klubo šalinimo modalas (naudotojas prisijungęs kaip administratorius)](storage/app/public/readme/GymsDel.png) |
-| :--------------------------------------------------------------------------------------------------------------------: |
-|                     _Sporto klubo šalinimo modalas (naudotojas prisijungęs kaip administratorius)_                     |
+| ![Sporto klubo kūrimo puslapis (naudotojas prisijungęs kaip administratorius)](public/images/readme/GymsCre.png) |
+| :--------------------------------------------------------------------------------------------------------------: |
+|                  _Sporto klubo kūrimo puslapis (naudotojas prisijungęs kaip administratorius)_                   |
 
 <br>
 
-| ![Sporto klubo kūrimo puslapis (naudotojas prisijungęs kaip administratorius)](storage/app/public/readme/GymsCre.png) |
-| :-------------------------------------------------------------------------------------------------------------------: |
-|                     _Sporto klubo kūrimo puslapis (naudotojas prisijungęs kaip administratorius)_                     |
-
-<br>
-
-| ![Sporto klubo redagavimo puslapis (naudotojas prisijungęs kaip administratorius)](storage/app/public/readme/GymsEdi.png) |
-| :-----------------------------------------------------------------------------------------------------------------------: |
-|                     _Sporto klubo redagavimo puslapis (naudotojas prisijungęs kaip administratorius)_                     |
-
-<br>
-
-| ![Trenerio šalinimo modalas (naudotojas prisijungęs kaip administratorius)](storage/app/public/readme/CoachesDel.png) |
-| :-------------------------------------------------------------------------------------------------------------------: |
-|                      _Trenerio šalinimo modalas (naudotojas prisijungęs kaip administratorius)_                       |
-
-<br>
-
-| ![Trenerio kūrimo puslapis (naudotojas prisijungęs kaip administratorius)](storage/app/public/readme/CoachesCre.png) |
+| ![Sporto klubo redagavimo puslapis (naudotojas prisijungęs kaip administratorius)](public/images/readme/GymsEdi.png) |
 | :------------------------------------------------------------------------------------------------------------------: |
-|                      _Trenerio kūrimo puslapis (naudotojas prisijungęs kaip administratorius)_                       |
+|                  _Sporto klubo redagavimo puslapis (naudotojas prisijungęs kaip administratorius)_                   |
 
 <br>
 
-| ![Trenerio redagavimo puslapis (naudotojas prisijungęs kaip administratorius)](storage/app/public/readme/CoachesEdi.png) |
-| :----------------------------------------------------------------------------------------------------------------------: |
-|                      _Trenerio redagavimo puslapis (naudotojas prisijungęs kaip administratorius)_                       |
+| ![Trenerio šalinimo modalas (naudotojas prisijungęs kaip administratorius)](public/images/readme/CoachesDel.png) |
+| :--------------------------------------------------------------------------------------------------------------: |
+|                    _Trenerio šalinimo modalas (naudotojas prisijungęs kaip administratorius)_                    |
 
 <br>
 
-| ![Prisiregistruotų naudotojų peržiūros puslapis (naudotojas prisijungęs kaip administratorius)](storage/app/public/readme/Users.png) |
-| :----------------------------------------------------------------------------------------------------------------------------------: |
-|                    _Prisiregistruotų naudotojų peržiūros puslapis (naudotojas prisijungęs kaip administratorius)_                    |
+| ![Trenerio kūrimo puslapis (naudotojas prisijungęs kaip administratorius)](public/images/readme/CoachesCre.png) |
+| :-------------------------------------------------------------------------------------------------------------: |
+|                    _Trenerio kūrimo puslapis (naudotojas prisijungęs kaip administratorius)_                    |
 
 <br>
 
-| ![Prisiregistruoto naudotojo šalinimo modalas (naudotojas prisijungęs kaip administratorius)](storage/app/public/readme/UsersDel.png) |
-| :-----------------------------------------------------------------------------------------------------------------------------------: |
-|                     _Prisiregistruoto naudotojo šalinimo modalas (naudotojas prisijungęs kaip administratorius)_                      |
+| ![Trenerio redagavimo puslapis (naudotojas prisijungęs kaip administratorius)](public/images/readme/CoachesEdi.png) |
+| :-----------------------------------------------------------------------------------------------------------------: |
+|                    _Trenerio redagavimo puslapis (naudotojas prisijungęs kaip administratorius)_                    |
+
+<br>
+
+| ![Prisiregistruotų naudotojų peržiūros puslapis (naudotojas prisijungęs kaip administratorius)](public/images/readme/Users.png) |
+| :-----------------------------------------------------------------------------------------------------------------------------: |
+|                 _Prisiregistruotų naudotojų peržiūros puslapis (naudotojas prisijungęs kaip administratorius)_                  |
+
+<br>
+
+| ![Prisiregistruoto naudotojo šalinimo modalas (naudotojas prisijungęs kaip administratorius)](public/images/readme/UsersDel.png) |
+| :------------------------------------------------------------------------------------------------------------------------------: |
+|                   _Prisiregistruoto naudotojo šalinimo modalas (naudotojas prisijungęs kaip administratorius)_                   |
 
 <br>
 
