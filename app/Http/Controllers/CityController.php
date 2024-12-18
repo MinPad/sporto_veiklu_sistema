@@ -15,25 +15,17 @@ class CityController extends Controller
     {
         return response()->json(CityResource::collection(City::all()), 200);
     }
-    // public function index()
-    // {
-    //     return response()->json(['message' => 'Cities retrieved successfully!'], 200);
-    // }
     public function store(CreateCityRequest $request)
     {
-        // Authorize the user to create a city
         $this->authorize('create', City::class);  
     
-        // Validate the JSON request content
         $data = json_decode($request->getContent(), true);
         if (json_last_error() !== JSON_ERROR_NONE) {
             return response()->json(['message' => 'Invalid JSON'], 422);
         }
     
-        // Create a new city using validated data
         $city = City::create($request->validated());
     
-        // Return the created city as a resource
         return response()->json(new CityResource($city), 201);
     }
     public function show($id)
@@ -54,6 +46,5 @@ class CityController extends Controller
         $city->delete();
         return response('', 204);
     }
-    
     
 }

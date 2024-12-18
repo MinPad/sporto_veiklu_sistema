@@ -3,12 +3,16 @@ import Header from '../components/Header';
 import axiosClient from "../axios";
 import LoadingDialog from "../components/core/LoadingDialog";
 import { jwtDecode } from "jwt-decode";
-
+import TButton from "../components/core/TButton";
+import ConfirmationDialog from "../components/core/ConfirmationDialog";
+import { TrashIcon } from '@heroicons/react/24/outline';
+import { useNavigate } from 'react-router-dom'
 const Profile = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
-
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const navigate = useNavigate();
     // Profile fields
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -53,7 +57,28 @@ const Profile = () => {
             setError("Failed to update profile.");
         }
     };
+    const [userIdToDelete, setUserToDelete] = useState(null);
 
+    const handleDeleteClick = () => {
+        setUserToDelete(userId);
+        setIsDialogOpen(true);
+    };
+
+    const confirmDelete = () => {
+        axiosClient.delete(`/users/${userIdToDelete}`)
+            .then(() => {
+                // alert('Profile deleted successfully!');
+                localStorage.removeItem('TOKEN');
+                localStorage.removeItem('REFRESH_TOKEN');
+                navigate(`/signup`);
+                setIsDialogOpen(false);
+                setUserToDelete(null);
+            })
+            .catch((error) => {
+                console.error("Error deleting profile:", error);
+                setIsDialogOpen(false);
+            });
+    };
     if (error) return <div className="text-red-500">{error}</div>;
 
     return (
@@ -147,12 +172,22 @@ const Profile = () => {
                                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                                 />
                                             </div>
-                                            <button
-                                                onClick={() => setIsEditing(true)}
-                                                className="bg-indigo-700 hover:bg-indigo-800 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                            >
-                                                Edit
-                                            </button>
+                                            <div className="flex justify-between items-center">
+                                                <button
+                                                    onClick={() => setIsEditing(true)}
+                                                    className="bg-indigo-700 hover:bg-indigo-800 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                                >
+                                                    Edit
+                                                </button>
+                                                <TButton
+                                                    onClick={handleDeleteClick}
+                                                    circle
+                                                    link
+                                                    color="red"
+                                                >
+                                                    <TrashIcon className="w-5 h-5" />
+                                                </TButton>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
@@ -161,6 +196,13 @@ const Profile = () => {
                     </div>
                 </div>
             )}
+            <ConfirmationDialog
+                isOpen={isDialogOpen}
+                onClose={() => setIsDialogOpen(false)}
+                title="Delete Profile"
+                message="Are you sure you want to delete your profile? This action cannot be undone."
+                onConfirm={confirmDelete}
+            />
         </>
     );
 };

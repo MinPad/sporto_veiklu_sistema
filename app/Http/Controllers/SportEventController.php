@@ -12,14 +12,12 @@ class SportEventController extends Controller
     use AuthorizesRequests;
     public function index()
     {
-        // Paginate the results (10 events per page, adjust as needed)
         $events = SportsEvent::with('users')->paginate(10);
         return response()->json(SportEventResource::collection($events), 200);
     }
     public function join(Request $request, $id)
     {
     // \Log::info('Joining event:', ['id' => $id, 'user' => auth()->id()]);
-
     try {
         $user = auth()->user();
         $sportsEvent = SportsEvent::findOrFail($id);
@@ -55,17 +53,4 @@ class SportEventController extends Controller
             ], 400);
         }
     }
-
-    
-    // public function delete(SportEvent $city)
-    // {
-    //     $this->authorize('delete', $city); 
-    //     if (!$city->id) {
-    //         return response(['message' => 'Resource not found'], 404);
-    //     }
-    //     $city->delete();
-    //     return response('', 204);
-    // }
-    
-    
 }

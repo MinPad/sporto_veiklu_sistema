@@ -27,11 +27,6 @@ class UserController extends Controller
     try {
         $user = User::findOrFail($id);
 
-        // error_log('Authorization check: ' . json_encode([
-        //     'loggedInUser' => auth()->user(),
-        //     'targetUser' => $user,
-        // ]));
-
         $this->authorize('view', $user);
         return new UserResource($user);
     } catch (ModelNotFoundException $e) {
@@ -41,7 +36,7 @@ class UserController extends Controller
     public function current()
     {
     try {
-        $user = auth()->user(); // Automatically gets the currently authenticated user
+        $user = auth()->user();
         return new UserResource($user);
     } catch (Exception $e) {
         return response()->json(['message' => 'Unable to fetch user data'], 500);
@@ -63,23 +58,18 @@ class UserController extends Controller
         }
         
         try {
-            // Find the user by ID
             $user = User::findOrFail($id);
             $this->authorize('update', $user);
 
-            // Hash password if it's in the request
             if (isset($data['password'])) {
                 $data['password'] = Hash::make($data['password']);
             }
     
-            // Update user with valid data
             $user->update($data);
     
-            // Return the updated resource
             return (new UserResource($user))->response()->setStatusCode(200);
     
         } catch (ModelNotFoundException $e) {
-            // If the user is not found, return a 404 error message
             return response()->json(['message' => 'A user with this id doesn\'t exist'], 404);
         }
     }
@@ -93,11 +83,8 @@ class UserController extends Controller
             return response('', 204);
 
         } catch (ModelNotFoundException $e) {
-            // If the user is not found, return a 404 error message
             return response()->json(['message' => 'A user with this id doesn\'t exist'], 404);
         }
        
-        // auth()->invalidate();
-        // return response()->json(['message' => 'User deleted successfully.'], 200);
     }
 }

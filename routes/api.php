@@ -26,16 +26,12 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:api');
 
-// Route::post('/refresh-token', [AuthController::class, 'refresh']);
-// Route::middleware(['cors'])->post('/refresh-token', [AuthController::class, 'refresh']);
 Route::post('/refresh-token', [AuthController::class, 'refresh']);
 
-// Route::get('/users/{user}', [UserController::class, 'show'])->middleware('auth:api', 'can:view,user');
 
 Route::get('/users', [UserController::class, 'index'])->middleware('auth:api');
 
 Route::get('/users/{id}', [UserController::class, 'show'])->middleware('auth:api');
-// Route::get('/users/{id}', [UserController::class, 'show'])->middleware(['auth:api', 'can:view,user']);
 
 Route::get('/user', [UserController::class, 'current'])->middleware('auth:api');
 
