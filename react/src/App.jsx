@@ -1,12 +1,19 @@
 // App.jsx
 import { useState } from 'react';
-import Modal from './components/Modal'; // Correct path to Modal component
+import Modal from './components/Modal';
 import PageComponent from './components/PageComponent';
+import { useLocation } from "react-router-dom";
+import UnauthorizedModal from "./components/UnauthorizedModal";
 
 export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(true); // Modal open by default
   const closeModal = () => setIsModalOpen(false);
+  const location = useLocation();
+  // console.log("testas", location);
+  // const showUnauthorizedModal = location.state?.showUnauthorizedModal || false;
+  // const [isModalOpen, setIsModalOpen] = useState(showUnauthorizedModal);
 
+  // const closeModal = () => setIsModalOpen(false);
   // return (
   //   <PageComponent title="Dashboard">
   //     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
@@ -48,6 +55,9 @@ export default function App() {
       </button> */}
 
       <Modal isOpen={isModalOpen} closeModal={closeModal} />
+      {/* {isModalOpen && (
+        <UnauthorizedModal isOpen={isModalOpen} closeModal={closeModal} />
+      )} */}
     </PageComponent>
   );
 }
