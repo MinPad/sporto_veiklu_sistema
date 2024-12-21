@@ -18,27 +18,41 @@ Prisiregistravę naudotojai galės registruotis į veiklas bei palikti atsiliepi
 Sistemos svečias galės:
 
 -Peržiūrėti sistemoje egzistuojančius miestus ir sporto veiklas;
+
 -Filtruoti sporto veiklas pagal miestą ar kitus kriterijus;
+
 -Matyti trumpą sporto veiklos aprašymą (pvz., sporto tipą, bet ne tikslią vietą ar laiką);
+
 -Registruotis sistemoje norint gauti pilną prieigą.
 
 Registruotas naudotojas galės:
 
 -Prisijungti prie sistemos;
+
 -Matyti išsamią informaciją apie sporto veiklas ir jų vietas;
+
 -Registruotis į sporto veiklas ir renginius;
+
 -Palikti atsiliepimus apie veiklas, vietas;
+
 -Dalyvauti diskusijose ar komentaruose, susijusiuose su sporto veiklomis;
+
 -Atnaujinti savo naudotojo informaciją.
 
 Administratorius galės:
 
 -Prisijungti prie sistemos;
+
 -Pridėti naujas sporto veiklas ir vietas;
+
 -Redaguoti esamas sporto veiklas ir vietas;
+
 -Šalinti nereikalingas sporto veiklas ir vietas;
+
 -Tvarkyti registruotų naudotojų sąrašą, šalinti netinkamus naudotojus;
+
 -Prižiūrėti ir moderuoti naudotojų turinį (atsiliepimus, diskusijas);
+
 -Matyti sistemos statistiką ir valdyti administracines funkcijas.
 
 ## 2. Sistemos architektūra
@@ -46,8 +60,11 @@ Administratorius galės:
 Sistemos sudedamosios dalys:
 
 Kliento pusė – bus realizuota naudojant React.jsx;
+
 Serverio pusė – bus realizuota naudojant PHP Laravel;
+
 Duomenų bazė – MySQL.
+
 Žemiau pavaizduota kuriamos sistemos architektūra pasitelkiant diegimo diagramą.
 
 | ![Sistemos architektūra](public/images/readme/Deplyoment.png) |
