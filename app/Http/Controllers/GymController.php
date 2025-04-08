@@ -46,20 +46,26 @@ class GymController extends Controller
     {
     $this->authorize('create', Gym::class);
 
-    try {
-        $city = City::findOrFail($cityId);
-    } catch (ModelNotFoundException $e) {
-        return response()->json(['message' => 'City not found'], 404);
-    }
+    $city = City::findOrFail($cityId);
+
     $data = $request->validated();
 
+    // Upload local image
     if ($request->hasFile('image')) {
-        $filePath = $request->file('image')->store('gym-images', 'public');
-        $data['image_url'] = asset('storage/' . $filePath);
-    } elseif ($request->filled('image_url')) {
-        $data['image_url'] = $request->input('image_url');
-    } else {
-        $data['image_url'] = null; // Replace with a default URL if needed
+        $imagePath = $request->file('image')->store('gym-images', 'public');
+        // dd($request->hasFile('image'), $request->file('image'));
+        $data['image_path'] = $imagePath;
+    }
+
+    // OR store image from URL if no file provided
+    elseif ($request->filled('image_url')) {
+        // dd($request->hasFile('image'), $request->file('image'));
+        $data['image_path'] = $request->input('image_url'); // Could also fetch & store remotely
+    }
+
+    // Optional fallback (or skip this if you don't want a default image)
+    else {
+        $data['image_path'] = null;
     }
 
     $gym = Gym::create($data + ['city_id' => $city->id]);
@@ -67,30 +73,35 @@ class GymController extends Controller
     return response()->json(new GymResource($gym), 201);
     }
 
-    public function update(City $city, $gymId, UpdateGymRequest $request)
-    {
-        // Validate JSON input
-        try {
 
-            $data = json_decode($request->getContent(), true);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                return response()->json(['message' => 'Invalid JSON'], 422);
-            }
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Invalid JSON format'], 422);
-        }
-    
-        $gym = Gym::find($gymId);
-        $this->authorize('update', $gym); 
-        if (!$gym) {
-            return response()->json(['message' => 'Gym not found'], 404);
-        }
-        if ($city->id !== $gym->city_id) {
-            return response()->json(['message' => 'Gym not found in the specified city'], 404);
-        }
-    
-        $gym->update($request->validated());
-        return response()->json(new GymResource($gym), 200);
+    public function update(City $city, $gymId, Request $request)
+    {
+    $gym = Gym::findOrFail($gymId);
+    $this->authorize('update', $gym);
+
+    if ($city->id !== $gym->city_id) {
+        return response()->json(['message' => 'Gym not found in the specified city'], 404);
+    }
+
+    $validated = $request->validate([
+        'name' => ['required', 'string', 'min:5', 'max:255'],
+        'address' => ['required', 'string', 'min:5', 'max:50'],
+        'description' => ['required', 'string', 'min:10', 'max:150'],
+        'opening_hours' => ['nullable', 'string'],
+        'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+        'image_url' => ['nullable', 'url'],
+    ]);
+
+    if ($request->hasFile('image')) {
+        $imagePath = $request->file('image')->store('gym-images', 'public');
+        $validated['image_path'] = $imagePath;
+    } elseif ($request->filled('image_url')) {
+        $validated['image_path'] = $request->input('image_url');
+    }
+
+    $gym->update($validated);
+
+    return response()->json(new GymResource($gym), 200);
     }
     
     

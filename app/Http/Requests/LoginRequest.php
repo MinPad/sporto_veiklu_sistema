@@ -28,4 +28,14 @@ class LoginRequest extends FormRequest
             'remember' => 'boolean'
         ];
     }
+    public function messages()
+    {
+        return [
+            'email.required' => 'Email is required.',
+            'email.unique' => 'This email is already registered.',
+            'password.required' => 'Password is required.',
+            'login.failed' => 'Incorrect email or password.',
+            'server.error' => 'Something went wrong. Please try again later.',
+        ];
+    }
 }

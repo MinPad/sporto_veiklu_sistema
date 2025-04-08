@@ -20,7 +20,7 @@ class Gym extends Model
         'description',
         'opening_hours',
         'city_id',
-        'image_url',
+        'image_path',
     ];
 
     public function coaches()
@@ -36,6 +36,18 @@ class Gym extends Model
     public function city()
     {
         return $this->belongsTo(City::class, 'city_id');
+    }
+    public function getImageUrlAttribute()
+    {
+    if (!$this->image_path) {
+        return asset('images/default-gym.png'); // Fallback image
+    }
+
+    if (filter_var($this->image_path, FILTER_VALIDATE_URL)) {
+        return $this->image_path; // External link
+    }
+
+    return asset('storage/' . $this->image_path); // Local storage file
     }
 
 }

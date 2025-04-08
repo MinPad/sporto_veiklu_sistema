@@ -41,6 +41,9 @@ Route::patch('/users/{user}', [UserController::class, 'update'])->middleware('au
 // Route::delete('/users/{user}', [UserController::class, 'delete'])->middleware('auth:api', 'can:delete,user');
 Route::delete('/users/{user}', [UserController::class, 'delete'])->middleware('auth:api');
 
+Route::post('/users/{id}/personalization', [UserController::class, 'updatePersonalization'])->middleware('auth:api');
+
+
 Route::get('/cities', [CityController::class, 'index']);
 Route::get('/cities/{id}', [CityController::class, 'show']);
 Route::delete('/cities/{city}',[CityController::class, 'delete'])->middleware('auth:api');

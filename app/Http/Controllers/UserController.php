@@ -13,6 +13,7 @@ use App\Http\Requests\AuthenticateUserRequest;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Http\Requests\UpdateUserPersonalizationRequest;
 class UserController extends Controller
 {   
     use AuthorizesRequests;
@@ -87,4 +88,30 @@ class UserController extends Controller
         }
        
     }
+
+    public function updatePersonalization(UpdateUserPersonalizationRequest $request, $id)
+    {
+        
+    $user = User::findOrFail($id);
+    $this->authorize('update', $user);
+    
+    if ($request->hasFile('avatar')) {
+        $avatarPath = $request->file('avatar')->store('avatars', 'public');
+        $user->avatar = $avatarPath;
+    }
+
+    if ($request->hasFile('cover_photo')) {
+        $coverPath = $request->file('cover_photo')->store('covers', 'public');
+        $user->cover_photo = $coverPath;
+    }
+
+    if ($request->filled('motivational_text')) {
+        $user->motivational_text = $request->motivational_text;
+    }
+
+    $user->save();
+
+    return response()->json(['message' => 'Personalization updated successfully.']);
+    }
+
 }

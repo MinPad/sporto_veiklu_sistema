@@ -37,26 +37,27 @@ class AuthController extends Controller
     {
     $credentials = $request->validated();
 
-    if (!$token = auth()->attempt($credentials)) {
+    if (!auth()->attempt($credentials)) {
         return response()->json([
-            'success' => false,
-            'message' => 'Unauthorized',
-        ], 401);
+            'errors' => [
+                'login' => ['Incorrect email or password.']
+            ]
+        ], 422);
     }
 
+    $token = auth()->attempt($credentials);
     $refreshToken = auth()->setTTL(config('jwt.refresh_ttl'))->attempt($credentials);
+
     return response()->json([
         'success' => true,
         'message' => 'Login successful',
-        'accessToken' => $token, 
+        'accessToken' => $token,
         'refreshToken' => $refreshToken,
         'tokenType' => 'bearer',
         'accessExpiresIn' => auth()->factory()->getTTL() * 60,
-        'refreshExpiresIn' => config('jwt.refresh_ttl') * 60, 
+        'refreshExpiresIn' => config('jwt.refresh_ttl') * 60,
     ]);
-    
     }
-    
     public function refresh()
     {
     try {
@@ -66,8 +67,11 @@ class AuthController extends Controller
         if (!$token) {
             return response()->json(['message' => 'Refresh token is missing'], 400);
         }
+
         // \Log::info('Received Token for Refresh:', ['token' => $token]);
         // Manually set the token for refreshing
+        // $newAccessToken = auth()->setToken($newRefreshToken)->refresh();
+
         $newAccessToken = auth()->setToken($token)->refresh();
 
         return response()->json([
@@ -82,6 +86,8 @@ class AuthController extends Controller
         return response()->json(['message' => 'Invalid refresh token'], 401);
     } catch (JWTException $e) {
         return response()->json(['message' => 'Could not refresh token'], 500);
+    } catch (\Tymon\JWTAuth\Exceptions\TokenBlacklistedException $e) {
+        return response()->json(['message' => 'Refresh token blacklisted'], 401);
     }
     }
 

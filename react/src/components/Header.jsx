@@ -4,6 +4,7 @@ import logo from '../assets/third.png';
 import { Fragment } from "react";
 import { useNavigate, Navigate, Link, NavLink, Outlet } from 'react-router-dom';
 import { jwtDecode } from "jwt-decode";
+import ConfirmationDialog from "../components/core/ConfirmationDialog";
 
 import axiosClient from "../axios";
 import { useEffect, useState } from "react";
@@ -43,6 +44,10 @@ export default function Header() {
         }
 
     }, []);
+
+
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+
     // console.log(isAdmin)
     // console.log("header ", currentUser.name);
     // console.log('Current userToken in Header:', userToken); // Debugging
@@ -52,12 +57,16 @@ export default function Header() {
     // } else {
     //     console.log("User is logged in with token:", userToken);
     // }
+    const confirmSignOut = () => {
+        setIsDialogOpen(true);
+    };
 
     const logout = (ev) => {
         ev.preventDefault();
         axiosClient.post("/logout").then(() => {
             setCurrentUser({});
             setUserToken(null);
+            localStorage.removeItem('REFRESH_TOKEN');
             navigate('/login');
         });
     };
@@ -168,7 +177,7 @@ export default function Header() {
                                                         {({ active }) => (
                                                             <a
                                                                 href="#"
-                                                                onClick={(ev) => logout(ev)}
+                                                                onClick={(ev) => confirmSignOut(ev)}
                                                                 className={`block px-4 py-2 text-sm ${active ? 'bg-gray-100' : 'text-gray-700'}`}
                                                             >
                                                                 Sign out
@@ -208,6 +217,13 @@ export default function Header() {
                         </DisclosureButton>
                     </div>
                 </div>
+                <ConfirmationDialog
+                    isOpen={isDialogOpen}
+                    onClose={() => setIsDialogOpen(false)}
+                    title="Sign out"
+                    message="Are you sure you want to sign out?"
+                    onConfirm={logout}
+                />
             </div>
             {/* ------------------------------------- */}
             {/* TELEFONO DYDZIO */}
@@ -277,7 +293,7 @@ export default function Header() {
                                 <Disclosure
                                     as="a"
                                     href="#"
-                                    onClick={(ev) => logout(ev)}
+                                    onClick={(ev) => confirmSignOut(ev)}
                                     className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
                                 >
                                     Sign out
@@ -293,6 +309,13 @@ export default function Header() {
                             </div>
                         </>
                     )}
+                    <ConfirmationDialog
+                        isOpen={isDialogOpen}
+                        onClose={() => setIsDialogOpen(false)}
+                        title="Sign out"
+                        message="Are you sure you want to sign out?"
+                        onConfirm={logout}
+                    />
                 </div>
             </DisclosurePanel>
         </Disclosure>

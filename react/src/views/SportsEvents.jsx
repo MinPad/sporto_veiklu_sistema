@@ -30,7 +30,7 @@ export default function SportsEvents() {
                 : event
         );
         setSportsEvents(updatedSportsEvents);
-        setFilteredSportsEvents(updatedSportsEvents); // Update filtered list
+        setFilteredSportsEvents(updatedSportsEvents);
     };
 
     useEffect(() => {

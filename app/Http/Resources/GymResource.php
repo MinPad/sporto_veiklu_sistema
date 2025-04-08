@@ -15,14 +15,14 @@ class GymResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'cityId' => $this->city_id,
-            'cityName' => $this->city->name,
-            'address' => $this->address,
-            'description' => $this->description,
-            'openingHours' => $this->opening_hours,
-            'image_url' => $this->image_url, // New line for the image URL
+        'id' => $this->id,
+        'name' => $this->name,
+        'cityId' => $this->city_id,
+        'cityName' => $this->city->name,
+        'address' => $this->address,
+        'description' => $this->description,
+        'openingHours' => $this->opening_hours,
+        'image_url' => $this->image_url, // <-- comes from accessor
         ];
     }
 }

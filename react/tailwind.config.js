@@ -1,16 +1,10 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: 'class',
   content: [
     "./index.html",
-    "./src/**/*.{js,jsx,ts,tsx}", // This ensures that Tailwind scans your React components for classes
+    "./src/**/*.{js,jsx,ts,tsx}",
   ],
-  // theme: {
-  //   extend: {
-  //     fontFamily: {
-  //       custom: ['Dancing Script', 'cursive'],
-  //     },
-  //   },
-  // },
   theme: {
     extend: {
       fontFamily: {
@@ -19,6 +13,6 @@ module.exports = {
     },
   },
   plugins: [
-    require("@tailwindcss/forms")
+    require("@tailwindcss/forms"),
   ],
 };

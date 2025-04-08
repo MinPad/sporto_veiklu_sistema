@@ -32,7 +32,7 @@ export default function App() {
   return (
     <PageComponent title="Dashboard">
       {/* Welcome section */}
-      <div className="bg-white shadow rounded-lg p-6 mb-8 flex flex-col md:flex-row items-center">
+      <div className="bg-white shadow rounded-lg p-6 mb-8 flex flex-col md:flex-row items-center dark:bg-gray-800 dark:text-white">
         <div className="flex-1 mb-4 md:mb-0">
           <h2 className="text-2xl font-bold mb-4">Welcome to sports activities Website!</h2>
           <p className="text-gray-700">

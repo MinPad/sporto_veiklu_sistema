@@ -14,7 +14,7 @@ export default function Signup() {
     const navigate = useNavigate();
     const onSubmit = (ev) => {
         ev.preventDefault();
-        setError({ __html: "" })
+        setError({ __html: "" });
 
         axiosClient.post('/signup', {
             name: fullName,

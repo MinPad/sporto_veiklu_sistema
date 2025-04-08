@@ -43,6 +43,7 @@ export const ContextProvider = ({ children }) => {
         } else {
             // console.log("Removing userToken");
             localStorage.removeItem("TOKEN");
+            localStorage.removeItem("REFRESH_TOKEN");
         }
         _setUserToken(token);
         // console.log('UserToken after setUserToken:', token); // Debugging line

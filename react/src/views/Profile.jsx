@@ -7,7 +7,27 @@ import TButton from "../components/core/TButton";
 import ConfirmationDialog from "../components/core/ConfirmationDialog";
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom'
+
+import SettingsList from '../components/settings/SettingsList.jsx';
+import PersonalizationSection from '../components/settings/PersonalizationSection.jsx';
+import PublicProfileSection from '../components/settings/PublicProfileSection.jsx';
+
 const Profile = () => {
+
+    const settingsList = [
+        { title: 'Public Profile', id: 'publicProfile' },
+        { title: 'Settings', id: 'settings' },
+        { title: 'Personalization', id: 'personalization' },
+        { title: 'Health Report', id: 'healthReport' },
+    ];
+
+    const [activeSetting, setActiveSetting] = useState('personalization');
+
+    const handleSettingsClick = (setting) => {
+        setActiveSetting(setting.id);
+    };
+
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
@@ -20,7 +40,6 @@ const Profile = () => {
     const [userId, setUserId] = useState(null);
 
     useEffect(() => {
-        // Fetch the currently authenticated user's data
         axiosClient.get('/user')
             .then(({ data }) => {
                 const { name, email } = data.data;
@@ -40,23 +59,50 @@ const Profile = () => {
         }
     }, []);
 
-    const handleSave = async () => {
+    const handleSavePersonalization = async (e) => {
+        e.preventDefault();
         try {
-            const updatedProfile = {
-                name,
-                email,
-            };
-            console.log(updatedProfile);
-            console.log(`/users/${userId}`);
-            // debugger;
-            axiosClient.patch(`/user/${userId}`, updatedProfile);
-            alert('Profile updated successfully!');
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('email', email);
+            formData.append('motivational_text', motivationalText);
+            if (avatar) formData.append('avatar', avatar);
+            if (coverPhoto) formData.append('cover_photo', coverPhoto);
+
+            await axiosClient.post(`/users/${userId}/personalization`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+
+            alert('Personalization saved!');
             setIsEditing(false);
         } catch (err) {
-            console.error("Error updating profile:", err);
-            setError("Failed to update profile.");
+            console.error("Error saving personalization:", err);
+            setError("Failed to save personalization.");
         }
     };
+
+
+    const handleSaveProfile = async (e) => {
+        e.preventDefault();
+        try {
+            await axiosClient.patch(`/users/${userId}`, {
+                name,
+                email
+            });
+
+            alert('Public profile saved!');
+            setIsEditing(false);
+        } catch (err) {
+            console.error("Error saving profile:", err);
+            setError("Failed to save profile.");
+        }
+    };
+
+
+
+
     const [userIdToDelete, setUserToDelete] = useState(null);
 
     const handleDeleteClick = () => {
@@ -81,6 +127,11 @@ const Profile = () => {
     };
     if (error) return <div className="text-red-500">{error}</div>;
 
+    const [avatar, setAvatar] = useState(null);
+    const [coverPhoto, setCoverPhoto] = useState(null);
+    const [motivationalText, setMotivationalText] = useState('');
+
+
     return (
         <>
             <Header />
@@ -92,105 +143,59 @@ const Profile = () => {
                             <div className="col-span-1 md:border-r border-gray-300 md:pr-8">
                                 <div className="sticky top-20">
                                     <h2 className="text-2xl font-semibold mb-4">Settings</h2>
-                                    <a href="#" className="block px-4 py-2 font-bold bg-white text-indigo-900 border rounded-full hover:bg-indigo-100">
-                                        Public Profile
-                                    </a>
+
+                                    <SettingsList
+                                        settingsList={settingsList}
+                                        activeSetting={activeSetting}
+                                        onClick={handleSettingsClick}
+                                    />
+
                                 </div>
                             </div>
                             <div className="col-span-2">
+                                {activeSetting === 'publicProfile' && (
+                                    <PublicProfileSection
+                                        isEditing={isEditing}
+                                        setIsEditing={setIsEditing}
+                                        handleSave={handleSaveProfile}
+                                        handleDeleteClick={handleDeleteClick}
+                                        name={name}
+                                        setName={setName}
+                                        email={email}
+                                        setEmail={setEmail}
+                                    />
+                                )}
+                                {activeSetting === 'settings' && (
+                                    <div>
+                                        <h2 className="text-xl font-semibold text-indigo-900">Settings</h2>
+                                        {/* Settings Content */}
+                                        <p>Configure your application settings here.</p>
+                                    </div>
+                                )}
+                                {activeSetting === 'personalization' && (
+                                    <PersonalizationSection
+                                        handleSave={handleSavePersonalization}
+                                        isEditing={isEditing}
+                                        setIsEditing={setIsEditing}
+                                        avatar={avatar}
+                                        setAvatar={setAvatar}
+                                        coverPhoto={coverPhoto}
+                                        setCoverPhoto={setCoverPhoto}
+                                        motivationalText={motivationalText}
+                                        setMotivationalText={setMotivationalText}
+                                    />
+                                )}
+                                {activeSetting === 'healthReport' && (
+                                    <div>
+                                        <h2 className="text-xl font-semibold text-indigo-900">Health Report</h2>
+                                        {/* Health Report Content */}
+                                        <p>View your recent health stats and reports.</p>
+                                    </div>
+                                )}
+
+
                                 {/* <div className="bg-white p-6 rounded-lg shadow"> */}
-                                <div className="w-full max-w-md p-4 bg-gray-100 border border-gray-300 rounded-lg shadow-lg sm:p-6 md:p-8 dark:bg-gray-800 dark:border-gray-700">
-                                    {isEditing ? (
-                                        <form onSubmit={handleSave} className="space-y-4 text-[#202142]">
-                                            <h2 className="text-xl font-semibold text-indigo-900">Profile Edit</h2>
-                                            <div>
-                                                <label htmlFor="name" className="block text-sm font-medium text-gray-900">
-                                                    Name
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    id="name"
-                                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                                    value={name}
-                                                    onChange={(e) => setName(e.target.value)}
-                                                    required
-                                                />
-                                            </div>
-                                            <div>
-                                                <label htmlFor="email" className="block text-sm font-medium text-gray-900">
-                                                    Email address
-                                                </label>
-                                                <input
-                                                    type="email"
-                                                    id="email"
-                                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                                    value={email}
-                                                    onChange={(e) => setEmail(e.target.value)}
-                                                    required
-                                                />
-                                            </div>
-                                            <div className="flex justify-end space-x-4">
-                                                <button
-                                                    type="submit"
-                                                    className="bg-indigo-700 hover:bg-indigo-800 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                                >
-                                                    Save
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setIsEditing(false)}
-                                                    className="text-indigo-700 bg-white border border-indigo-700 hover:bg-indigo-100 font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                                >
-                                                    Cancel
-                                                </button>
-                                            </div>
-                                        </form>
-                                    ) : (
-                                        <div className="space-y-4">
-                                            <h2 className="text-xl font-semibold text-indigo-900">Profile View</h2>
-                                            <div>
-                                                <label htmlFor="name" className="block text-sm font-medium text-gray-900">
-                                                    Name
-                                                </label>
-                                                <input
-                                                    id="name"
-                                                    name="name"
-                                                    value={name}
-                                                    readOnly
-                                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label htmlFor="email" className="block text-sm font-medium text-gray-900">
-                                                    Email address
-                                                </label>
-                                                <input
-                                                    id="email"
-                                                    name="email"
-                                                    value={email}
-                                                    readOnly
-                                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                                />
-                                            </div>
-                                            <div className="flex justify-between items-center">
-                                                <button
-                                                    onClick={() => setIsEditing(true)}
-                                                    className="bg-indigo-700 hover:bg-indigo-800 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                                >
-                                                    Edit
-                                                </button>
-                                                <TButton
-                                                    onClick={handleDeleteClick}
-                                                    circle
-                                                    link
-                                                    color="red"
-                                                >
-                                                    <TrashIcon className="w-5 h-5" />
-                                                </TButton>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
+
                             </div>
                         </div>
                     </div>

@@ -40,25 +40,33 @@ export default function GymUpdate() {
     const onSubmit = async (ev) => {
         ev.preventDefault();
 
-        const updatedGym = {
-            name,
-            address,
-            description,
-            opening_hours: openingHours,
-            image_url: imageUrl,
-        };
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('address', address);
+        formData.append('description', description);
+        formData.append('opening_hours', openingHours);
 
-        console.log("Updated Gym:", updatedGym); // This should now show updated values
+        // Only add one image field depending on what user provided
+        if (image) {
+            formData.append('image', image); // Local file
+        } else if (imageUrl) {
+            formData.append('image_url', imageUrl); // External URL
+        }
 
-        axiosClient.put(`cities/${cityId}/gyms/${gymId}`, updatedGym)
-            .then(() => {
-                navigate(`/cities/${cityId}/gyms/`); // Navigate after successful update
-            })
-            .catch((err) => {
-                console.error("Error updating gym:", err);
-                setError("Error updating gym");
-            });
+        try {
+            await axiosClient.post(
+                `cities/${cityId}/gyms/${gymId}?_method=PUT`, // Use method spoofing
+                formData,
+                { headers: { 'Content-Type': 'multipart/form-data' } }
+            );
+
+            navigate(`/cities/${cityId}/gyms/`);
+        } catch (err) {
+            console.error("Error updating gym:", err);
+            setError("Error updating gym");
+        }
     };
+
 
     if (error) return <div>{error}</div>;
 
@@ -90,11 +98,25 @@ export default function GymUpdate() {
                                     <input
                                         type="url"
                                         placeholder="Or enter an image URL"
-                                        value={imageUrl} // Use imageUrl state
-                                        onChange={(e) => setImageUrl(e.target.value)} // Update imageUrl directly
+                                        value={imageUrl}
+                                        onChange={(e) => setImageUrl(e.target.value)}
                                         className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                     />
                                 </div>
+
+                                <div className="mt-2">
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => setImage(e.target.files[0])}
+                                        className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                                    />
+                                </div>
+
+                                <p className="text-sm text-gray-500 mt-1">
+                                    You can upload a gym image or enter an image URL above. If both are provided, the uploaded file will be used.
+                                </p>
+
                             </div>
 
                             {/* Gym Name */}

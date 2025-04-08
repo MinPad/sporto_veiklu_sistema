@@ -12,43 +12,6 @@ export default function Login() {
     const [error, setError] = useState({ __html: "" });
 
     const navigate = useNavigate();
-    // const [isButtonVisible, setButtonVisible] = useState(true);
-
-    // useEffect(() => {
-    //     const timer = setTimeout(() => {
-    //         setButtonVisible(false);
-    //     }, 5000);
-
-    //     return () => clearTimeout(timer);
-    // }, []);
-    // const onSubmit = (ev) => {
-    //     ev.preventDefault();
-    //     setError({ __html: "" });
-
-    //     axiosClient
-    //         .post("/login", {
-    //             email,
-    //             password,
-    //         })
-    //         .then(({ data }) => {
-    //             // debugger;
-    //             setCurrentUser(data.user);
-    //             setUserToken(data.token);
-    //             localStorage.setItem('TOKEN', data.accessToken)
-    //             navigate(`/`);
-
-    //         })
-    //         .catch((error) => {
-    //             if (error.response) {
-    //                 const finalErrors = Object.values(error.response.data.errors).reduce(
-    //                     (accum, next) => [...accum, ...next],
-    //                     []
-    //                 );
-    //                 setError({ __html: finalErrors.join("<br>") });
-    //             }
-    //             console.error(error);
-    //         });
-    // };
     const onSubmit = (ev) => {
         ev.preventDefault();
         setError({ __html: "" });
@@ -74,14 +37,13 @@ export default function Login() {
                 }
             })
             .catch((error) => {
-                if (error.response) {
+                if (error.response && error.response.status === 422) {
                     const finalErrors = Object.values(error.response.data.errors).reduce(
                         (accum, next) => [...accum, ...next],
                         []
                     );
                     setError({ __html: finalErrors.join("<br>") });
                 }
-                console.error(error);
             });
     };
 
