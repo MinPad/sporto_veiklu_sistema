@@ -6,8 +6,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import LoadingDialog from "../components/core/LoadingDialog";
 
 export default function GymUpdate() {
-    const { cityId, gymId } = useParams(); // Extract cityId and gymId from URL params
-    const [gym, setGym] = useState({}); // Set gym to an empty object initially to avoid null errors
+    const { cityId, gymId } = useParams();
+    const [gym, setGym] = useState({});
     const [loading, setLoading] = useState(true);
     const [name, setName] = useState('');
     const [address, setAddress] = useState('');
@@ -18,16 +18,21 @@ export default function GymUpdate() {
     const [error, setError] = useState(null);
     const navigate = useNavigate();
 
+    const [openingStart, setOpeningStart] = useState('');
+    const [openingEnd, setOpeningEnd] = useState('');
+
     useEffect(() => {
-        // console.log('useEffect fired');
         axiosClient.get(`cities/${cityId}/gyms/${gymId}`)
             .then(({ data }) => {
                 setGym(data);
                 setName(data.name);
                 setAddress(data.address);
                 setDescription(data.description);
-                setOpeningHours(data.opening_hours);
                 setImageUrl(data.image_url || '');
+                const [start, end] = data.openingHours?.split(' - ') || ['', ''];
+                setOpeningStart(start);
+                setOpeningEnd(end);
+
                 setLoading(false);
             })
             .catch((err) => {
@@ -37,16 +42,19 @@ export default function GymUpdate() {
             });
     }, [cityId, gymId]);
 
+
     const onSubmit = async (ev) => {
         ev.preventDefault();
-
+        if (!openingStart || !openingEnd) {
+            setError("Please select both start and end opening hours.");
+            return;
+        }
         const formData = new FormData();
         formData.append('name', name);
         formData.append('address', address);
         formData.append('description', description);
-        formData.append('opening_hours', openingHours);
+        formData.append('opening_hours', `${openingStart} - ${openingEnd}`);
 
-        // Only add one image field depending on what user provided
         if (image) {
             formData.append('image', image); // Local file
         } else if (imageUrl) {
@@ -55,7 +63,7 @@ export default function GymUpdate() {
 
         try {
             await axiosClient.post(
-                `cities/${cityId}/gyms/${gymId}?_method=PUT`, // Use method spoofing
+                `cities/${cityId}/gyms/${gymId}?_method=PUT`,
                 formData,
                 { headers: { 'Content-Type': 'multipart/form-data' } }
             );
@@ -127,8 +135,8 @@ export default function GymUpdate() {
                                 <input
                                     type="text"
                                     id="name"
-                                    value={name} // Use name state
-                                    onChange={(e) => setName(e.target.value)} // Update name directly
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
                                     placeholder="Gym Title"
                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                 />
@@ -141,8 +149,8 @@ export default function GymUpdate() {
                                 </label>
                                 <textarea
                                     id="description"
-                                    value={description} // Use description state
-                                    onChange={(e) => setDescription(e.target.value)} // Update description directly
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
                                     placeholder="Describe your gym"
                                     maxLength={150}
                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
@@ -174,13 +182,20 @@ export default function GymUpdate() {
                                 <div className="flex space-x-2">
                                     <input
                                         type="time"
-                                        id="openingHoursStart"
-                                        value={openingHours} // Use openingHours state
-                                        onChange={(e) => setOpeningHours(e.target.value)} // Update openingHours directly
+                                        value={openingStart}
+                                        onChange={(e) => setOpeningStart(e.target.value)}
+                                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    />
+                                    <span className="self-center">-</span>
+                                    <input
+                                        type="time"
+                                        value={openingEnd}
+                                        onChange={(e) => setOpeningEnd(e.target.value)}
                                         className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                     />
                                 </div>
                             </div>
+
                         </div>
                         <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
                             <TButton>Save</TButton>

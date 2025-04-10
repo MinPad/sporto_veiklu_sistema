@@ -76,25 +76,23 @@ export default function GymView() {
                     <div className="space-y-6 bg-white px-4 py-5 sm:p-6">
                         {/* Image Upload */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">
-                                Photo
-                            </label>
+                            <label className="block text-sm font-medium text-gray-700">Photo</label>
                             <div className="mt-1 flex items-center">
                                 {/* Show local image preview if uploaded */}
                                 {gym.image && (
                                     <img
                                         src={URL.createObjectURL(gym.image)}
                                         alt="Gym"
-                                        className="w-32 h-32 object-cover"
+                                        className="w-32 h-32 object-cover rounded-md"
                                     />
                                 )}
 
                                 {/* Show image preview if URL is entered */}
-                                {gym.image_URL && (
+                                {!gym.image && gym.image_URL && (
                                     <img
                                         src={gym.image_URL}
                                         alt="Gym"
-                                        className="w-32 h-32 object-cover"
+                                        className="w-32 h-32 object-cover rounded-md"
                                     />
                                 )}
 
@@ -106,23 +104,10 @@ export default function GymView() {
                                 )}
                             </div>
 
-                            {/* Upload image file input */}
-                            <div className="mt-2">
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Upload Image
-                                </label>
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleImageChange}
-                                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                />
-                            </div>
-
                             {/* Image URL input */}
                             <div className="mt-2">
                                 <label className="block text-sm font-medium text-gray-700">
-                                    OR Enter Image URL
+                                    Or enter an image URL
                                 </label>
                                 <input
                                     type="url"
@@ -132,8 +117,25 @@ export default function GymView() {
                                     className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                 />
                             </div>
+
+                            {/* Upload image file input */}
+                            <div className="mt-2">
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Upload Image
+                                </label>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleImageChange}
+                                    className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                                />
+                            </div>
+
+                            <p className="text-sm text-gray-500 mt-1">
+                                You can upload a gym image or enter an image URL above. If both are provided, the uploaded file will be used.
+                            </p>
                         </div>
-                        {/* Image Upload */}
+
                         {/* Title */}
                         <div className="col-span-6 sm:col-span-3">
                             <label

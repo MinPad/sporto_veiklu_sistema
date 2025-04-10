@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
 import router from './router.jsx'
-import { RouterProvider } from 'react-router-dom'
+import RouterWrapper from './router';
 import { ContextProvider } from './contexts/ContexProvider.jsx'
 
 // ✅ Apply theme on app load BEFORE React renders
@@ -17,7 +17,7 @@ if (savedTheme === 'dark') {
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ContextProvider>
-      <RouterProvider router={router} />
+      <RouterWrapper />
     </ContextProvider>
   </StrictMode>,
 )

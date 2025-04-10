@@ -2,7 +2,8 @@ import { useContext, createContext, useState } from "react";
 import lorem from '../assets/lorem.png';
 import react from '../assets/react.png';
 import laravel from '../assets/laravel.png';
-
+import { useEffect } from "react";
+import axiosClient from "../axios";
 const StateContext = createContext({
     currentUser: {},
     userToken: null,
@@ -21,7 +22,17 @@ export const ContextProvider = ({ children }) => {
     const [toast, setToast] = useState({ message: '', show: false })
 
     // const [surveys, setSurveys] = useState(tmpSurveys)
-
+    useEffect(() => {
+        if (userToken && !currentUser?.id) {
+            axiosClient.get('/user')
+                .then(({ data }) => setCurrentUser(data.data))
+                .catch((err) => {
+                    setCurrentUser({});
+                    setUserLoadError("Failed to load user data.");
+                    showToast("Oops! Could not load your profile. Please try again.");
+                });
+        }
+    }, [userToken]);
     // const setUserToken = (token) => {
     //     if (token) {
     //         console.log('Setting userToken:', token);

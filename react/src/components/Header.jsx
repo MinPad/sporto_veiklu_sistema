@@ -48,15 +48,6 @@ export default function Header() {
 
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-    // console.log(isAdmin)
-    // console.log("header ", currentUser.name);
-    // console.log('Current userToken in Header:', userToken); // Debugging
-
-    // if (!userToken) {
-    //     console.log("User is not logged in");
-    // } else {
-    //     console.log("User is logged in with token:", userToken);
-    // }
     const confirmSignOut = () => {
         setIsDialogOpen(true);
     };
@@ -74,13 +65,8 @@ export default function Header() {
         ev.preventDefault();
         navigate('/user/${userId}/profile');
     };
+    // console.log('Current user in Header:', currentUser);
 
-    // useEffect(() => {
-    //     axiosClient.get('/me')
-    //         .then(({ data }) => {
-    //             setCurrentUser(data)
-    //         })
-    // }, [])
     return (
         <Disclosure as="nav" className="bg-gray-800">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -160,7 +146,15 @@ export default function Header() {
                                             <div>
                                                 <Menu.Button className="flex max-w-xs items-center rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
                                                     <span className="sr-only">Open user menu</span>
-                                                    <UserIcon className="w-8 h-8 bg-black/25 p-2 rounded-full text-white" />
+                                                    {currentUser?.avatar_url ? (
+                                                        <img
+                                                            src={currentUser.avatar_url}
+                                                            alt="User avatar"
+                                                            className="w-8 h-8 rounded-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <UserIcon className="w-8 h-8 bg-black/25 p-2 rounded-full text-white" />
+                                                    )}
                                                 </Menu.Button>
                                             </div>
                                             <Transition

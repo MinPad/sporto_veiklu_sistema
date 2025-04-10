@@ -105,13 +105,14 @@ class UserController extends Controller
         $user->cover_photo = $coverPath;
     }
 
-    if ($request->filled('motivational_text')) {
-        $user->motivational_text = $request->motivational_text;
+    $user->motivational_text = $request->input('motivational_text', '');
+    
+    if ($request->input('remove_avatar') === 'true') {
+        $user->avatar = null;
     }
-
     $user->save();
 
-    return response()->json(['message' => 'Personalization updated successfully.']);
+    return new UserResource($user);
     }
 
 }

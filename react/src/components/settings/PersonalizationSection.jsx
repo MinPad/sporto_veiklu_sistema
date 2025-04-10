@@ -6,14 +6,18 @@ const PersonalizationSection = ({
     setIsEditing,
     avatar,
     setAvatar,
+    currentAvatarUrl,
+    setCurrentAvatarUrl,
     coverPhoto,
     setCoverPhoto,
     motivationalText,
     setMotivationalText,
+    avatarRemoved,
+    setAvatarRemoved,
 }) => {
+
     const [theme, setTheme] = useState('light');
 
-    // Load theme from localStorage on mount
     useEffect(() => {
         const savedTheme = localStorage.getItem('theme') || 'light';
         setTheme(savedTheme);
@@ -26,6 +30,11 @@ const PersonalizationSection = ({
         setTheme(newTheme);
         localStorage.setItem('theme', newTheme);
         document.documentElement.classList.toggle('dark', isDark);
+    };
+
+    const handleAvatarRemove = () => {
+        setAvatar(null);
+        setRemoveAvatar(true);
     };
 
     return (
@@ -50,27 +59,63 @@ const PersonalizationSection = ({
                     </div>
                 </div>
 
-                {/* Avatar Upload */}
+                {/* Avatar Upload + Preview */}
                 <div>
                     <label className="block text-sm font-medium">Profile Avatar</label>
+
+                    {(!avatarRemoved && (avatar || currentAvatarUrl)) && (
+                        <div className="mt-2 flex items-center space-x-4">
+                            <img
+                                src={avatar ? URL.createObjectURL(avatar) : currentAvatarUrl}
+                                alt="Avatar Preview"
+                                className="w-24 h-24 object-cover rounded-full border border-gray-300"
+                            />
+                            {/* Only allow removing if avatar is not newly selected */}
+                            {!avatarRemoved && currentAvatarUrl && (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setAvatar(null);
+                                        setCurrentAvatarUrl('');
+                                        setAvatarRemoved(true);
+                                    }}
+                                    className="text-sm text-red-500 hover:underline"
+                                >
+                                    Remove Avatar
+                                </button>
+                            )}
+                        </div>
+                    )}
+
                     <input
                         type="file"
                         accept="image/*"
-                        onChange={(e) => setAvatar(e.target.files[0])}
-                        className="block w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 cursor-pointer dark:text-gray-200 dark:bg-gray-700 dark:border-gray-600"
+                        onChange={(e) => {
+                            setAvatar(e.target.files[0]);
+                            setRemoveAvatar(false); // In case they previously chose to remove
+                        }}
+                        className="block w-full text-sm text-gray-700 
+                            file:mr-4 file:py-2 file:px-4 
+                            file:border-0 file:text-sm file:font-semibold 
+                            file:bg-indigo-50 file:text-indigo-700 
+                            hover:file:bg-indigo-100 mt-2"
                     />
                 </div>
 
                 {/* Cover Photo Upload */}
-                <div>
+                {/* <div>
                     <label className="block text-sm font-medium">Cover Photo</label>
                     <input
                         type="file"
                         accept="image/*"
                         onChange={(e) => setCoverPhoto(e.target.files[0])}
-                        className="block w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 cursor-pointer dark:text-gray-200 dark:bg-gray-700 dark:border-gray-600"
+                        className="block w-full text-sm text-gray-700 
+                            file:mr-4 file:py-2 file:px-4 
+                            file:border-0 file:text-sm file:font-semibold 
+                            file:bg-indigo-50 file:text-indigo-700 
+                            hover:file:bg-indigo-100"
                     />
-                </div>
+                </div> */}
 
                 {/* Motivational Text */}
                 <div>
