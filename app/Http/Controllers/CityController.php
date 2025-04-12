@@ -31,7 +31,9 @@ class CityController extends Controller
     public function show($id)
     {
         try {
+            // \Log::error('Joining event:',['id' => $id]);
             $city = City::findOrFail($id);
+            // \Log::error('Joining event:',['city' => $city]);
             return response()->json(new CityResource($city), 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(['message' => 'A city with this ID doesn\'t exist'], 404);

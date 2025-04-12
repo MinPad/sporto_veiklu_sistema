@@ -5,6 +5,8 @@ import TButton from '../components/core/TButton';
 import axiosClient from "../axios";
 import { useParams, useNavigate } from 'react-router-dom';
 
+import { geocodeAddress } from '../utils/geocoding';
+
 export default function GymView() {
     const { cityId } = useParams();
     const [error, setError] = useState(null);
@@ -21,6 +23,8 @@ export default function GymView() {
         openingHoursStart: "",
         openingHoursEnd: "",
         opening_hours: "",
+        // latitude: "",
+        // longitude: "",
         questions: [],
     });
 
@@ -41,10 +45,19 @@ export default function GymView() {
         formData.append("name", gym.name);
         formData.append("description", gym.description);
         formData.append("address", gym.address);
-
+        // formData.append("latitude", gym.latitude);
+        // formData.append("longitude", gym.longitude);
         const openingHours = `${gym.openingHoursStart} - ${gym.openingHoursEnd}`;
         formData.append("opening_hours", openingHours);
 
+        const coords = await geocodeAddress(gym.address);
+        if (coords) {
+            formData.append("latitude", coords.latitude);
+            formData.append("longitude", coords.longitude);
+        } else {
+            setError("Failed to determine location from address. Please check the address.");
+            return;
+        }
         try {
             await axiosClient.post(`/cities/${cityId}/gyms`, formData, {
                 headers: {
@@ -199,6 +212,39 @@ export default function GymView() {
                             />
                             <div className="text-sm text-gray-500 pl-1">{gym.address.length}/50</div>
                         </div>
+                        {/* Latitude */}
+                        {/* <div className="col-span-6 sm:col-span-3">
+                            <label htmlFor="latitude" className="block text-sm font-medium text-gray-700">
+                                Latitude
+                            </label>
+                            <input
+                                type="number"
+                                name="latitude"
+                                id="latitude"
+                                value={gym.latitude}
+                                step="any"
+                                onChange={(e) => setGym({ ...gym, latitude: e.target.value })}
+                                placeholder="54.6872"
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            />
+                        </div> */}
+
+                        {/* Longitude */}
+                        {/* <div className="col-span-6 sm:col-span-3">
+                            <label htmlFor="longitude" className="block text-sm font-medium text-gray-700">
+                                Longitude
+                            </label>
+                            <input
+                                type="number"
+                                name="longitude"
+                                id="longitude"
+                                value={gym.longitude}
+                                step="any"
+                                onChange={(e) => setGym({ ...gym, longitude: e.target.value })}
+                                placeholder="25.2797"
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                            />
+                        </div> */}
                         {/* Opening Hours */}
                         <div className="col-span-6 sm:col-span-3">
                             <label className="block text-sm font-medium text-gray-700">

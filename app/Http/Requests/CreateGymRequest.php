@@ -33,6 +33,8 @@ class CreateGymRequest extends FormRequest
             'opening_hours' => ['required', 'string', 'regex:/^\d{2}:\d{2} - \d{2}:\d{2}$/'],
             'image' => ['nullable', 'file', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
             'image_url' => ['nullable', 'url'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
         ];
     }
 

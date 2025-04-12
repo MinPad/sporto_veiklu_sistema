@@ -5,6 +5,7 @@ import './index.css'
 import router from './router.jsx'
 import RouterWrapper from './router';
 import { ContextProvider } from './contexts/ContexProvider.jsx'
+import 'leaflet/dist/leaflet.css';
 
 // ✅ Apply theme on app load BEFORE React renders
 const savedTheme = localStorage.getItem('theme');

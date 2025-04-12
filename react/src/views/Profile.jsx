@@ -29,7 +29,7 @@ const Profile = () => {
         { title: 'Health Report', id: 'healthReport' },
     ];
 
-    const [activeSetting, setActiveSetting] = useState('personalization');
+    const [activeSetting, setActiveSetting] = useState('publicProfile');
     const [currentAvatarUrl, setCurrentAvatarUrl] = useState('');
 
 
@@ -183,12 +183,14 @@ const Profile = () => {
             });
     };
     const hasUnsavedPersonalization = useMemo(() => {
+        const currentMotivation = currentUser?.motivational_text || '';
         return (
-            motivationalText !== currentUser?.motivational_text ||
+            motivationalText.trim() !== currentMotivation.trim() ||
             avatar !== null ||
             avatarRemoved
         );
     }, [motivationalText, currentUser?.motivational_text, avatar, avatarRemoved]);
+
 
     const hasUnsavedPublicProfile = useMemo(() => {
         return (
@@ -231,11 +233,11 @@ const Profile = () => {
             <Header />
             {loading && <LoadingDialog />}
             {!loading && (
-                <div className="bg-gray-200 min-h-screen">
-                    <div className="container mx-auto py-8 px-4 md:px-0">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            <div className="col-span-1 md:border-r border-gray-300 md:pr-8">
-                                <div className="sticky top-20">
+                <div className="bg-gray-200 min-h-[calc(100vh-64px)] overflow-hidden">
+                    <div className="bg-gray-200 h-[calc(100vh-64px)] overflow-hidden">
+                        <div className="grid grid-cols-1 md:grid-cols-3 h-full">
+                            <div className="col-span-1 border-r border-gray-300 p-6">
+                                <div className="sticky top-4">
                                     <h2 className="text-2xl font-semibold mb-4">Settings</h2>
 
                                     <SettingsList
@@ -246,7 +248,7 @@ const Profile = () => {
 
                                 </div>
                             </div>
-                            <div className="col-span-2">
+                            <div className="col-span-2 overflow-y-auto p-6">
                                 {activeSetting === 'publicProfile' && (
                                     <PublicProfileSection
                                         isEditing={isEditing}

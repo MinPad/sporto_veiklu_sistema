@@ -1,3 +1,5 @@
+import { lazy } from 'react';
+
 import App from './App';
 import Login from './views/Login';
 import Signup from './views/signup';
@@ -6,7 +8,8 @@ import Users from './views/Users';
 import UserProfile from './views/Profile';
 import Gyms from './views/Gyms';
 import Coaches from './views/Coaches';
-import CoachView from './views/CoachView';
+// import CoachView from './views/CoachView';
+
 import GymView from './views/GymView';
 import GymUpdate from './views/GymUpdate';
 import CoachUpdate from './views/CoachUpdate';
@@ -17,8 +20,15 @@ import ResetPassword from './components/ResetPassword';
 import UnauthorizedPage from './views/UnauthorizedPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import SportsEventsPage from './views/SportsEvents';
+import NotFoundPage from './views/NotFoundPage';
+
+const CoachView = lazy(() => import('./views/CoachView'));
 
 const routes = [
+    {
+        path: '*',
+        element: <NotFoundPage />,
+    },
     {
         path: '/',
         element: <App />,

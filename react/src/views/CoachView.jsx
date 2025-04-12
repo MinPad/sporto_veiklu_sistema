@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
-import axiosClient from '../axios'; // Assuming axiosClient is set up for API calls
+import axiosClient from '../axios';
 
 export default function CoachView({ coach, cityId }) {
-    const [gyms, setGyms] = useState([]); // To store gyms where the coach works
+    const [gyms, setGyms] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Fetch gyms where this coach works using the gymId and cityId
         fetchGyms(coach.id, cityId);
     }, [coach.id, cityId]);
 
@@ -15,7 +14,6 @@ export default function CoachView({ coach, cityId }) {
         axiosClient
             .get(`/cities/${cityId}/gyms`)
             .then(({ data }) => {
-                // Filter gyms where the coach works (assuming coach has a `gymId` property)
                 const gymsWhereCoachWorks = data.filter(gym => gym.coaches.some(c => c.id === coachId));
                 setGyms(gymsWhereCoachWorks);
                 setLoading(false);

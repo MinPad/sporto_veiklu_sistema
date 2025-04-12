@@ -21,6 +21,8 @@ class Gym extends Model
         'opening_hours',
         'city_id',
         'image_path',
+        'latitude',
+        'longitude',   
     ];
 
     public function coaches()

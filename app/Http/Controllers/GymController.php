@@ -45,29 +45,22 @@ class GymController extends Controller
     public function store($cityId, CreateGymRequest $request)
     {
     $this->authorize('create', Gym::class);
-
     $city = City::findOrFail($cityId);
-
     $data = $request->validated();
 
-    // Upload local image
     if ($request->hasFile('image')) {
         $imagePath = $request->file('image')->store('gym-images', 'public');
-        // dd($request->hasFile('image'), $request->file('image'));
         $data['image_path'] = $imagePath;
     }
 
-    // OR store image from URL if no file provided
     elseif ($request->filled('image_url')) {
-        // dd($request->hasFile('image'), $request->file('image'));
         $data['image_path'] = $request->input('image_url'); // Could also fetch & store remotely
     }
-
-    // Optional fallback (or skip this if you don't want a default image)
     else {
         $data['image_path'] = null;
     }
-
+    $data['latitude'] = $request->input('latitude');
+    $data['longitude'] = $request->input('longitude');
     $gym = Gym::create($data + ['city_id' => $city->id]);
 
     return response()->json(new GymResource($gym), 201);
@@ -88,6 +81,8 @@ class GymController extends Controller
         'address' => ['required', 'string', 'min:5', 'max:50'],
         'description' => ['required', 'string', 'min:10', 'max:150'],
         'opening_hours' => ['nullable', 'string'],
+        'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+        'longitude' => ['nullable', 'numeric', 'between:-180,180'], 
         'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
         'image_url' => ['nullable', 'url'],
     ]);

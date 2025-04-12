@@ -4,6 +4,7 @@ import TButton from '../components/core/TButton';
 import axiosClient from "../axios";
 import { useParams, useNavigate } from 'react-router-dom';
 import LoadingDialog from "../components/core/LoadingDialog";
+import { geocodeAddress } from '../utils/geocoding';
 
 export default function GymUpdate() {
     const { cityId, gymId } = useParams();
@@ -21,6 +22,9 @@ export default function GymUpdate() {
     const [openingStart, setOpeningStart] = useState('');
     const [openingEnd, setOpeningEnd] = useState('');
 
+    // const [latitude, setLatitude] = useState('');
+    // const [longitude, setLongitude] = useState('');
+
     useEffect(() => {
         axiosClient.get(`cities/${cityId}/gyms/${gymId}`)
             .then(({ data }) => {
@@ -32,7 +36,8 @@ export default function GymUpdate() {
                 const [start, end] = data.openingHours?.split(' - ') || ['', ''];
                 setOpeningStart(start);
                 setOpeningEnd(end);
-
+                // setLatitude(data.latitude || '');
+                // setLongitude(data.longitude || '');
                 setLoading(false);
             })
             .catch((err) => {
@@ -54,11 +59,18 @@ export default function GymUpdate() {
         formData.append('address', address);
         formData.append('description', description);
         formData.append('opening_hours', `${openingStart} - ${openingEnd}`);
-
+        const coords = await geocodeAddress(address);
+        if (coords) {
+            formData.append("latitude", coords.latitude);
+            formData.append("longitude", coords.longitude);
+        } else {
+            setError("Failed to determine location from address. Please check the address.");
+            return;
+        }
         if (image) {
-            formData.append('image', image); // Local file
+            formData.append('image', image);
         } else if (imageUrl) {
-            formData.append('image_url', imageUrl); // External URL
+            formData.append('image_url', imageUrl);
         }
 
         try {
@@ -173,7 +185,37 @@ export default function GymUpdate() {
                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                 />
                             </div>
+                            {/* Latitude
+                            <div className="col-span-6 sm:col-span-3">
+                                <label htmlFor="latitude" className="block text-sm font-medium text-gray-700">
+                                    Latitude
+                                </label>
+                                <input
+                                    type="number"
+                                    id="latitude"
+                                    value={latitude}
+                                    onChange={(e) => setLatitude(e.target.value)}
+                                    placeholder="e.g. 54.6872"
+                                    step="any"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
+                            </div>
 
+                            {/* Longitude */}
+                            {/* <div className="col-span-6 sm:col-span-3">
+                                <label htmlFor="longitude" className="block text-sm font-medium text-gray-700">
+                                    Longitude
+                                </label>
+                                <input
+                                    type="number"
+                                    id="longitude"
+                                    value={longitude}
+                                    onChange={(e) => setLongitude(e.target.value)}
+                                    placeholder="e.g. 25.2797"
+                                    step="any"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
+                            </div> */}
                             {/* Opening Hours */}
                             <div className="col-span-6 sm:col-span-3">
                                 <label className="block text-sm font-medium text-gray-700">

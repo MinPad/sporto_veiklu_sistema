@@ -8,11 +8,11 @@ import TButton from "../components/core/TButton";
 import ConfirmationDialog from "../components/core/ConfirmationDialog";
 
 export default function Cities() {
-    const [cities, setCities] = useState([]); // Original cities from the API
+    const [cities, setCities] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isAdmin, setIsAdmin] = useState(false);
 
-    const [searchQuery, setSearchQuery] = useState(""); // State to store the search query
+    const [searchQuery, setSearchQuery] = useState("");
     const [filteredCities, setFilteredCities] = useState([]);
 
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -30,13 +30,12 @@ export default function Cities() {
         fetchCities();
     }, []);
 
-    // Fetch cities from the API
     const fetchCities = () => {
         setLoading(true);
         axiosClient.get("/cities")
             .then(({ data }) => {
                 setCities(data);
-                setFilteredCities(data); // Set filteredCities to all cities initially
+                setFilteredCities(data);
                 setLoading(false);
             })
             .catch(error => {
@@ -45,16 +44,14 @@ export default function Cities() {
             });
     };
 
-    // Handle search input changes
     const handleSearchChange = (ev) => {
         const query = ev.target.value;
         setSearchQuery(query);
 
-        // Filter cities based on the search query
         const filtered = cities.filter(city =>
             city.name.toLowerCase().startsWith(query.toLowerCase())
         );
-        setFilteredCities(filtered); // Update the filtered cities list
+        setFilteredCities(filtered);
     };
 
     const handleDeleteClick = (cityId) => {
@@ -76,7 +73,6 @@ export default function Cities() {
             });
     };
 
-    // Search bar component
     const searchBar = (
         <div className="relative w-full max-w-xs">
             <input
@@ -101,7 +97,7 @@ export default function Cities() {
                     </TButton>
                 )
             }
-            searchBar={searchBar} // Pass the search bar here
+            searchBar={searchBar}
         >
             <div className="container mx-auto py-4">
                 {loading && <LoadingDialog />}

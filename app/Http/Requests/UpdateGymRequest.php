@@ -28,7 +28,9 @@ class UpdateGymRequest extends FormRequest
         return [
             'name' => ['required', 'string' ,'min:5', 'max:255', 'regex:/^[\pL\d\- ]*$/u'],
             'address' => ['required', 'string' ,'min:5', 'max:50', 'regex:/^[\pL\d\.\- ]*$/u'],
-            'description' => ['required', 'string' ,'min:10', 'max:150']
+            'description' => ['required', 'string' ,'min:10', 'max:150'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
         ];
     }
 

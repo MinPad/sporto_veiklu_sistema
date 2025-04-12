@@ -140,10 +140,9 @@ axiosClient.interceptors.response.use(
             });
 
         }
-        // Handle 403 Forbidden error (Unauthorized access)
         if (response && response.status === 403) {
-            console.log('Access Denied. Redirecting to Unauthorized page...');
-            window.location.href = '/UnauthorizedPage';
+            console.warn('403 Forbidden - redirecting to UnauthorizedPage');
+            history.push('/UnauthorizedPage');
         }
         return Promise.reject(error);
     }

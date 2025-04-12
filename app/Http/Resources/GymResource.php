@@ -22,7 +22,9 @@ class GymResource extends JsonResource
         'address' => $this->address,
         'description' => $this->description,
         'openingHours' => $this->opening_hours,
-        'image_url' => $this->image_url, // <-- comes from accessor
+        'image_url' => $this->image_url,
+        'latitude' => $this->latitude,
+        'longitude' => $this->longitude,  
         ];
     }
 }

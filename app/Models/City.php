@@ -11,8 +11,11 @@ class City extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name'
+        'name',
+        'latitude',
+        'longitude',
     ];
+    
 
     public $timestamps = false;
 
