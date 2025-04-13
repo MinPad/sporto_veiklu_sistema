@@ -23,6 +23,9 @@ export default function Gyms() {
     const [showMap, setShowMap] = useState(false);
     const mapSectionRef = useRef(null);
 
+    const [selectedDistance, setSelectedDistance] = useState(0); // 0 = show all
+    const [visibleGymCount, setVisibleGymCount] = useState(null);
+
     const onDeleteClick = (gymId) => {
         const updatedGyms = gyms.filter(gym => gym.id !== gymId);
         setGyms(updatedGyms);
@@ -79,6 +82,7 @@ export default function Gyms() {
             return newVal;
         });
     };
+    // console.log(gyms);
     const searchBar = (
         <div className="relative w-full max-w-xs">
             <input
@@ -112,26 +116,68 @@ export default function Gyms() {
                 </div>
             ) : (
                 <>
-                    <div className="sticky bottom-4 z-40 flex justify-center md:justify-end mb-4 px-4">
-                        <button
-                            onClick={handleToggleMap}
-                            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded shadow text-sm transition duration-150"
-                        >
-                            {showMap ? 'Hide Map' : 'Show Map'}
-                        </button>
-                    </div>
-
-                    {showMap && (
-                        <div
-                            ref={mapSectionRef}
-                            className="transition-all duration-300 ease-in-out overflow-hidden rounded-lg"
-                        >
-                            <MapBoxMap gyms={filteredGyms} cityId={cityId} />
+                    {/* 👉 Show Map button when map is hidden */}
+                    {!showMap && (
+                        <div className="flex justify-end px-4 mb-4">
+                            <button
+                                onClick={handleToggleMap}
+                                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded shadow text-sm transition"
+                            >
+                                Show Map
+                            </button>
                         </div>
                     )}
 
+                    {/* 👉 When map is visible, show Hide button + filters + map */}
+                    {showMap && (
+                        <>
+                            <div className="flex justify-end px-4 mb-2">
+                                <button
+                                    onClick={handleToggleMap}
+                                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded shadow text-sm transition"
+                                >
+                                    Hide Map
+                                </button>
+                            </div>
+
+                            <div className="flex items-center justify-between flex-wrap px-4 mb-2 gap-2">
+                                <div className="flex items-center gap-2">
+                                    <label className="text-sm font-medium text-gray-700">Distance filter:</label>
+                                    <select
+                                        className="text-sm border rounded px-3 py-1 pr-8 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        value={selectedDistance}
+                                        onChange={(e) => setSelectedDistance(parseFloat(e.target.value))}
+                                    >
+                                        <option value={0}>All</option>
+                                        <option value={1}>Within 1 km</option>
+                                        <option value={3}>Within 3 km</option>
+                                        <option value={5}>Within 5 km</option>
+                                    </select>
+                                </div>
+                                <p className="text-sm text-gray-600">
+                                    {visibleGymCount !== null
+                                        ? `${visibleGymCount} gym${visibleGymCount !== 1 ? "s" : ""} shown`
+                                        : "Loading..."}
+                                </p>
+                            </div>
+
+                            <div
+                                ref={mapSectionRef}
+                                className="transition-all duration-300 ease-in-out overflow-hidden rounded-lg"
+                            >
+                                <MapBoxMap
+                                    gyms={filteredGyms}
+                                    cityId={cityId}
+                                    selectedDistance={selectedDistance}
+                                    onVisibleGymCountChange={setVisibleGymCount}
+                                />
+                            </div>
+                        </>
+                    )}
+
+                    {/* Gym List */}
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3">
-                        {filteredGyms.map(gym => (
+                        {filteredGyms.map((gym) => (
                             <GymListItem
                                 key={gym.id}
                                 gym={gym}
@@ -145,4 +191,5 @@ export default function Gyms() {
             )}
         </PageComponent>
     );
+
 }

@@ -26,8 +26,8 @@ class CreateGymRequest extends FormRequest
                 ),
             ],
             'address' => [
-                'required', 'string', 'min:5', 'max:50',
-                'regex:/^[\pL\d\.\- ]+$/u'
+            'required', 'string', 'min:5', 'max:50',
+            'regex:/^[\pL\d\s.,#\/\-]+$/u'
             ],
             'description' => ['required', 'string', 'min:10', 'max:150'],
             'opening_hours' => ['required', 'string', 'regex:/^\d{2}:\d{2} - \d{2}:\d{2}$/'],
@@ -43,7 +43,7 @@ class CreateGymRequest extends FormRequest
         return [
             'name.unique' => 'A gym with this name and address already exists in this city.',
             'name.regex' => 'Only letters, digits, spaces, and dashes are allowed.',
-            'address.regex' => 'Only letters, digits, dots, dashes, and spaces are allowed.',
+            'address.regex' => 'Only letters, digits, spaces, dots, dashes, commas, slashes, and # are allowed.',
             'image_url.url' => 'The image URL must be a valid URL.',
         ];
     }

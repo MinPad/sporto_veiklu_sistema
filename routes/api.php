@@ -8,7 +8,7 @@ use App\Http\Controllers\CoachesController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\SportEventController;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\MapboxController;
 
 
 Route::post('/password/email', [PasswordResetController::class, 'sendResetLink']);
@@ -86,3 +86,4 @@ Route::prefix('/cities/{city}')->group(function ()
 //         return $request->user();
 //     });
 // });
+Route::get('/mapbox/distance', [MapboxController::class, 'getDistance']);
