@@ -5,6 +5,7 @@ import axiosClient from "../axios";
 import { useParams, useNavigate } from 'react-router-dom';
 import LoadingDialog from "../components/core/LoadingDialog";
 import { geocodeAddress } from '../utils/geocoding';
+import Select from 'react-select';
 
 export default function GymUpdate() {
     const { cityId, gymId } = useParams();
@@ -25,27 +26,57 @@ export default function GymUpdate() {
     // const [latitude, setLatitude] = useState('');
     // const [longitude, setLongitude] = useState('');
 
+    const [specialties, setSpecialties] = useState([]);
+    const [allSpecialties, setAllSpecialties] = useState([]);
+    const [isFree, setIsFree] = useState(false);
+    const [monthlyFee, setMonthlyFee] = useState('');
     useEffect(() => {
-        axiosClient.get(`cities/${cityId}/gyms/${gymId}`)
-            .then(({ data }) => {
-                setGym(data);
-                setName(data.name);
-                setAddress(data.address);
-                setDescription(data.description);
-                setImageUrl(data.image_url || '');
-                const [start, end] = data.openingHours?.split(' - ') || ['', ''];
+        const fetchData = async () => {
+            try {
+                const [gymRes, specRes] = await Promise.all([
+                    axiosClient.get(`cities/${cityId}/gyms/${gymId}`),
+                    axiosClient.get('/specialties')
+                ]);
+
+                const gymData = gymRes.data;
+                const specList = Array.isArray(specRes.data) ? specRes.data : specRes.data.data;
+
+                // Map all specialties
+                const formattedSpecs = specList.map((s) => ({
+                    value: s.id,
+                    label: s.name,
+                }));
+                setAllSpecialties(formattedSpecs);
+
+                // Set initial gym data
+                setGym(gymData);
+                setName(gymData.name);
+                setAddress(gymData.address);
+                setDescription(gymData.description);
+                setImageUrl(gymData.image_url || '');
+                const [start, end] = gymData.openingHours?.split(' - ') || ['', ''];
                 setOpeningStart(start);
                 setOpeningEnd(end);
-                // setLatitude(data.latitude || '');
-                // setLongitude(data.longitude || '');
+                setIsFree(!!gymData.isFree);
+                setMonthlyFee(gymData.monthlyFee || '');
+                // Map preselected specialties to same shape as in Select
+                const prefilled = (gymData.specialties || []).map(spec => ({
+                    value: spec.id,
+                    label: spec.name
+                }));
+                setSpecialties(prefilled);
+
                 setLoading(false);
-            })
-            .catch((err) => {
-                console.error("Error fetching gym:", err);
-                setError("Error fetching gym details");
+            } catch (err) {
+                console.error("Error loading gym or specialties:", err);
+                setError("Failed to load gym details");
                 setLoading(false);
-            });
+            }
+        };
+
+        fetchData();
     }, [cityId, gymId]);
+
 
 
     const onSubmit = async (ev) => {
@@ -58,7 +89,12 @@ export default function GymUpdate() {
         formData.append('name', name);
         formData.append('address', address);
         formData.append('description', description);
+        specialties.forEach(spec => {
+            formData.append('specialties[]', spec.value);
+        });
         formData.append('opening_hours', `${openingStart} - ${openingEnd}`);
+        formData.append("is_free", isFree ? 1 : 0);
+        formData.append("monthly_fee", isFree ? '' : monthlyFee);
         const coords = await geocodeAddress(address);
         if (coords) {
             formData.append("latitude", coords.latitude);
@@ -169,7 +205,21 @@ export default function GymUpdate() {
                                 ></textarea>
                                 {/* <div className="pl-1 text-sm text-gray-500">{gym.description.length}/150</div> */}
                             </div>
-
+                            <div className="col-span-6 sm:col-span-3">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Specialties
+                                </label>
+                                <Select
+                                    isMulti
+                                    name="specialties"
+                                    options={allSpecialties}
+                                    value={specialties}
+                                    onChange={(selected) => setSpecialties(selected)}
+                                    className="basic-multi-select"
+                                    classNamePrefix="select"
+                                    placeholder="Select specialties"
+                                />
+                            </div>
                             {/* Address */}
                             <div className="col-span-6 sm:col-span-3">
                                 <label htmlFor="address" className="block text-sm font-medium text-gray-700">
@@ -237,7 +287,46 @@ export default function GymUpdate() {
                                     />
                                 </div>
                             </div>
+                            {/* Is Free Checkbox */}
+                            <div className="col-span-6 sm:col-span-3">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Is this gym free to access?
+                                </label>
+                                <div className="flex items-center space-x-4">
+                                    <label className="flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={isFree}
+                                            onChange={(e) => {
+                                                setIsFree(e.target.checked);
+                                                if (e.target.checked) setMonthlyFee('');
+                                            }}
+                                            className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                                        />
+                                        <span className="ml-2 text-sm text-gray-700">Yes, it's free</span>
+                                    </label>
+                                </div>
+                            </div>
 
+                            {/* Monthly Fee Input */}
+                            {!isFree && (
+                                <div className="col-span-6 sm:col-span-3">
+                                    <label htmlFor="monthlyFee" className="block text-sm font-medium text-gray-700">
+                                        Monthly Subscription Fee (€)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        name="monthlyFee"
+                                        id="monthlyFee"
+                                        value={monthlyFee}
+                                        onChange={(e) => setMonthlyFee(e.target.value)}
+                                        min="0"
+                                        step="0.01"
+                                        placeholder="e.g. 29.99"
+                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                    />
+                                </div>
+                            )}
                         </div>
                         <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
                             <TButton>Save</TButton>

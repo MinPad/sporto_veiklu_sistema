@@ -61,46 +61,52 @@ class GymController extends Controller
     }
     $data['latitude'] = $request->input('latitude');
     $data['longitude'] = $request->input('longitude');
-    $gym = Gym::create($data + ['city_id' => $city->id]);
 
+    $data['is_free'] = $request->input('is_free', false);
+    $data['monthly_fee'] = $request->input('monthly_fee');
+    $gym = Gym::create($data + ['city_id' => $city->id]);
+    if ($request->has('specialties')) {
+        $gym->specialties()->attach($request->input('specialties'));
+    }
     return response()->json(new GymResource($gym), 201);
     }
 
-
     public function update(City $city, $gymId, Request $request)
     {
-    $gym = Gym::findOrFail($gymId);
-    $this->authorize('update', $gym);
-
-    if ($city->id !== $gym->city_id) {
-        return response()->json(['message' => 'Gym not found in the specified city'], 404);
-    }
-
-    $validated = $request->validate([
-        'name' => ['required', 'string', 'min:5', 'max:255'],
-        'address' => ['required', 'string', 'min:5', 'max:50'],
-        'description' => ['required', 'string', 'min:10', 'max:150'],
-        'opening_hours' => ['nullable', 'string'],
-        'latitude' => ['nullable', 'numeric', 'between:-90,90'],
-        'longitude' => ['nullable', 'numeric', 'between:-180,180'], 
-        'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
-        'image_url' => ['nullable', 'url'],
-    ]);
-
-    if ($request->hasFile('image')) {
-        $imagePath = $request->file('image')->store('gym-images', 'public');
-        $validated['image_path'] = $imagePath;
-    } elseif ($request->filled('image_url')) {
-        $validated['image_path'] = $request->input('image_url');
-    }
-
-    $gym->update($validated);
-
-    return response()->json(new GymResource($gym), 200);
+        $gym = Gym::findOrFail($gymId);
+        $this->authorize('update', $gym);
+    
+        if ($city->id !== $gym->city_id) {
+            return response()->json(['message' => 'Gym not found in the specified city'], 404);
+        }
+    
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'min:5', 'max:255'],
+            'address' => ['required', 'string', 'min:5', 'max:50'],
+            'description' => ['required', 'string', 'min:10', 'max:150'],
+            'opening_hours' => ['nullable', 'string'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'], 
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+            'image_url' => ['nullable', 'url'],
+            'is_free' => ['required', 'boolean'],
+            'monthly_fee' => ['nullable', 'numeric', 'between:0,99999.99'],
+        ]);
+    
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('gym-images', 'public');
+            $validated['image_path'] = $imagePath;
+        } elseif ($request->filled('image_url')) {
+            $validated['image_path'] = $request->input('image_url');
+        }
+        
+        if ($request->has('specialties')) {
+            $gym->specialties()->sync($request->input('specialties'));
+        }
+        $gym->update($validated);
+        return response()->json(new GymResource($gym), 200);
     }
     
-    
-
     public function delete(City $city, Gym $gym)
     {
         if($city->id != $gym->city_id) return response(['message' => 'Resource not found'], 404);

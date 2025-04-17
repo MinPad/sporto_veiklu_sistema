@@ -9,7 +9,8 @@ use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\SportEventController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MapboxController;
-
+use App\Http\Controllers\SpecialtyController;
+use App\Http\Controllers\GymReviewController;
 
 Route::post('/password/email', [PasswordResetController::class, 'sendResetLink']);
 Route::post('/password/reset', [PasswordResetController::class, 'resetPassword']);
@@ -88,4 +89,26 @@ Route::prefix('/cities/{city}')->group(function ()
 //         return $request->user();
 //     });
 // });
+
+//MAPBOX
 Route::get('/mapbox/distance', [MapboxController::class, 'getDistance']);
+
+
+//GYM SPECIALTYS
+Route::get('/specialties', [SpecialtyController::class, 'index']);
+
+//admin
+Route::post('/specialties', [SpecialtyController::class, 'store'])->middleware('auth:api');
+Route::delete('/specialties/{id}', [SpecialtyController::class, 'destroy'])->middleware('auth:api');
+
+
+//--------------------------------------------------------reviews
+Route::middleware('auth:api')->group(function () {
+    Route::post('/gyms/{gym}/reviews', [GymReviewController::class, 'store']);
+
+    Route::put('/reviews/{review}', [GymReviewController::class, 'update']);
+
+    Route::delete('/reviews/{review}', [GymReviewController::class, 'destroy']);
+});
+
+Route::get('/gyms/{gym}/reviews', [GymReviewController::class, 'index']);

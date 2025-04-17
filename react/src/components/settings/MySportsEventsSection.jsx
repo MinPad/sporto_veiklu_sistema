@@ -113,7 +113,7 @@ const MySportsEventsSection = () => {
                                                 Free
                                             </span>
                                         ) : (
-                                            <span className="text-sm text-gray-600">${event.entry_fee}</span>
+                                            <span className="text-sm text-gray-600">€{event.entry_fee}</span>
                                         )}
                                     </div>
                                     <p className="text-sm text-gray-600 mb-1">

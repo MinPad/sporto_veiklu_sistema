@@ -23,6 +23,8 @@ class Gym extends Model
         'image_path',
         'latitude',
         'longitude',   
+        'is_free',
+        'monthly_fee',
     ];
 
     public function coaches()
@@ -42,14 +44,26 @@ class Gym extends Model
     public function getImageUrlAttribute()
     {
     if (!$this->image_path) {
-        return asset('images/default-gym.png'); // Fallback image
+        return asset('images/default-gym.png'); 
     }
 
     if (filter_var($this->image_path, FILTER_VALIDATE_URL)) {
-        return $this->image_path; // External link
+        return $this->image_path; 
     }
 
-    return asset('storage/' . $this->image_path); // Local storage file
+    return asset('storage/' . $this->image_path);
+    }
+    public function specialties()
+    {
+        return $this->belongsToMany(Specialty::class, 'gym_specialty')->withTimestamps();
+    }
+    public function reviews()
+    {
+        return $this->hasMany(GymReview::class);
+    }
+    public function averageRating()
+    {
+        return $this->reviews()->avg('rating');
     }
 
 }

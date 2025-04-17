@@ -11,6 +11,8 @@ import { jwtDecode } from "jwt-decode";
 import MapView from '../components/MapView';
 import MapBoxMap from '../components/map/MapBoxMap';
 
+import SuccessAlert from '../components/core/SuccessAlert';
+
 export default function Gyms() {
     const { cityId } = useParams();
     const [gyms, setGyms] = useState([]);
@@ -26,6 +28,19 @@ export default function Gyms() {
     const [selectedDistance, setSelectedDistance] = useState(0); // 0 = show all
     const [visibleGymCount, setVisibleGymCount] = useState(null);
 
+    const [successMessage, setSuccessMessage] = useState('');
+    const successTimeoutRef = useRef(null);
+    const showSuccessMessage = (msg) => {
+        console.log("SUCCESS ALERT TRIGGERED:", msg);
+        setSuccessMessage(msg);
+        if (successTimeoutRef.current) {
+            clearTimeout(successTimeoutRef.current);
+        }
+        successTimeoutRef.current = setTimeout(() => {
+            setSuccessMessage('');
+            successTimeoutRef.current = null;
+        }, 3000);
+    };
     const onDeleteClick = (gymId) => {
         const updatedGyms = gyms.filter(gym => gym.id !== gymId);
         setGyms(updatedGyms);
@@ -95,7 +110,6 @@ export default function Gyms() {
             <MagnifyingGlassIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-500" />
         </div>
     );
-
 
     return (
         <PageComponent
@@ -174,6 +188,11 @@ export default function Gyms() {
                             </div>
                         </>
                     )}
+                    {successMessage && (
+                        <div className="mb-4 px-4">
+                            <SuccessAlert message={successMessage} />
+                        </div>
+                    )}
 
                     {/* Gym List */}
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3">
@@ -184,6 +203,7 @@ export default function Gyms() {
                                 onDeleteClick={onDeleteClick}
                                 isAdmin={isAdmin}
                                 cityId={cityId}
+                                onSuccess={showSuccessMessage}
                             />
                         ))}
                     </div>

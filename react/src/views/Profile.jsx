@@ -31,7 +31,7 @@ const Profile = () => {
         { title: 'My Sports Events', id: 'mySportsEvents' },
     ];
 
-    const [activeSetting, setActiveSetting] = useState('mySportsEvents');
+    const [activeSetting, setActiveSetting] = useState('publicProfile');
     const [currentAvatarUrl, setCurrentAvatarUrl] = useState('');
 
 

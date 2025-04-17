@@ -1,11 +1,12 @@
 import { LinkIcon, PhotoIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PageComponent from '../components/PageComponent';
 import TButton from '../components/core/TButton';
 import axiosClient from "../axios";
 import { useParams, useNavigate } from 'react-router-dom';
 
 import { geocodeAddress } from '../utils/geocoding';
+import Select from 'react-select';
 
 export default function GymView() {
     const { cityId } = useParams();
@@ -25,9 +26,23 @@ export default function GymView() {
         opening_hours: "",
         // latitude: "",
         // longitude: "",
+        isFree: false,
+        monthlyFee: "",
         questions: [],
+        specialties: [],
     });
-
+    const [allSpecialties, setAllSpecialties] = useState([]);
+    useEffect(() => {
+        axiosClient.get('/specialties')
+            .then(({ data }) => {
+                const items = Array.isArray(data) ? data : data.data;
+                const formatted = items.map((s) => ({ value: s.id, label: s.name }));
+                setAllSpecialties(formatted);
+            })
+            .catch((error) => {
+                console.error("Failed to load specialties", error);
+            });
+    }, []);
     const onSubmit = async (ev) => {
         ev.preventDefault();
         setError(null);
@@ -47,9 +62,13 @@ export default function GymView() {
         formData.append("address", gym.address);
         // formData.append("latitude", gym.latitude);
         // formData.append("longitude", gym.longitude);
+        gym.specialties.forEach((spec) => {
+            formData.append('specialties[]', spec.value);
+        });
         const openingHours = `${gym.openingHoursStart} - ${gym.openingHoursEnd}`;
         formData.append("opening_hours", openingHours);
-
+        formData.append("is_free", gym.isFree ? 1 : 0);
+        formData.append("monthly_fee", gym.isFree ? '' : gym.monthlyFee);
         const coords = await geocodeAddress(gym.address);
         if (coords) {
             formData.append("latitude", coords.latitude);
@@ -190,6 +209,24 @@ export default function GymView() {
                             ></textarea>
                             <div className="pl-1 text-sm text-gray-500">{gym.description.length}/150</div>
                         </div>
+                        {/* Specialties Multi-Select */}
+                        <div className="col-span-6 sm:col-span-3">
+                            <div className="col-span-6 sm:col-span-3">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Specialties
+                                </label>
+                                <Select
+                                    isMulti
+                                    name="specialties"
+                                    options={allSpecialties}
+                                    value={gym.specialties}
+                                    onChange={(selected) => setGym({ ...gym, specialties: selected })}
+                                    className="basic-multi-select"
+                                    classNamePrefix="select"
+                                    placeholder="Select specialties"
+                                />
+                            </div>
+                        </div>
                         {/* Address */}
                         <div className="col-span-6 sm:col-span-3">
                             <label
@@ -270,6 +307,45 @@ export default function GymView() {
                                 />
                             </div>
                         </div>
+                        {/* Pricing Section */}
+                        <div className="col-span-6 sm:col-span-3">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Is this gym free to access?
+                            </label>
+                            <div className="flex items-center space-x-4">
+                                <label className="flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        checked={gym.isFree}
+                                        onChange={(e) => setGym({ ...gym, isFree: e.target.checked, monthlyFee: "" })}
+                                        className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                                    />
+                                    <span className="ml-2 text-sm text-gray-700">Yes, it's free</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        {!gym.isFree && (
+                            <div className="col-span-6 sm:col-span-3">
+                                <label
+                                    htmlFor="monthlyFee"
+                                    className="block text-sm font-medium text-gray-700"
+                                >
+                                    Monthly Subscription Fee (€)
+                                </label>
+                                <input
+                                    type="number"
+                                    name="monthlyFee"
+                                    id="monthlyFee"
+                                    value={gym.monthlyFee}
+                                    min="0"
+                                    step="0.01"
+                                    onChange={(e) => setGym({ ...gym, monthlyFee: e.target.value })}
+                                    placeholder="e.g. 29.99"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                />
+                            </div>
+                        )}
                     </div>
                     <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
                         <TButton>Save</TButton>

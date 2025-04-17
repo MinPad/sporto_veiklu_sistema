@@ -68,5 +68,9 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->belongsToMany(SportsEvent::class, 'sports_event_user')->withTimestamps();
     }
+    public function gymReviews()
+    {
+        return $this->hasMany(GymReview::class);
+    }
 
 }
