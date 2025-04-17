@@ -30,7 +30,8 @@ class SportEventResource extends JsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             // Optionally, include user data who joined the event, if needed
-            'participants' => UserResource::collection(resource: $this->whenLoaded('users')), // If you want to include participants data, and you eager load 'users'
+            'participants' => UserResource::collection(resource: $this->whenLoaded('users')),
+            'is_joined' => $request->user() ? $this->users->contains($request->user()->id) : false,
         ];
     }
 }

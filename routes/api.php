@@ -17,6 +17,8 @@ Route::post('/password/reset', [PasswordResetController::class, 'resetPassword']
 
 Route::get('/sports-events', [SportEventController::class, 'index']);
 Route::middleware('auth:api')->post('/sports-events/{id}/join', [SportEventController::class, 'join']);
+Route::middleware('auth:api')->get('/my-sports-events', [SportEventController::class, 'myEvents']);
+Route::middleware('auth:api')->post('/sports-events/{id}/leave', [SportEventController::class, 'leave']);
 
 // Autherization
 // Route::post('/signup', [AuthController::class, 'signup']);

@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import SettingsList from '../components/settings/SettingsList.jsx';
 import PersonalizationSection from '../components/settings/PersonalizationSection.jsx';
 import PublicProfileSection from '../components/settings/PublicProfileSection.jsx';
+import MySportsEventsSection from '../components/settings/MySportsEventsSection.jsx';
 
 import { useStateContext } from '../contexts/ContexProvider';
 import { useLocation, useNavigationType } from 'react-router-dom';
@@ -27,9 +28,10 @@ const Profile = () => {
         { title: 'Settings', id: 'settings' },
         { title: 'Personalization', id: 'personalization' },
         { title: 'Health Report', id: 'healthReport' },
+        { title: 'My Sports Events', id: 'mySportsEvents' },
     ];
 
-    const [activeSetting, setActiveSetting] = useState('publicProfile');
+    const [activeSetting, setActiveSetting] = useState('mySportsEvents');
     const [currentAvatarUrl, setCurrentAvatarUrl] = useState('');
 
 
@@ -234,74 +236,71 @@ const Profile = () => {
             {loading && <LoadingDialog />}
             {!loading && (
                 <div className="bg-gray-200 min-h-[calc(100vh-64px)] overflow-hidden">
-                    <div className="bg-gray-200 h-[calc(100vh-64px)] overflow-hidden">
-                        <div className="grid grid-cols-1 md:grid-cols-3 h-full">
-                            <div className="col-span-1 border-r border-gray-300 p-6">
-                                <div className="sticky top-4">
-                                    <h2 className="text-2xl font-semibold mb-4">Settings</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-3 h-full">
+                        {/* Sidebar */}
+                        <div className="border-b md:border-b-0 md:border-r border-gray-300 p-6">
+                            <div className="sticky top-4">
+                                <h2 className="text-2xl font-semibold mb-4">Settings</h2>
+                                <SettingsList
+                                    settingsList={settingsList}
+                                    activeSetting={activeSetting}
+                                    onClick={handleSettingsClick}
+                                />
+                            </div>
+                        </div>
 
-                                    <SettingsList
-                                        settingsList={settingsList}
-                                        activeSetting={activeSetting}
-                                        onClick={handleSettingsClick}
-                                    />
-
+                        {/* Main Content */}
+                        <div className="col-span-2 overflow-y-auto p-6">
+                            {activeSetting === 'publicProfile' && (
+                                <PublicProfileSection
+                                    isEditing={isEditing}
+                                    setIsEditing={setIsEditing}
+                                    handleSave={handleSaveProfile}
+                                    handleDeleteClick={handleDeleteClick}
+                                    name={name}
+                                    setName={setName}
+                                    email={email}
+                                    setEmail={setEmail}
+                                />
+                            )}
+                            {activeSetting === 'settings' && (
+                                <div>
+                                    <h2 className="text-xl font-semibold text-indigo-900">Settings</h2>
+                                    <p>Configure your application settings here.</p>
                                 </div>
-                            </div>
-                            <div className="col-span-2 overflow-y-auto p-6">
-                                {activeSetting === 'publicProfile' && (
-                                    <PublicProfileSection
-                                        isEditing={isEditing}
-                                        setIsEditing={setIsEditing}
-                                        handleSave={handleSaveProfile}
-                                        handleDeleteClick={handleDeleteClick}
-                                        name={name}
-                                        setName={setName}
-                                        email={email}
-                                        setEmail={setEmail}
-                                    />
-                                )}
-                                {activeSetting === 'settings' && (
-                                    <div>
-                                        <h2 className="text-xl font-semibold text-indigo-900">Settings</h2>
-                                        {/* Settings Content */}
-                                        <p>Configure your application settings here.</p>
-                                    </div>
-                                )}
-                                {activeSetting === 'personalization' && (
-                                    <PersonalizationSection
-                                        handleSave={handleSavePersonalization}
-                                        isEditing={isEditing}
-                                        setIsEditing={setIsEditing}
-                                        avatar={avatar}
-                                        setAvatar={setAvatar}
-                                        currentAvatarUrl={currentAvatarUrl}
-                                        setCurrentAvatarUrl={setCurrentAvatarUrl}
-                                        coverPhoto={coverPhoto}
-                                        setCoverPhoto={setCoverPhoto}
-                                        motivationalText={motivationalText}
-                                        setMotivationalText={setMotivationalText}
-                                        avatarRemoved={avatarRemoved}
-                                        setAvatarRemoved={setAvatarRemoved}
-                                    />
-
-                                )}
-                                {activeSetting === 'healthReport' && (
-                                    <div>
-                                        <h2 className="text-xl font-semibold text-indigo-900">Health Report</h2>
-                                        {/* Health Report Content */}
-                                        <p>View your recent health stats and reports.</p>
-                                    </div>
-                                )}
-
-
-                                {/* <div className="bg-white p-6 rounded-lg shadow"> */}
-
-                            </div>
+                            )}
+                            {activeSetting === 'personalization' && (
+                                <PersonalizationSection
+                                    handleSave={handleSavePersonalization}
+                                    isEditing={isEditing}
+                                    setIsEditing={setIsEditing}
+                                    avatar={avatar}
+                                    setAvatar={setAvatar}
+                                    currentAvatarUrl={currentAvatarUrl}
+                                    setCurrentAvatarUrl={setCurrentAvatarUrl}
+                                    coverPhoto={coverPhoto}
+                                    setCoverPhoto={setCoverPhoto}
+                                    motivationalText={motivationalText}
+                                    setMotivationalText={setMotivationalText}
+                                    avatarRemoved={avatarRemoved}
+                                    setAvatarRemoved={setAvatarRemoved}
+                                />
+                            )}
+                            {activeSetting === 'healthReport' && (
+                                <div>
+                                    <h2 className="text-xl font-semibold text-indigo-900">Health Report</h2>
+                                    <p>View your recent health stats and reports.</p>
+                                </div>
+                            )}
+                            {activeSetting === 'mySportsEvents' && (
+                                <MySportsEventsSection />
+                            )}
                         </div>
                     </div>
                 </div>
             )}
+
+            {/* Confirmation Dialogs */}
             <ConfirmationDialog
                 isOpen={isDialogOpen}
                 onClose={() => setIsDialogOpen(false)}
@@ -318,6 +317,7 @@ const Profile = () => {
             />
         </>
     );
+
 };
 
 export default Profile;

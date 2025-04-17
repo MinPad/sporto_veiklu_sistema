@@ -26,6 +26,15 @@ export default function SportsEvents() {
     const onJoinClick = (sportEventId, updatedParticipants) => {
         const updatedSportsEvents = sportsEvents.map(event =>
             event.id === sportEventId
+                ? { ...event, current_participants: updatedParticipants, is_joined: !event.is_joined }
+                : event
+        );
+        setSportsEvents(updatedSportsEvents);
+        setFilteredSportsEvents(updatedSportsEvents);
+    };
+    const onLeaveClick = (sportEventId, updatedParticipants) => {
+        const updatedSportsEvents = sportsEvents.map(event =>
+            event.id === sportEventId
                 ? { ...event, current_participants: updatedParticipants }
                 : event
         );
@@ -98,10 +107,12 @@ export default function SportsEvents() {
                             sportEvent={sportEvent}
                             key={sportEvent.id}
                             onDeleteClick={onDeleteClick}
-                            onJoinClick={onJoinClick} // Pass the callback here
+                            onJoinClick={onJoinClick}
+                            onLeaveClick={onLeaveClick}
                             isAdmin={isAdmin}
                             isGuest={isGuest}
                         />
+
                     ))}
                 </div>
             )}

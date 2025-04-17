@@ -53,4 +53,13 @@ class SportEventController extends Controller
             ], 400);
         }
     }
+    public function myEvents(Request $request)
+    {
+    $user = $request->user();
+    $events = $user->sportsEvents()->get();
+
+    return response()->json(SportEventResource::collection($events), 200);
+    }
+
+
 }

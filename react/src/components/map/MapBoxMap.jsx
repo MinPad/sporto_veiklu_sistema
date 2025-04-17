@@ -87,7 +87,7 @@ const MapBoxMap = ({ gyms, cityId, selectedDistance, onVisibleGymCountChange }) 
             if (ctrlContainer) {
                 ctrlContainer.style.display = 'flex';
                 ctrlContainer.style.flexDirection = 'column';
-                ctrlContainer.style.alignItems = 'center';
+                ctrlContainer.style.alignItems = 'flex-end';
                 ctrlContainer.style.gap = '8px';
                 ctrlContainer.style.margin = '1rem';
 
