@@ -12,6 +12,7 @@ import Coaches from './views/Coaches';
 
 import GymView from './views/GymView';
 import GymUpdate from './views/GymUpdate';
+import GymDetail from './views/GymDetailView';
 import CoachUpdate from './views/CoachUpdate';
 import CityCreateView from './views/CityCreateView';
 import CoachCreateView from './views/CoachCreateView';
@@ -21,6 +22,8 @@ import UnauthorizedPage from './views/UnauthorizedPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import SportsEventsPage from './views/SportsEvents';
 import NotFoundPage from './views/NotFoundPage';
+
+import GymReviewsView from './views/GymReviewsView';
 
 const CoachView = lazy(() => import('./views/CoachView'));
 
@@ -94,6 +97,10 @@ const routes = [
         ),
     },
     {
+        path: '/cities/:cityId/gyms/:gymId/details',
+        element: <GymDetail />,
+    },
+    {
         path: '/users',
         element: (
             <ProtectedRoute requiredRole="Admin">
@@ -125,6 +132,10 @@ const routes = [
             </ProtectedRoute>
         ),
     },
+    {
+        path: '/cities/:cityId/gyms/:gymId/reviews',
+        element: <GymReviewsView />,
+    }
 ];
 
 export default routes;

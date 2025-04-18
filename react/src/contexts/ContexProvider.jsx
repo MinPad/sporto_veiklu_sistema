@@ -4,6 +4,8 @@ import react from '../assets/react.png';
 import laravel from '../assets/laravel.png';
 import { useEffect } from "react";
 import axiosClient from "../axios";
+
+import { jwtDecode } from "jwt-decode";
 const StateContext = createContext({
     currentUser: {},
     userToken: null,
@@ -20,7 +22,7 @@ export const ContextProvider = ({ children }) => {
     const [currentUser, setCurrentUser] = useState({})
     const [userToken, _setUserToken] = useState(localStorage.getItem('TOKEN') || '');
     const [toast, setToast] = useState({ message: '', show: false })
-
+    const [userRole, setUserRole] = useState(null);
     // const [surveys, setSurveys] = useState(tmpSurveys)
     useEffect(() => {
         if (userToken && !currentUser?.id) {
@@ -33,33 +35,36 @@ export const ContextProvider = ({ children }) => {
                 });
         }
     }, [userToken]);
-    // const setUserToken = (token) => {
-    //     if (token) {
-    //         console.log('Setting userToken:', token);
-
-    //         localStorage.setItem('TOKEN', token)
-    //     } else {
-    //         console.log('SettiremoveItemn userToken:', token);
-
-    //         localStorage.removeItem('TOKEN')
-    //     }
-    //     console.log('wtf userToken:', token);
-
-    //     _setUserToken(token);
-    // }
     const setUserToken = (token) => {
         if (token) {
-            // console.log("Setting userToken:", token);
             localStorage.setItem("TOKEN", token);
+
+            try {
+                const decoded = jwtDecode(token);
+                setUserRole(decoded.role || null);
+            } catch (err) {
+                console.error("Invalid token format", err);
+                setUserRole(null);
+            }
+
         } else {
-            // console.log("Removing userToken");
             localStorage.removeItem("TOKEN");
             localStorage.removeItem("REFRESH_TOKEN");
+            setUserRole(null);
         }
         _setUserToken(token);
-        // console.log('UserToken after setUserToken:', token); // Debugging line
     };
-
+    useEffect(() => {
+        if (userToken && !userRole) {
+            try {
+                const decoded = jwtDecode(userToken);
+                setUserRole(decoded.role || null);
+            } catch {
+                setUserRole(null);
+            }
+        }
+    }, [userToken]);
+    // console.log("Decoded Token:", jwtDecode(userToken));
 
     const showToast = (message) => {
         setToast({ message, show: true })
@@ -75,7 +80,7 @@ export const ContextProvider = ({ children }) => {
             setCurrentUser,
             userToken,
             setUserToken,
-            // surveys,
+            userRole,
             toast,
             showToast
         }}>
