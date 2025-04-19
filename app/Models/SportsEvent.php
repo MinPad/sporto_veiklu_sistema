@@ -19,15 +19,29 @@ class SportsEvent extends Model
         'end_date',
         'max_participants',
         'current_participants',
+        'gym_id',
+        'activity_type',
+        'difficulty_level',
+        'goal_tags',
     ];
 
     protected $with = ['users']; // Eager load users relationship
-
+    protected $casts = [
+        'goal_tags' => 'array',
+    ]; 
+    public function specialties()
+    {
+        return $this->belongsToMany(Specialty::class, 'event_specialty')->withTimestamps();
+    }
     public function isFull()
     {
         return $this->max_participants !== null && $this->current_participants >= $this->max_participants;
     }
 
+    public function gym()
+    {
+        return $this->belongsTo(Gym::class);
+    }
     public function users()
     {
         return $this->belongsToMany(User::class, 'sports_event_user')->withTimestamps();

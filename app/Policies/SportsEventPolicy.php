@@ -45,7 +45,7 @@ class SportsEventPolicy
      */
     public function delete(User $user, SportsEvent $sportsEvent): bool
     {
-        //
+        return $user->role === 'Admin'; 
     }
 
     /**

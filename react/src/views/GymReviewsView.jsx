@@ -4,7 +4,7 @@ import PageComponent from "../components/PageComponent";
 import LoadingDialog from "../components/core/LoadingDialog";
 import TButton from "../components/core/TButton";
 import ConfirmationDialog from "../components/core/ConfirmationDialog";
-import { TrashIcon, ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
+import { TrashIcon, ChatBubbleLeftRightIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { useStateContext } from "../contexts/ContexProvider";
 import axiosClient from "../axios";
 import ReviewEditor from "../components/reviews/ReviewEditor";
@@ -79,8 +79,38 @@ export default function GymReviewsView() {
         );
     }
     return (
-        <PageComponent title={`All Reviews in "${gym.name}"`}>
-            <div className="w-full px-4 sm:px-0 mb-4 flex flex-col sm:flex-row gap-2 sm:justify-end">
+        <PageComponent
+            title={gym ? `All Reviews in "${gym.name}"` : (
+                <div className="flex items-center gap-2">
+                    <LoadingDialog size="sm" />
+                    Loading City...
+                </div>
+            )}
+            buttons={
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto sm:ml-auto">
+                    <TButton
+                        to={`/cities/${cityId}/gyms/${gymId}/details`}
+                        className="flex items-center justify-center w-full sm:w-auto"
+                    >
+                        <ArrowLeftIcon className="w-5 h-5 mr-2" />
+                        Back to Gym
+                    </TButton>
+
+                    {currentUser && !reviews.some(r => r.user_id === currentUser.id) && (
+                        <TButton
+                            color="green"
+                            onClick={() => setShowReviewForm(prev => !prev)}
+                            className="flex items-center justify-center w-full sm:w-auto"
+                        >
+                            <ChatBubbleLeftRightIcon className="w-5 h-5 mr-2" />
+                            {showReviewForm ? "Hide Review Form" : "Leave a Review"}
+                        </TButton>
+                    )}
+                </div>
+            }
+        >
+
+            {/* <div className="w-full px-4 sm:px-0 mb-4 flex flex-col sm:flex-row gap-2 sm:justify-end">
                 <TButton
                     to={`/cities/${cityId}/gyms/${gymId}/details`}
                     className="flex items-center justify-center w-full sm:w-auto"
@@ -99,13 +129,12 @@ export default function GymReviewsView() {
                         {showReviewForm ? "Hide Review Form" : "Leave a Review"}
                     </TButton>
                 )}
-            </div>
+            </div> */}
             {successMessage && (
                 <div className="mb-4 px-4">
                     <SuccessAlert message={successMessage} />
                 </div>
             )}
-            {/* Place form here */}
             {showReviewForm && (
                 <div className="container mx-auto py-4">
                     <ReviewEditor

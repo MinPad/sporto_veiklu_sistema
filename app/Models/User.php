@@ -36,6 +36,12 @@ class User extends Authenticatable implements JWTSubject
         'avatar',
         'cover_photo',
         'motivational_text',
+        'goal',
+        'height',
+        'weight',
+        'preferred_workout_types',
+        'experience_level',
+        'personalization_updated_at',
     ];
 
     /**
@@ -58,6 +64,8 @@ class User extends Authenticatable implements JWTSubject
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'preferred_workout_types' => 'array',
+            'goal' => 'array',
         ];
     }
     public function refreshTokens()

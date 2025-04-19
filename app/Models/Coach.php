@@ -26,7 +26,10 @@ class Coach extends Model
         'is_approved' => 0
     ];
 
-
+    public function specialties()
+    {
+        return $this->belongsToMany(Specialty::class, 'coach_specialty')->withTimestamps();
+    }
     public function gym()
     {
     return $this->belongsTo(Gym::class, 'gym_id');

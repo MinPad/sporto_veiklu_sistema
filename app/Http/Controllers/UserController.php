@@ -89,30 +89,61 @@ class UserController extends Controller
        
     }
 
+    // public function updatePersonalization(UpdateUserPersonalizationRequest $request, $id)
+    // {
+        
+    // $user = User::findOrFail($id);
+    // $this->authorize('update', $user);
+    
+    // if ($request->hasFile('avatar')) {
+    //     $avatarPath = $request->file('avatar')->store('avatars', 'public');
+    //     $user->avatar = $avatarPath;
+    // }
+
+    // if ($request->hasFile('cover_photo')) {
+    //     $coverPath = $request->file('cover_photo')->store('covers', 'public');
+    //     $user->cover_photo = $coverPath;
+    // }
+
+    // $user->motivational_text = $request->input('motivational_text', '');
+    
+    // if ($request->input('remove_avatar') === 'true') {
+    //     $user->avatar = null;
+    // }
+    // $user->save();
+
+    // return new UserResource($user);
+    // }
     public function updatePersonalization(UpdateUserPersonalizationRequest $request, $id)
     {
-        
-    $user = User::findOrFail($id);
-    $this->authorize('update', $user);
+        $user = User::findOrFail($id);
+        $this->authorize('update', $user);
     
-    if ($request->hasFile('avatar')) {
-        $avatarPath = $request->file('avatar')->store('avatars', 'public');
-        $user->avatar = $avatarPath;
-    }
-
-    if ($request->hasFile('cover_photo')) {
-        $coverPath = $request->file('cover_photo')->store('covers', 'public');
-        $user->cover_photo = $coverPath;
-    }
-
-    $user->motivational_text = $request->input('motivational_text', '');
+        if ($request->hasFile('avatar')) {
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+            $user->avatar = $avatarPath;
+        }
     
-    if ($request->input('remove_avatar') === 'true') {
-        $user->avatar = null;
-    }
-    $user->save();
+        if ($request->hasFile('cover_photo')) {
+            $coverPath = $request->file('cover_photo')->store('covers', 'public');
+            $user->cover_photo = $coverPath;
+        }
+    
+        if ($request->input('remove_avatar') === 'true') {
+            $user->avatar = null;
+        }
+    
+        $user->motivational_text = $request->input('motivational_text', '');
+    
+        $user->goal = $request->input('goal');
+        $user->height = $request->input('height');
+        $user->weight = $request->input('weight');
+        $user->experience_level = $request->input('experience_level');
+        $user->preferred_workout_types = $request->input('preferred_workout_types', []);
 
-    return new UserResource($user);
+        $user->personalization_updated_at = now();
+        $user->save();
+    
+        return new UserResource($user);
     }
-
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Header from '../components/Header';
 import axiosClient from "../axios";
 import LoadingDialog from "../components/core/LoadingDialog";
@@ -17,7 +17,7 @@ import { useStateContext } from '../contexts/ContexProvider';
 import { useLocation, useNavigationType } from 'react-router-dom';
 
 import { useUnsavedChangesPrompt } from '../hooks/useUnsavedChangesPrompt';
-
+import SuccessAlert from '../components/core/SuccessAlert';
 
 const Profile = () => {
     const { setCurrentUser } = useStateContext();
@@ -31,7 +31,7 @@ const Profile = () => {
         { title: 'My Sports Events', id: 'mySportsEvents' },
     ];
 
-    const [activeSetting, setActiveSetting] = useState('publicProfile');
+    const [activeSetting, setActiveSetting] = useState('personalization');
     const [currentAvatarUrl, setCurrentAvatarUrl] = useState('');
 
 
@@ -62,6 +62,27 @@ const Profile = () => {
     const navigationType = useNavigationType();
     const [nextLocation, setNextLocation] = useState(null);
     const [blockNavigation, setBlockNavigation] = useState(false);
+    const [form, setForm] = useState({
+        height: '',
+        weight: '',
+        goals: [],
+        experience_level: ''
+    });
+    const [updatedAt, setUpdatedAt] = useState(null);
+    const [successMessage, setSuccessMessage] = useState('');
+    const successTimeoutRef = useRef(null);
+    const showSuccessMessage = (msg) => {
+        setSuccessMessage(msg);
+
+        if (successTimeoutRef.current) {
+            clearTimeout(successTimeoutRef.current);
+        }
+
+        successTimeoutRef.current = setTimeout(() => {
+            setSuccessMessage('');
+            successTimeoutRef.current = null;
+        }, 3000);
+    };
 
     const handleSettingsClick = (setting) => {
         if (hasUnsavedChanges) {
@@ -79,13 +100,21 @@ const Profile = () => {
         setAvatarRemoved(false);
         setName(currentUser?.name || '');
         setEmail(currentUser?.email || '');
-        // If switching sections internally
+        setForm({
+            height: currentUser?.height || '',
+            weight: currentUser?.weight || '',
+            experience_level: currentUser?.experience_level || '',
+            goals: Array.isArray(currentUser?.goal)
+                ? currentUser.goal.map(g => ({ label: g, value: g }))
+                : typeof currentUser?.goal === 'string'
+                    ? JSON.parse(currentUser.goal).map(g => ({ label: g, value: g }))
+                    : [],
+        });
+
         if (pendingSetting) {
             setActiveSetting(pendingSetting.id);
             setPendingSetting(null);
         }
-
-        // If trying to navigate to another page
         if (nextLocation && typeof nextLocation.retry === 'function') {
             nextLocation.retry();
         }
@@ -110,12 +139,21 @@ const Profile = () => {
 
     useEffect(() => {
         if (currentUser && currentUser.id) {
-            const { name, email, avatar_url, motivational_text } = currentUser;
+            const { name, email, avatar_url, motivational_text, height, weight, goal, experience_level, personalization_updated_at } = currentUser;
             setName(name || '');
             setEmail(email || '');
             setCurrentAvatarUrl(avatar_url || '');
             setOriginalAvatarUrl(avatar_url || '');
             setMotivationalText(motivational_text || '');
+            const parsedGoals = typeof goal === 'string' ? JSON.parse(goal) : goal || [];
+            setForm(prev => ({
+                ...prev,
+                height: height || '',
+                weight: weight || '',
+                experience_level: experience_level || '',
+                goals: parsedGoals.map(g => ({ label: g, value: g })),
+            }));
+            setUpdatedAt(personalization_updated_at || null);
             setLoading(false);
         }
     }, [currentUser]);
@@ -127,12 +165,19 @@ const Profile = () => {
         try {
             const formData = new FormData();
             formData.append('motivational_text', motivationalText !== undefined ? motivationalText : '');
+            formData.append('height', form.height || '');
+            formData.append('weight', form.weight || '');
+            const selectedGoalValues = form.goals.map(g => g.value); // extract values
+            formData.append('goal', JSON.stringify(selectedGoalValues));
+            formData.append('experience_level', form.experience_level || '');
+
             if (avatar) formData.append('avatar', avatar);
             if (coverPhoto) formData.append('cover_photo', coverPhoto);
             if (avatarRemoved && !avatar) formData.append('remove_avatar', true);
             const response = await axiosClient.post(`/users/${currentUser.id}/personalization`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
+
 
             const updatedUser = response.data.data;
             setCurrentUser(updatedUser);
@@ -141,7 +186,7 @@ const Profile = () => {
             setAvatar(null);
             setAvatarRemoved(false);
             setAvatarPreviewRestored(false);
-            alert('Personalization saved!');
+            showSuccessMessage('Personalization saved!');
             setIsEditing(false);
         } catch (err) {
             console.error("Error saving personalization:", err);
@@ -152,12 +197,12 @@ const Profile = () => {
     const handleSaveProfile = async (e) => {
         e.preventDefault();
         try {
-            await axiosClient.patch(`/users/${userId}`, {
+            await axiosClient.patch(`/users/${currentUser.id}`, {
                 name,
                 email
             });
 
-            alert('Public profile saved!');
+            showSuccessMessage('Public profile saved!');
             setIsEditing(false);
         } catch (err) {
             console.error("Error saving profile:", err);
@@ -186,13 +231,39 @@ const Profile = () => {
     };
     const hasUnsavedPersonalization = useMemo(() => {
         const currentMotivation = currentUser?.motivational_text || '';
+        const currentHeight = currentUser?.height || '';
+        const currentWeight = currentUser?.weight || '';
+        const currentLevel = currentUser?.experience_level || '';
+        const currentGoals = Array.isArray(currentUser?.goal)
+            ? currentUser.goal
+            : typeof currentUser?.goal === 'string'
+                ? JSON.parse(currentUser.goal)
+                : [];
+
+        const currentGoalSet = new Set(currentGoals);
+        const formGoalSet = new Set(form.goals.map(g => g.value));
+        const goalsChanged = currentGoals.length !== form.goals.length ||
+            [...currentGoalSet].some(goal => !formGoalSet.has(goal));
+
         return (
             motivationalText.trim() !== currentMotivation.trim() ||
+            form.height !== currentHeight ||
+            form.weight !== currentWeight ||
+            form.experience_level !== currentLevel ||
+            goalsChanged ||
             avatar !== null ||
             avatarRemoved
         );
-    }, [motivationalText, currentUser?.motivational_text, avatar, avatarRemoved]);
-
+    }, [
+        motivationalText,
+        form.height,
+        form.weight,
+        form.experience_level,
+        form.goals,
+        avatar,
+        avatarRemoved,
+        currentUser
+    ]);
 
     const hasUnsavedPublicProfile = useMemo(() => {
         return (
@@ -233,6 +304,13 @@ const Profile = () => {
     return (
         <>
             <Header />
+            {successMessage && (
+                <SuccessAlert
+                    key={successMessage}
+                    message={successMessage}
+                    onClose={() => setSuccessMessage('')}
+                />
+            )}
             {loading && <LoadingDialog />}
             {!loading && (
                 <div className="bg-gray-200 min-h-[calc(100vh-64px)] overflow-hidden">
@@ -284,6 +362,9 @@ const Profile = () => {
                                     setMotivationalText={setMotivationalText}
                                     avatarRemoved={avatarRemoved}
                                     setAvatarRemoved={setAvatarRemoved}
+                                    form={form}
+                                    setForm={setForm}
+                                    updatedAt={updatedAt}
                                 />
                             )}
                             {activeSetting === 'healthReport' && (

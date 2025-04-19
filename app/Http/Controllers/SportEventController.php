@@ -60,6 +60,17 @@ class SportEventController extends Controller
 
     return response()->json(SportEventResource::collection($events), 200);
     }
-
-
+    public function delete(SportsEvent $sportsEvent)
+    {
+        $this->authorize('delete', $sportsEvent);
+    
+        if (!$sportsEvent->id) {
+            return response(['message' => 'Resource not found'], 404);
+        }
+    
+        $sportsEvent->delete();
+    
+        return response('', 204); // No content
+    }
+    
 }

@@ -81,6 +81,7 @@ export default function SportEventListItem({
                 showSuccessMessage(error.response?.data?.message || "An error occurred while joining the event.");
             });
     };
+    //  console.log('Event:', sportEvent.name, 'gym_id:', sportEvent.gym_id);
     return (
         <>
             {successMessage && (
@@ -91,7 +92,12 @@ export default function SportEventListItem({
                 />
             )}
             <div className="flex flex-col py-4 px-6 shadow-lg bg-white hover:bg-gray-50 h-[470px]">
-                <h4 className="mt-4 text-lg font-bold">{sportEvent.name}</h4>
+                <h4 className="mt-4 text-lg font-bold flex items-center gap-2">
+                    {sportEvent.name}
+                    {sportEvent.gym_id == null && (
+                        <span title="Outdoor Event" className="text-green-500 text-sm">🌿</span>
+                    )}
+                </h4>
 
                 <div className="text-sm text-gray-700 mt-2">
                     <p><strong>Location:</strong> {sportEvent.location}</p>
@@ -105,6 +111,48 @@ export default function SportEventListItem({
                     <p>
                         <strong>Participants:</strong> {sportEvent.current_participants} / {sportEvent.max_participants ?? "Unlimited"}
                     </p>
+
+                    {sportEvent.difficulty_level && (
+                        <div className="mt-1">
+                            <strong>Difficulty:</strong>{" "}
+                            <span className={`inline-block rounded px-2 py-0.5 text-xs font-semibold ${sportEvent.difficulty_level === "Beginner"
+                                ? "bg-green-100 text-green-700"
+                                : sportEvent.difficulty_level === "Intermediate"
+                                    ? "bg-yellow-100 text-yellow-800"
+                                    : "bg-red-100 text-red-700"
+                                }`}>
+                                {sportEvent.difficulty_level}
+                            </span>
+                        </div>
+                    )}
+
+                    {sportEvent.goal_tags?.length > 0 && (
+                        <div className="mt-1">
+                            <strong>Goals:</strong>{" "}
+                            {sportEvent.goal_tags.map((tag, index) => (
+                                <span
+                                    key={index}
+                                    className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold mr-1 px-2.5 py-0.5 rounded"
+                                >
+                                    {tag}
+                                </span>
+                            ))}
+                        </div>
+                    )}
+
+                    {sportEvent.specialties?.length > 0 && (
+                        <div className="mt-1">
+                            <strong>Specialties:</strong>{" "}
+                            {sportEvent.specialties.map((specialty, index) => (
+                                <span
+                                    key={index}
+                                    className="inline-block bg-purple-100 text-purple-800 text-xs font-semibold mr-1 px-2.5 py-0.5 rounded"
+                                >
+                                    {specialty.name}
+                                </span>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 <div className="flex-1 overflow-hidden mt-4">
@@ -138,7 +186,6 @@ export default function SportEventListItem({
                         <TButton color="red" onClick={() => setLeaveDialogOpen(true)}>
                             Leave Event
                         </TButton>
-
                     ) : (
                         <TButton
                             color="green"
@@ -149,9 +196,6 @@ export default function SportEventListItem({
                             {sportEvent.isFull ? "Event Full" : "Join Event"}
                         </TButton>
                     )}
-
-
-
                 </div>
 
                 <ConfirmationDialog
@@ -171,4 +215,5 @@ export default function SportEventListItem({
             </div>
         </>
     );
+
 }

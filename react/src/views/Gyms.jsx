@@ -15,6 +15,8 @@ import SuccessAlert from '../components/core/SuccessAlert';
 
 export default function Gyms() {
     const { cityId } = useParams();
+    const [city, setCity] = useState(null);
+
     const [gyms, setGyms] = useState([]);
     const [loading, setLoading] = useState(true); // Loading state
     const [isAdmin, setIsAdmin] = useState(false);
@@ -27,6 +29,7 @@ export default function Gyms() {
 
     const [selectedDistance, setSelectedDistance] = useState(0); // 0 = show all
     const [visibleGymCount, setVisibleGymCount] = useState(null);
+
 
     const [successMessage, setSuccessMessage] = useState('');
     const successTimeoutRef = useRef(null);
@@ -59,22 +62,21 @@ export default function Gyms() {
                 setIsAdmin(true);
             }
         }
-        fetchGyms();
-    }, [cityId]);
 
-    const fetchGyms = () => {
-        setLoading(true);
-        axiosClient.get(`cities/${cityId}/gyms`)
-            .then(({ data }) => {
-                setGyms(data);
-                setFilteredGyms(data);
-                setLoading(false);
+        Promise.all([
+            axiosClient.get(`cities/${cityId}/gyms`),
+            axiosClient.get(`/cities/${cityId}`)
+        ])
+            .then(([gymsRes, cityRes]) => {
+                setGyms(gymsRes.data);
+                setFilteredGyms(gymsRes.data);
+                setCity(cityRes.data);
             })
-            .catch((error) => {
-                console.error("Error fetching gyms:", error);
-                setLoading(false);
-            });
-    };
+            .catch((err) => {
+                console.error("Error fetching gyms or city:", err);
+            })
+            .finally(() => setLoading(false));
+    }, [cityId]);
 
     const handleSearchChange = (ev) => {
         const query = ev.target.value;
@@ -97,15 +99,14 @@ export default function Gyms() {
             return newVal;
         });
     };
-    // console.log(gyms);
     const searchBar = (
-        <div className="relative w-full max-w-xs">
+        <div className="relative w-full sm:max-w-xs">
             <input
                 type="text"
                 value={searchQuery}
                 onChange={handleSearchChange}
                 placeholder="Search gyms..."
-                className="p-2 pl-10 border border-gray-300 rounded-lg w-full"
+                className="p-2 pl-10 border border-gray-300 rounded-lg w-full text-sm"
             />
             <MagnifyingGlassIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-500" />
         </div>
@@ -113,16 +114,20 @@ export default function Gyms() {
 
     return (
         <PageComponent
-            title="Gyms"
+            title={city ? `Gyms in "${city.name}"` : "Loading Gyms..."}
+            searchBar={searchBar}
             buttons={
                 isAdmin && (
-                    <TButton color="green" to={`/cities/${cityId}/gyms/create`}>
-                        <PlusCircleIcon className="h-6 w-6 mr-2" />
+                    <TButton
+                        color="green"
+                        to={`/cities/${cityId}/gyms/create`}
+                        className="w-full sm:w-auto justify-center"
+                    >
+                        <PlusCircleIcon className="h-5 w-5 mr-2" />
                         Create new Gym
                     </TButton>
                 )
             }
-            searchBar={searchBar}
         >
             {loading ? (
                 <div className="flex justify-center items-center h-40">
@@ -130,32 +135,31 @@ export default function Gyms() {
                 </div>
             ) : (
                 <>
-                    {/* 👉 Show Map button when map is hidden */}
+                    {/* Show Map Button */}
                     {!showMap && (
                         <div className="flex justify-end px-4 mb-4">
                             <button
                                 onClick={handleToggleMap}
-                                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded shadow text-sm transition"
+                                className="w-full sm:w-auto px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded shadow text-sm transition"
                             >
                                 Show Map
                             </button>
                         </div>
                     )}
 
-                    {/* 👉 When map is visible, show Hide button + filters + map */}
                     {showMap && (
                         <>
                             <div className="flex justify-end px-4 mb-2">
                                 <button
                                     onClick={handleToggleMap}
-                                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded shadow text-sm transition"
+                                    className="w-full sm:w-auto px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded shadow text-sm transition"
                                 >
                                     Hide Map
                                 </button>
                             </div>
 
-                            <div className="flex items-center justify-between flex-wrap px-4 mb-2 gap-2">
-                                <div className="flex items-center gap-2">
+                            <div className="flex flex-col sm:flex-row justify-between px-4 mb-2 gap-2 sm:items-center">
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                                     <label className="text-sm font-medium text-gray-700">Distance filter:</label>
                                     <select
                                         className="text-sm border rounded px-3 py-1 pr-8 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -188,13 +192,15 @@ export default function Gyms() {
                             </div>
                         </>
                     )}
+
+                    {/* Success Alert */}
                     {successMessage && (
                         <div className="mb-4 px-4">
                             <SuccessAlert message={successMessage} />
                         </div>
                     )}
 
-                    {/* Gym List */}
+                    {/* Gym Cards */}
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3">
                         {filteredGyms.map((gym) => (
                             <GymListItem

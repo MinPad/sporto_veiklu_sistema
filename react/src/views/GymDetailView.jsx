@@ -4,7 +4,7 @@ import axiosClient from '../axios';
 import PageComponent from '../components/PageComponent';
 import LoadingDialog from "../components/core/LoadingDialog";
 import TButton from '../components/core/TButton';
-import { ArrowTopRightOnSquareIcon, PencilIcon, TrashIcon, UserGroupIcon, ChatBubbleLeftRightIcon, StarIcon } from '@heroicons/react/24/outline';
+import { ArrowTopRightOnSquareIcon, PencilIcon, TrashIcon, UserGroupIcon, ChatBubbleLeftRightIcon, StarIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { useStateContext } from '../contexts/ContexProvider';
 import SuccessAlert from '../components/core/SuccessAlert';
 import ConfirmationDialog from "../components/core/ConfirmationDialog";
@@ -182,7 +182,20 @@ export default function GymDetailView() {
 
     return (
         <>
-            <PageComponent title={gym.name}>
+            <PageComponent
+                title={gym.name}
+                buttons={
+                    <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto sm:ml-auto">
+                        <TButton
+                            to={`/cities/${cityId}/gyms/`}
+                            className="flex items-center justify-center w-full sm:w-auto"
+                        >
+                            <ArrowLeftIcon className="w-5 h-5 mr-2" />
+                            Back to City
+                        </TButton>
+
+                    </div>
+                }>
                 {successMessage && (
                     <div className="mb-4 px-4">
                         <SuccessAlert message={successMessage} />

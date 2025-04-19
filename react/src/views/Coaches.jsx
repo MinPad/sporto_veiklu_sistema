@@ -4,7 +4,7 @@ import PageComponent from "../components/PageComponent";
 import LoadingDialog from "../components/core/LoadingDialog";
 import axiosClient from "../axios";
 import { jwtDecode } from "jwt-decode";
-import { PencilIcon, EnvelopeIcon, PlusCircleIcon, TrashIcon, EyeIcon, MagnifyingGlassIcon, BriefcaseIcon } from "@heroicons/react/24/outline";
+import { PencilIcon, EnvelopeIcon, PlusCircleIcon, TrashIcon, EyeIcon, MagnifyingGlassIcon, BriefcaseIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 import TButton from "../components/core/TButton";
 import ConfirmationDialog from "../components/core/ConfirmationDialog";
 
@@ -81,32 +81,46 @@ export default function Coaches() {
     };
 
     const searchBar = (
-        <div className="relative w-80"> {/* Fixed width */}
+        <div className="relative w-full sm:max-w-xs">
             <input
                 type="text"
                 value={searchQuery}
                 onChange={handleSearchChange}
                 placeholder="Search coaches by name and specialty"
-                className="p-2 pl-10 border border-gray-300 rounded-lg w-full"
+                className="p-2 pl-10 border border-gray-300 rounded-lg w-full text-sm"
             />
             <MagnifyingGlassIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-500" />
         </div>
     );
 
-
     return (
         <PageComponent
             title="Coaches"
+            searchBar={searchBar}
             buttons={
-                isAdmin && (
-                    <TButton color="green" to={`/cities/${cityId}/gyms/${gymId}/coaches/create`}>
-                        <PlusCircleIcon className="h-6 w-6 mr-2" />
-                        Create new Coach
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto sm:ml-auto">
+                    <TButton
+                        to={`/cities/${cityId}/gyms/${gymId}/details`}
+                        className="flex items-center justify-center w-full sm:w-auto"
+                    >
+                        <ArrowLeftIcon className="w-5 h-5 mr-2" />
+                        Back to Gym
                     </TButton>
-                )
+
+                    {isAdmin && (
+                        <TButton
+                            color="green"
+                            to={`/cities/${cityId}/gyms/${gymId}/coaches/create`}
+                            className="flex items-center justify-center w-full sm:w-auto"
+                        >
+                            <PlusCircleIcon className="h-5 w-5 mr-2" />
+                            Create new Coach
+                        </TButton>
+                    )}
+                </div>
             }
-            searchBar={searchBar} // Pass the search bar here
         >
+
             <div className="container mx-auto py-4">
                 {loading && <LoadingDialog />}
 
@@ -154,6 +168,6 @@ export default function Coaches() {
                     </div>
                 )}
             </div>
-        </PageComponent>
+        </PageComponent >
     );
 }

@@ -74,13 +74,13 @@ export default function Cities() {
     };
 
     const searchBar = (
-        <div className="relative w-full max-w-xs">
+        <div className="relative w-full sm:max-w-xs">
             <input
                 type="text"
                 value={searchQuery}
                 onChange={handleSearchChange}
                 placeholder="Search cities..."
-                className="p-2 pl-10 border border-gray-300 rounded-lg w-full"
+                className="p-2 pl-10 border border-gray-300 rounded-lg w-full text-sm"
             />
             <MagnifyingGlassIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-500" />
         </div>
@@ -91,8 +91,8 @@ export default function Cities() {
             title="Cities"
             buttons={
                 isAdmin && (
-                    <TButton color="green" to="/cities/create">
-                        <PlusCircleIcon className="h-6 w-6 mr-2" />
+                    <TButton color="green" to="/cities/create" className="w-full sm:w-auto justify-center">
+                        <PlusCircleIcon className="h-5 w-5 mr-2" />
                         Create new City
                     </TButton>
                 )

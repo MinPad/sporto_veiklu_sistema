@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\SportsEvent;
 use Illuminate\Database\Seeder;
+use App\Models\Specialty;
 
 class SportsEventSeeder extends Seeder
 {
@@ -14,7 +15,9 @@ class SportsEventSeeder extends Seeder
      */
     public function run()
     {
-        // Create 10 fake events
-        SportsEvent::factory()->count(5)->create();
+        SportsEvent::factory()->count(5)->create()->each(function ($event) {
+            $specialties = Specialty::inRandomOrder()->take(rand(1, 2))->pluck('id');
+            $event->specialties()->attach($specialties);
+        });
     }
 }

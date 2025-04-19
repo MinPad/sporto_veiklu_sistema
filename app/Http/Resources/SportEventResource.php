@@ -27,11 +27,15 @@ class SportEventResource extends JsonResource
             'current_participants' => $this->current_participants,
             'is_full' => $this->isFull(), // If you want to include a computed property (like whether the event is full)
             'participants_count' => $this->users()->count(), // Optional: Count the number of participants (if needed)
+            'gym_id' => $this->gym_id,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             // Optionally, include user data who joined the event, if needed
             'participants' => UserResource::collection(resource: $this->whenLoaded('users')),
             'is_joined' => $request->user() ? $this->users->contains($request->user()->id) : false,
+            'goal_tags' => $this->goal_tags,
+            'difficulty_level' => $this->difficulty_level,
+            'specialties' => $this->specialties,
         ];
     }
 }

@@ -74,24 +74,24 @@ export default function Users() {
         setFilteredUsers(filtered);
     };
     const searchBar = (
-        <div className="relative w-80"> {/* Fixed width */}
+        <div className="relative w-full sm:w-[340px]">
             <input
                 type="text"
                 value={searchQuery}
                 onChange={handleSearchChange}
                 placeholder="Search users by name, email and id..."
-                className="p-2 pl-10 border border-gray-300 rounded-lg w-full"
+                className="p-2 pl-10 border border-gray-300 rounded-lg w-full text-sm"
             />
             <MagnifyingGlassIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-500" />
         </div>
     );
 
-
     return (
         <PageComponent
             title="Users"
-            searchBar={searchBar} // Pass the search bar here
+            searchBar={searchBar}
         >
+
             <div className="container mx-auto py-4">
                 {loading && <LoadingDialog />}
 

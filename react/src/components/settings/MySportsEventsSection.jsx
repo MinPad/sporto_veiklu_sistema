@@ -105,9 +105,10 @@ const MySportsEventsSection = () => {
                             className="bg-white rounded-2xl shadow p-6 transition hover:shadow-md"
                         >
                             <div className="w-full flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
-                                <div className="border-l-4 border-indigo-500 pl-4">
-                                    <div className="flex items-center gap-2 mb-1">
+                                <div className="border-l-4 border-indigo-500 pl-4 w-full">
+                                    <div className="flex items-center flex-wrap gap-2 mb-1">
                                         <h3 className="font-bold text-lg m-0">{event.name}</h3>
+
                                         {event.is_free ? (
                                             <span className="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded-full">
                                                 Free
@@ -115,10 +116,27 @@ const MySportsEventsSection = () => {
                                         ) : (
                                             <span className="text-sm text-gray-600">€{event.entry_fee}</span>
                                         )}
+
+                                        {event.difficulty_level && (
+                                            <span className={`inline-block rounded px-2 py-0.5 text-xs font-semibold ${event.difficulty_level === "Beginner"
+                                                    ? "bg-green-100 text-green-700"
+                                                    : event.difficulty_level === "Intermediate"
+                                                        ? "bg-yellow-100 text-yellow-800"
+                                                        : "bg-red-100 text-red-700"
+                                                }`}>
+                                                {event.difficulty_level}
+                                            </span>
+                                        )}
+
+                                        {event.gym_id == null && (
+                                            <span title="Outdoor Event" className="text-green-500 text-sm">🌿</span>
+                                        )}
                                     </div>
+
                                     <p className="text-sm text-gray-600 mb-1">
                                         <span className="font-semibold">Location:</span> {event.location}
                                     </p>
+
                                     <div className="text-sm text-gray-600 mb-1 flex items-start sm:items-center gap-1">
                                         <CalendarDaysIcon className="h-4 w-4 text-gray-500 mt-0.5" />
                                         <div>
@@ -127,15 +145,45 @@ const MySportsEventsSection = () => {
                                         </div>
                                     </div>
 
-                                    <p className="text-sm text-gray-600">
+                                    <p className="text-sm text-gray-600 mb-1">
                                         <UserIcon className="h-4 w-4 inline text-gray-500 mr-1" />
-                                        {event.current_participants} / {event.max_participants} participants
+                                        {event.current_participants} / {event.max_participants ?? "Unlimited"} participants
                                     </p>
 
+                                    {event.goal_tags?.length > 0 && (
+                                        <div className="text-sm text-gray-600 mb-1">
+                                            <span className="font-semibold">Goals:</span>{" "}
+                                            {event.goal_tags.map((goal, index) => (
+                                                <span
+                                                    key={index}
+                                                    className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold mr-1 px-2.5 py-0.5 rounded"
+                                                >
+                                                    {goal}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {event.specialties?.length > 0 && (
+                                        <div className="text-sm text-gray-600 mb-1">
+                                            <span className="font-semibold">Specialties:</span>{" "}
+                                            {event.specialties.map((s, index) => (
+                                                <span
+                                                    key={index}
+                                                    className="inline-block bg-purple-100 text-purple-800 text-xs font-semibold mr-1 px-2.5 py-0.5 rounded"
+                                                >
+                                                    {s.name}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
+
                                     <p className="text-sm text-gray-600">
-                                        <span className="font-semibold">Description:</span> {event.description || 'No description provided.'}
+                                        <span className="font-semibold">Description:</span>{" "}
+                                        {event.description || "No description provided."}
                                     </p>
                                 </div>
+
                                 <button
                                     onClick={() => handleLeaveClick(event)}
                                     className="text-red-600 hover:text-red-800 font-medium text-sm border border-red-200 px-4 py-2 rounded-md sm:ml-4 w-full sm:w-auto text-center"

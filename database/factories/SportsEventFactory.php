@@ -3,6 +3,8 @@
 namespace Database\Factories;
 
 use App\Models\SportsEvent;
+use App\Models\Gym;
+use App\Models\Specialty;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Carbon\Carbon;
 
@@ -22,24 +24,31 @@ class SportsEventFactory extends Factory
      */
     public function definition()
     {
-        // Randomly determine if the event is free or paid
-        $isFree = $this->faker->boolean(50); // 70% chance the event is free
-
+        $isFree = $this->faker->boolean(50);
         $startDate = $this->faker->dateTimeBetween('now', '+1 year');
-
-        // Generate end date, must be after start date, and optional
         $endDate = $this->faker->optional()->dateTimeBetween($startDate, '+1 year');
-
+    
+        $isInGym = $this->faker->boolean(60);
+        $gym = $isInGym ? Gym::inRandomOrder()->first() : null;
+    
         return [
-            'name' => $this->faker->word, // Random event name
-            'description' => $this->faker->sentence, // Random description
-            'location' => $this->faker->city, // Random city for location
-            'entry_fee' => $isFree ? null : $this->faker->randomFloat(2, 0, 100), // Only generate fee if not free
+            'name' => $this->faker->words(2, true),
+            'description' => $this->faker->sentence,
+            'location' => $gym ? $gym->address : $this->faker->city,
+            'entry_fee' => $isFree ? null : $this->faker->randomFloat(2, 5, 50),
             'is_free' => $isFree,
-            'start_date' => $startDate->format('Y-m-d'), // Format start date as Y-m-d
-            'end_date' => $endDate ? $endDate->format('Y-m-d') : null, // Format end date as Y-m-d or null
-            'max_participants' => $this->faker->numberBetween(1, 500), // Random max participants
-            'current_participants' => $this->faker->numberBetween(0, 100), // Random current participants
+            'start_date' => $startDate->format('Y-m-d'),
+            'end_date' => $endDate ? $endDate->format('Y-m-d') : null,
+            'max_participants' => $this->faker->numberBetween(10, 100),
+            'current_participants' => $this->faker->numberBetween(0, 30),
+    
+            'gym_id' => $gym?->id,
+            'difficulty_level' => $this->faker->randomElement(['Beginner', 'Intermediate', 'Advanced']),
+            'goal_tags' => $this->faker->randomElements(
+                ['Weight Loss', 'Muscle Gain', 'Endurance', 'Flexibility', 'Cardio Health'],
+                rand(1, 3)
+            ),
         ];
     }
+    
 }
