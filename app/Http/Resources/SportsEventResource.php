@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class SportEventResource extends JsonResource
+class SportsEventResource extends JsonResource
 {
     public function toArray($request)
     {
@@ -13,26 +13,14 @@ class SportEventResource extends JsonResource
             'name' => $this->name,
             'description' => $this->description,
             'location' => $this->location,
-            'entry_fee' => $this->entry_fee,
-            'is_free' => $this->is_free,
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
+            'entry_fee' => $this->entry_fee,
+            'is_free' => $this->is_free,
             'max_participants' => $this->max_participants,
             'current_participants' => $this->current_participants,
-            'is_full' => $this->isFull(),
-            'participants_count' => $this->users()->count(),
-            'gym_id' => $this->gym_id,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-
-            'goal_tags' => $this->goal_tags,
             'difficulty_level' => $this->difficulty_level,
-
-            'is_joined' => $request->user() ? $this->users->contains($request->user()->id) : false,
-
-            'participants' => UserResource::collection(
-                $this->whenLoaded('users')
-            ),
+            'goal_tags' => $this->goal_tags,
 
             'specialties' => $this->specialties->map(function ($specialty) {
                 return [

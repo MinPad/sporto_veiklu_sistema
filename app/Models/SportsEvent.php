@@ -42,6 +42,10 @@ class SportsEvent extends Model
     {
         return $this->belongsTo(Gym::class);
     }
+    public function coaches()
+    {
+        return $this->belongsToMany(Coach::class, 'coach_sports_event')->withTimestamps();
+    }
     public function users()
     {
         return $this->belongsToMany(User::class, 'sports_event_user')->withTimestamps();

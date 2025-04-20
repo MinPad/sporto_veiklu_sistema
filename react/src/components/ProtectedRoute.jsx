@@ -5,7 +5,7 @@ const ProtectedRoute = ({ requiredRole, children }) => {
     const token = localStorage.getItem("TOKEN");
 
     if (!token) {
-        return <Navigate to="/login" replace />;
+        return <Navigate to="/login" replace state={{ fromProtected: true }} />;
     }
 
     try {
@@ -17,7 +17,7 @@ const ProtectedRoute = ({ requiredRole, children }) => {
         }
     } catch (error) {
         console.error("Invalid token:", error);
-        return <Navigate to="/login" replace />;
+        return <Navigate to="/login" replace state={{ fromProtected: true }} />;
     }
 
     return children;

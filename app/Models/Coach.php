@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\User;
 use App\Models\Gym;
+use App\Models\SportsEvent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -39,9 +40,9 @@ class Coach extends Model
     {
         return $this->hasMany(Exercise::class, 'coach_id');
     }
-
-    // public function user()
-    // {
-    //     return $this->belongsTo(User::class);
-    // }
+    public function sportsEvents()
+    {
+        return $this->belongsToMany(SportsEvent::class, 'coach_sports_event')->withTimestamps();
+    }
+    
 }

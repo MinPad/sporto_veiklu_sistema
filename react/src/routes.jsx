@@ -21,6 +21,7 @@ import ResetPassword from './components/ResetPassword';
 import UnauthorizedPage from './views/UnauthorizedPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import SportsEventsPage from './views/SportsEvents';
+import SportEventDetail from './views/SportEventDetailView.jsx';
 import NotFoundPage from './views/NotFoundPage';
 
 import GymReviewsView from './views/GymReviewsView';
@@ -47,6 +48,14 @@ const routes = [
     {
         path: '/sports-events',
         element: <SportsEventsPage />,
+    },
+    {
+        path: '/sports-events/:sporteventid/details',
+        element: (
+            <ProtectedRoute>
+                <SportEventDetail />
+            </ProtectedRoute>
+        ),
     },
     {
         path: '/UnauthorizedPage',

@@ -1,9 +1,10 @@
 import { LockClosedIcon } from '@heroicons/react/20/solid'
 import Header from '../components/Header'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react';
 import axiosClient from '../axios';
 import { useStateContext } from '../contexts/ContexProvider';
+import UnauthorizedAlert from '../components/core/UnauthorizedAlert';
 
 export default function Login() {
     const { setCurrentUser, setUserToken } = useStateContext();
@@ -11,7 +12,26 @@ export default function Login() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState({ __html: "" });
 
+    const location = useLocation();
     const navigate = useNavigate();
+    const [showProtectedBanner, setShowProtectedBanner] = useState(false);
+
+    useEffect(() => {
+        if (location.state?.fromProtected) {
+            setShowProtectedBanner(true);
+
+            const timeout = setTimeout(() => {
+                setShowProtectedBanner(false);
+            }, 4000);
+
+            window.history.replaceState({}, document.title);
+
+            return () => clearTimeout(timeout);
+        }
+    }, [location.state]);
+
+
+
     const onSubmit = (ev) => {
         ev.preventDefault();
         setError({ __html: "" });
@@ -22,15 +42,15 @@ export default function Login() {
                 password,
             })
             .then(({ data }) => {
-                const token = data.token || data.accessToken;  // Ensure we handle both possible keys
-                const refreshToken = data.refreshToken;  // Add this line
+                const token = data.token || data.accessToken;
+                const refreshToken = data.refreshToken;
                 if (token) {
                     // console.log("Backend Response:", data);
                     // console.log("data user:", data.user);
                     setCurrentUser(data.user);
-                    setUserToken(token); // Updates context and localStorage via setUserToken
-                    localStorage.setItem('TOKEN', token); // Set it in localStorage
-                    localStorage.setItem('REFRESH_TOKEN', refreshToken);  // Add this line
+                    setUserToken(token);
+                    localStorage.setItem('TOKEN', token);
+                    localStorage.setItem('REFRESH_TOKEN', refreshToken);
                     navigate(`/`);
                 } else {
                     console.error("No token received from API");
@@ -52,6 +72,16 @@ export default function Login() {
     return (
         <>
             <Header />
+            {showProtectedBanner && (
+                <UnauthorizedAlert
+                    message="You must be logged in to view that page."
+                    // actionLabel="Go to Homepage"
+                    // actionLink="/"
+                    type="warning"
+                    onClose={() => setShowProtectedBanner(false)}
+                />
+            )}
+
             <div className="flex min-h-full flex-1 justify-center px-6 py-12 lg:px-8">
                 <div className="w-full max-w-md p-4 bg-gray-100 border border-gray-300 rounded-lg shadow-lg sm:p-6 md:p-8 dark:bg-gray-800 dark:border-gray-700">
                     <div className="sm:mx-auto sm:w-full sm:max-w-sm">
