@@ -56,7 +56,7 @@ Route::delete('/cities/{city}',[CityController::class, 'delete'])->middleware('a
 Route::post('/cities',[CityController::class, 'store'])->middleware('auth:api');
 
 // Route::get('/gyms', [GymController::class, 'index']);
-
+Route::get('/gyms/{gymId}', [GymController::class, 'getGymById'])->middleware('auth:api');
 Route::prefix('/cities/{city}')->group(function ()
     {
         Route::get('/gyms', [GymController::class, 'index']);
@@ -87,11 +87,12 @@ Route::prefix('/cities/{city}')->group(function ()
             Route::put('/coaches/{coach}', [CoachesController::class, 'update'])->middleware('auth:api');
         });
     });
-// Route::middleware(['auth:api'])->group(function () {
-//     Route::get('/user', function (Request $request) {
-//         return $request->user();
-//     });
-// });
+Route::get('/coaches', [CoachesController::class, 'indexAll']);
+Route::get('/coaches/{coach}', [CoachesController::class, 'showSingle'])->middleware('auth:api');
+Route::middleware('auth:api')->post('/coaches', [CoachesController::class, 'storeWithoutGym']);
+Route::middleware('auth:api')->delete('/coaches/{coach}', [CoachesController::class, 'deleteCoach']);
+Route::middleware('auth:api')->put('/coaches/{coach}', [CoachesController::class, 'updateCoach']);
+
 
 //MAPBOX
 Route::get('/mapbox/distance', [MapboxController::class, 'getDistance']);

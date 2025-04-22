@@ -34,7 +34,7 @@ export default function Gyms() {
     const [successMessage, setSuccessMessage] = useState('');
     const successTimeoutRef = useRef(null);
     const showSuccessMessage = (msg) => {
-        console.log("SUCCESS ALERT TRIGGERED:", msg);
+        // console.log("SUCCESS ALERT TRIGGERED:", msg);
         setSuccessMessage(msg);
         if (successTimeoutRef.current) {
             clearTimeout(successTimeoutRef.current);

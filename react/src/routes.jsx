@@ -25,8 +25,11 @@ import SportEventDetail from './views/SportEventDetailView.jsx';
 import NotFoundPage from './views/NotFoundPage';
 
 import GymReviewsView from './views/GymReviewsView';
+import AllCoaches from './views/AllCoaches';
+import AllCoachesCreate from './views/CoachCreateGlobal.jsx';
+import CoachEdit from './views/CoachEdit.jsx';
 
-const CoachView = lazy(() => import('./views/CoachView'));
+// const CoachView = lazy(() => import('./views/CoachView'));
 
 const routes = [
     {
@@ -137,7 +140,29 @@ const routes = [
         path: '/cities/:cityId/gyms/:gymId/coaches/:coachId/update',
         element: (
             <ProtectedRoute requiredRole="Admin">
-                <CoachUpdate />
+                <CoachEdit />
+            </ProtectedRoute>
+        ),
+    },
+    {
+        path: '/coaches',
+        element: (
+            <AllCoaches />
+        ),
+    },
+    {
+        path: '/coaches/create',
+        element: (
+            <ProtectedRoute requiredRole="Admin">
+                <AllCoachesCreate />
+            </ProtectedRoute>
+        ),
+    },
+    {
+        path: '/coaches/:coachId/edit',
+        element: (
+            <ProtectedRoute requiredRole="Admin">
+                <CoachEdit />
             </ProtectedRoute>
         ),
     },

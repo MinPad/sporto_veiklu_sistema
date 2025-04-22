@@ -15,13 +15,12 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('surname');
-            $table->string('specialty');
             $table->boolean('is_approved')->default(0); // Default value is 0 (not approved)
             $table->foreignId('gym_id')->constrained('gyms')->onDelete('cascade'); // Define gym_id foreign key
             $table->foreignId('user_id')->constrained()->after('id');
             $table->timestamps();
 
-            $table->unique(['name', 'surname', 'specialty', 'gym_id']);
+            $table->unique(['name', 'surname', 'gym_id']);
         });
     }
 

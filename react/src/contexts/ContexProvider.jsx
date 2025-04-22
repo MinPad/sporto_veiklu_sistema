@@ -4,7 +4,6 @@ import react from '../assets/react.png';
 import laravel from '../assets/laravel.png';
 import { useEffect } from "react";
 import axiosClient from "../axios";
-
 import { jwtDecode } from "jwt-decode";
 const StateContext = createContext({
     currentUser: {},

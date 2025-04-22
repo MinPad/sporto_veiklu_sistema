@@ -29,7 +29,16 @@ class GymController extends Controller
     }
     return response()->json(GymResource::collection($city->gyms()->with('city')->get()), 200);
     }
+    public function getGymById($gymId)
+    {
+        $gym = Gym::with('city')->find($gymId);
 
+        if (!$gym) {
+          return response()->json(['message' => 'Gym not found'], 404);
+        }
+
+        return response()->json(new GymResource($gym), 200);
+    }
 
     public function show($cityId, Gym $gym)
     {

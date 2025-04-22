@@ -13,7 +13,7 @@ class CoachPolicy
      */
     public function viewAny(User $user): bool
     {
-        //
+        return $user->role === 'Admin';
     }
 
     /**
@@ -21,7 +21,7 @@ class CoachPolicy
      */
     public function view(User $user, Coach $coach): bool
     {
-        //
+        return $user->role === 'Admin';
     }
 
     /**

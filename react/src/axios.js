@@ -1,70 +1,3 @@
-// import axios from 'axios';
-// import router from './router';
-
-// const axiosClient = axios.create({
-//     baseURL: 'http://localhost:8000/api',
-// });
-
-// axiosClient.interceptors.request.use((config) => {
-//     const token = localStorage.getItem('TOKEN');
-//     if (token) {
-//         config.headers.Authorization = `Bearer ${token}`;
-//     }
-//     return config;
-// });
-
-// let isRefreshing = false;
-// let refreshSubscribers = [];
-
-// function onRefreshed(token) {
-//     refreshSubscribers.forEach(callback => callback(token));
-//     refreshSubscribers = [];
-// }
-
-// function addRefreshSubscriber(callback) {
-//     refreshSubscribers.push(callback);
-// }
-
-// axiosClient.interceptors.response.use(response => {
-//     return response;
-// }, error => {
-//     const { config, response } = error;
-
-//     // Check if 401 error and avoid looping if already retrying
-//     if (response && response.status === 401 && !config._retry) {
-//         config._retry = true;
-
-//         if (!isRefreshing) {
-//             isRefreshing = true;
-//             return axiosClient.post('/refresh-token')
-//                 .then(({ data }) => {
-//                     const newAccessToken = data.accessToken;
-//                     localStorage.setItem('TOKEN', newAccessToken);
-//                     axiosClient.defaults.headers.Authorization = `Bearer ${newAccessToken}`;
-//                     isRefreshing = false;
-//                     onRefreshed(newAccessToken);
-//                     return axiosClient(config); // Retry the original request
-//                 })
-//                 .catch(() => {
-//                     localStorage.removeItem('TOKEN');
-//                     router.navigate('/login');
-//                     return Promise.reject(error);
-//                 });
-//         }
-
-//         // Queue the request while refreshing
-//         return new Promise(resolve => {
-//             addRefreshSubscriber(token => {
-//                 config.headers.Authorization = `Bearer ${token}`;
-//                 resolve(axiosClient(config));
-//             });
-//         });
-//     }
-
-//     throw error;
-// });
-
-// export default axiosClient;
 import axios from 'axios';
 import router from './router';
 
@@ -102,51 +35,68 @@ axiosClient.interceptors.response.use(
     (error) => {
         const { config, response } = error;
 
+        // Token expired & hasn't retried yet
         if (response && response.status === 401 && !config._retry) {
             config._retry = true;
 
-            if (!isRefreshing) {
-                isRefreshing = true;
-                console.log('Sending Refresh Token:', localStorage.getItem('REFRESH_TOKEN'));
-                return axiosClient.post('/refresh-token', {}, {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem('REFRESH_TOKEN')}`
-                    }
-                })
-                    .then(({ data }) => {
-                        const newAccessToken = data.accessToken;
-                        localStorage.setItem('TOKEN', newAccessToken);
-                        axiosClient.defaults.headers.Authorization = `Bearer ${newAccessToken}`;
-                        isRefreshing = false;
-                        onRefreshed(newAccessToken);
-                        return axiosClient(config);
-                    })
-                    .catch((error) => {
-                        console.error('Error in refresh token request:', error.response || error);
-                        if (error.response && error.response.status === 401) {
-                            localStorage.removeItem('TOKEN');
-                            localStorage.removeItem('REFRESH_TOKEN');
-                            router.push('/login'); // Ensure proper redirection here
+            const refreshToken = localStorage.getItem('REFRESH_TOKEN');
+            if (refreshToken) {
+                // Try refresh
+                if (!isRefreshing) {
+                    isRefreshing = true;
+                    return axiosClient.post('/refresh-token', {}, {
+                        headers: {
+                            Authorization: `Bearer ${refreshToken}`
                         }
-                        return Promise.reject(error);
+                    })
+                        .then(({ data }) => {
+                            const newAccessToken = data.accessToken;
+                            localStorage.setItem('TOKEN', newAccessToken);
+                            axiosClient.defaults.headers.Authorization = `Bearer ${newAccessToken}`;
+                            isRefreshing = false;
+                            onRefreshed(newAccessToken);
+                            return axiosClient(config);
+                        })
+                        .catch((error) => {
+                            console.error('Error in refresh token request:', error.response || error);
+                            console.log('Refresh failed - redirecting to login');
+                            if (error.response && (
+                                error.response.status === 401 ||
+                                error.response.data?.message === 'Refresh token expired'
+                            )) {
+                                localStorage.removeItem('TOKEN');
+                                localStorage.removeItem('REFRESH_TOKEN');
+                                router.push('/login');
+                            }
+
+                            return Promise.reject(error);
+                        });
+                }
+
+                return new Promise((resolve) => {
+                    addRefreshSubscriber((token) => {
+                        config.headers.Authorization = `Bearer ${token}`;
+                        resolve(axiosClient(config));
                     });
-            }
-
-            return new Promise((resolve) => {
-                addRefreshSubscriber((token) => {
-                    config.headers.Authorization = `Bearer ${token}`;
-                    resolve(axiosClient(config));
                 });
-            });
-
+            } else {
+                // ❗ No refresh token → just logout and redirect
+                localStorage.removeItem('TOKEN');
+                localStorage.removeItem('REFRESH_TOKEN');
+                console.log('Redirecting to login')
+                router.push('/login');
+            }
         }
+
+        // Optional: catch 403
         if (response && response.status === 403) {
-            console.warn('403 Forbidden - redirecting to UnauthorizedPage');
             history.push('/UnauthorizedPage');
         }
+
         return Promise.reject(error);
     }
 );
+
 
 
 export default axiosClient;

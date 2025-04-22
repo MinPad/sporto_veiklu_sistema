@@ -1,36 +1,49 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PageComponent from '../components/PageComponent';
 import TButton from '../components/core/TButton';
 import axiosClient from "../axios";
+import Select from 'react-select';
 
 export default function CoachView() {
     const { cityId, gymId } = useParams();
     const [error, setError] = useState(null);
     const navigate = useNavigate();
-
+    const [allSpecialties, setAllSpecialties] = useState([]);
     const [coach, setCoach] = useState({
         name: "",
         surname: "",
-        specialty: "",
-        is_approved: false, // Updated to match the model
+        specialties: [],
+        is_approved: false,
     });
-
+    useEffect(() => {
+        axiosClient.get('/specialties')
+            .then(({ data }) => {
+                const formatted = (Array.isArray(data) ? data : data.data).map(s => ({
+                    value: s.id,
+                    label: s.name
+                }));
+                setAllSpecialties(formatted);
+            })
+            .catch((error) => {
+                console.error("Failed to load specialties", error);
+            });
+    }, []);
     const onSubmit = async (ev) => {
         ev.preventDefault();
         setError(null);
 
-        const formData = new FormData();
-
-        formData.append("name", coach.name);
-        formData.append("surname", coach.surname);
-        formData.append("specialty", coach.specialty);
-        formData.append("is_approved", coach.is_approved); // Add is_approved field
-        formData.append("gym_id", gymId); // Ensure gymId is included in the request
+        const payload = {
+            name: coach.name,
+            surname: coach.surname,
+            is_approved: coach.is_approved,
+            gym_id: gymId,
+            specialties: coach.specialties ? coach.specialties.map(s => s.value) : [],
+        };
 
         try {
-            await axiosClient.post(`/cities/${cityId}/gyms/${gymId}/coaches/`, formData);
-            navigate(`/cities/${cityId}/gyms/${gymId}/coaches/`);
+            await axiosClient.post(`/cities/${cityId}/gyms/${gymId}/coaches`, payload);
+            navigate(`/cities/${cityId}/gyms/${gymId}/coaches`);
         } catch (error) {
             if (error.response) {
                 setError(error.response.data.message || 'Error creating coach');
@@ -43,8 +56,9 @@ export default function CoachView() {
         }
     };
 
+
     return (
-        <PageComponent title="Create new Coach">
+        <PageComponent title="Create New Coach">
             <form action="#" method="POST" onSubmit={onSubmit}>
                 <div className="shadow sm:overflow-hidden sm:rounded-md">
                     <div className="space-y-6 bg-white px-4 py-5 sm:p-6">
@@ -84,27 +98,23 @@ export default function CoachView() {
                             <div className="pl-1 text-sm text-gray-500">{coach.surname.length}/35</div>
                         </div>
 
-                        {/* Specialty */}
-                        <div className="col-span-6 sm:col-span-3">
-                            <label htmlFor="specialty" className="pl-1 block text-sm font-medium text-gray-700">
-                                Specialty
+                        {/* ✅ Multi-Select Specialties */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Specialties (multiple allowed)
                             </label>
-                            <textarea
-                                name="specialty"
-                                id="specialty"
-                                value={coach.specialty}
-                                onChange={(ev) => {
-                                    // Prevent further input if the length exceeds 50 characters
-                                    if (ev.target.value.length <= 15) {
-                                        setCoach({ ...coach, specialty: ev.target.value });
-                                    }
-                                }}
-                                placeholder="Describe your specialty"
-                                maxLength={15}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                            ></textarea>
-                            <div className="pl-1 text-sm text-gray-500">{coach.specialty.length}/15</div>
+                            <Select
+                                isMulti
+                                name="specialties"
+                                options={allSpecialties}
+                                value={coach.specialties}
+                                onChange={(selected) => setCoach({ ...coach, specialties: selected })}
+                                className="basic-multi-select"
+                                classNamePrefix="select"
+                                placeholder="Select specialties"
+                            />
                         </div>
+
 
                         {/* Approval Status */}
                         <div className="col-span-6 sm:col-span-3">

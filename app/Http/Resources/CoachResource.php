@@ -18,10 +18,15 @@ class CoachResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'surname' => $this->surname,
-            'specialty' => $this->specialty,
             'isApproved' => $this->is_approved,
             'gymId' => $this->gym_id,
-    
+
+            'gym' => $this->gym ? [
+                'id' => $this->gym->id,
+                'name' => $this->gym->name,
+                'city_id' => $this->gym->city_id,
+            ] : null,
+
             'sportsEvents' => $this->sportsEvents->map(function ($event) {
                 return [
                     'id' => $event->id,
@@ -30,6 +35,13 @@ class CoachResource extends JsonResource
                     'endDate' => $event->end_date,
                     'location' => $event->location,
                     'isFree' => $event->is_free,
+                ];
+            }),
+
+            'specialties' => $this->specialties->map(function ($spec) {
+                return [
+                    'id' => $spec->id,
+                    'name' => $spec->name,
                 ];
             }),
         ];

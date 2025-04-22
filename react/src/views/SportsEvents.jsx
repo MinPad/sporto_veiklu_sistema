@@ -48,6 +48,7 @@ export default function SportsEvents() {
             const decodedToken = jwtDecode(token);
             if (decodedToken.role === "Admin") {
                 setIsAdmin(true);
+                setIsGuest(false);
             } else if (decodedToken.role === "User") {
                 setIsGuest(false);
             }

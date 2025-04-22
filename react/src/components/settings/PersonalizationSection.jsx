@@ -110,6 +110,9 @@ const PersonalizationSection = ({
                                 onChange={(selected) => setForm({ ...form, goals: selected })}
                                 classNamePrefix="select"
                                 placeholder="Select goals"
+                                menuPortalTarget={document.body}
+                                menuPosition="fixed"
+                                styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
                             />
                         </div>
                         <div>

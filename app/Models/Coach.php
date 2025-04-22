@@ -12,13 +12,13 @@ class Coach extends Model
 {
     use HasFactory;
 
-    public $incrementing = false;
-
+    // public $incrementing = false;
+    protected $keyType = 'int';
     protected $fillable = [
         'id',
         'name',
         'surname',
-        'specialty',
+        // 'specialty',
         'is_approved',
         'gym_id'
     ];
@@ -33,7 +33,7 @@ class Coach extends Model
     }
     public function gym()
     {
-    return $this->belongsTo(Gym::class, 'gym_id');
+        return $this->belongsTo(Gym::class, 'gym_id')->withDefault();
     }
 
     public function exercises()

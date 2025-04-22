@@ -9,26 +9,6 @@ export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(true); // Modal open by default
   const closeModal = () => setIsModalOpen(false);
   const location = useLocation();
-  // console.log("testas", location);
-  // const showUnauthorizedModal = location.state?.showUnauthorizedModal || false;
-  // const [isModalOpen, setIsModalOpen] = useState(showUnauthorizedModal);
-
-  // const closeModal = () => setIsModalOpen(false);
-  // return (
-  //   <PageComponent title="Dashboard">
-  //     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-  //       <button
-  //         onClick={() => setIsModalOpen(true)} // Button to open the modal
-  //         className="px-6 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 ease-in-out"
-  //       >
-  //         <span>Show Info</span>
-  //       </button>
-
-  //       {/* Modal Component */}
-  //       <Modal isOpen={isModalOpen} closeModal={closeModal} />
-  //     </div>
-  //   </PageComponent>
-  // );
   return (
     <PageComponent title="Dashboard">
       {/* Welcome section */}
