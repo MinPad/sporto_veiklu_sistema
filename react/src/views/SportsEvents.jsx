@@ -1,67 +1,59 @@
 import PageComponent from '../components/PageComponent';
 import SportEventListItem from '../components/SportEventListItem';
 import LoadingDialog from "../components/core/LoadingDialog";
-import { PlusCircleIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import TButton from '../components/core/TButton';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useEffect, useState } from 'react';
-import { useParams } from "react-router-dom";
 import axiosClient from "../axios";
 import { jwtDecode } from "jwt-decode";
 
 export default function SportsEvents() {
     const [sportsEvents, setSportsEvents] = useState([]);
-    const [loading, setLoading] = useState(true); // Loading state
+    const [filteredSportsEvents, setFilteredSportsEvents] = useState([]);
+    const [pagination, setPagination] = useState({});
+    const [loading, setLoading] = useState(true);
     const [isAdmin, setIsAdmin] = useState(false);
     const [isGuest, setIsGuest] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
-    const [filteredSportsEvents, setFilteredSportsEvents] = useState([]);
 
     const onDeleteClick = (sportEventId) => {
-        const updatedSportsEvents = sportsEvents.filter(sportEvent => sportEvent.id !== sportEventId);
-        setSportsEvents(updatedSportsEvents);
-        setFilteredSportsEvents(updatedSportsEvents);
+        const updated = sportsEvents.filter(e => e.id !== sportEventId);
+        setSportsEvents(updated);
+        setFilteredSportsEvents(updated);
     };
 
-    // Update participants count for a specific event
-    const onJoinClick = (sportEventId, updatedParticipants) => {
-        const updatedSportsEvents = sportsEvents.map(event =>
-            event.id === sportEventId
-                ? { ...event, current_participants: updatedParticipants, is_joined: !event.is_joined }
-                : event
+    const onJoinClick = (id, updatedParticipants) => {
+        const updated = sportsEvents.map(e =>
+            e.id === id ? { ...e, current_participants: updatedParticipants, is_joined: !e.is_joined } : e
         );
-        setSportsEvents(updatedSportsEvents);
-        setFilteredSportsEvents(updatedSportsEvents);
+        setSportsEvents(updated);
+        setFilteredSportsEvents(updated);
     };
-    const onLeaveClick = (sportEventId, updatedParticipants) => {
-        const updatedSportsEvents = sportsEvents.map(event =>
-            event.id === sportEventId
-                ? { ...event, current_participants: updatedParticipants }
-                : event
+
+    const onLeaveClick = (id, updatedParticipants) => {
+        const updated = sportsEvents.map(e =>
+            e.id === id ? { ...e, current_participants: updatedParticipants } : e
         );
-        setSportsEvents(updatedSportsEvents);
-        setFilteredSportsEvents(updatedSportsEvents);
+        setSportsEvents(updated);
+        setFilteredSportsEvents(updated);
     };
 
     useEffect(() => {
         const token = localStorage.getItem("TOKEN");
         if (token) {
-            const decodedToken = jwtDecode(token);
-            if (decodedToken.role === "Admin") {
-                setIsAdmin(true);
-                setIsGuest(false);
-            } else if (decodedToken.role === "User") {
-                setIsGuest(false);
-            }
+            const { role } = jwtDecode(token);
+            if (role === "Admin") setIsAdmin(true);
+            if (role === "Admin" || role === "User") setIsGuest(false);
         }
         fetchSportsEvents();
     }, []);
 
-    const fetchSportsEvents = () => {
+    const fetchSportsEvents = (page = 1) => {
         setLoading(true);
-        axiosClient.get(`/sports-events`)
+        axiosClient.get(`/sports-events?page=${page}`)
             .then(({ data }) => {
-                setSportsEvents(data);
-                setFilteredSportsEvents(data);
+                setSportsEvents(data.data || []);
+                setFilteredSportsEvents(data.data || []);
+                setPagination(data.meta || {});
                 setLoading(false);
             })
             .catch((error) => {
@@ -71,11 +63,10 @@ export default function SportsEvents() {
     };
 
     const handleSearchChange = (ev) => {
-        const query = ev.target.value;
+        const query = ev.target.value.toLowerCase();
         setSearchQuery(query);
-
-        const filtered = sportsEvents.filter(sportEvent =>
-            sportEvent.name.toLowerCase().startsWith(query.toLowerCase())
+        const filtered = sportsEvents.filter(e =>
+            e.name.toLowerCase().startsWith(query)
         );
         setFilteredSportsEvents(filtered);
     };
@@ -94,28 +85,52 @@ export default function SportsEvents() {
     );
 
     return (
-        <PageComponent title="SportsEvents"
-            searchBar={searchBar}
-        >
+        <PageComponent title="SportsEvents" searchBar={searchBar}>
             {loading ? (
                 <div className="flex justify-center items-center h-40">
-                    <LoadingDialog /> {/* Use the LoadingDialog here */}
+                    <LoadingDialog />
                 </div>
             ) : (
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3">
-                    {filteredSportsEvents.map(sportEvent => (
-                        <SportEventListItem
-                            sportEvent={sportEvent}
-                            key={sportEvent.id}
-                            onDeleteClick={onDeleteClick}
-                            onJoinClick={onJoinClick}
-                            onLeaveClick={onLeaveClick}
-                            isAdmin={isAdmin}
-                            isGuest={isGuest}
-                        />
+                <>
+                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3">
+                        {(filteredSportsEvents || []).map(sportEvent => (
+                            <SportEventListItem
+                                key={sportEvent.id}
+                                sportEvent={sportEvent}
+                                onDeleteClick={onDeleteClick}
+                                onJoinClick={onJoinClick}
+                                onLeaveClick={onLeaveClick}
+                                isAdmin={isAdmin}
+                                isGuest={isGuest}
+                            />
+                        ))}
+                    </div>
 
-                    ))}
-                </div>
+                    {/* Pagination Controls */}
+                    {pagination.total > pagination.per_page && (
+                        <div className="mt-6 flex justify-center gap-2">
+                            {pagination.current_page > 1 && (
+                                <button
+                                    onClick={() => fetchSportsEvents(pagination.current_page - 1)}
+                                    className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                                >
+                                    Previous
+                                </button>
+                            )}
+                            <span className="px-4 py-2 text-sm text-gray-600">
+                                Page {pagination.current_page} of {pagination.last_page}
+                            </span>
+                            {pagination.current_page < pagination.last_page && (
+                                <button
+                                    onClick={() => fetchSportsEvents(pagination.current_page + 1)}
+                                    className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                                >
+                                    Next
+                                </button>
+                            )}
+                        </div>
+                    )}
+                </>
             )}
         </PageComponent>
     );

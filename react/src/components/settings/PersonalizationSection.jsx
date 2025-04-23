@@ -105,6 +105,8 @@ const PersonalizationSection = ({
                                     { value: 'Endurance', label: 'Endurance' },
                                     { value: 'Flexibility', label: 'Flexibility' },
                                     { value: 'Cardio Health', label: 'Cardio Health' },
+                                    { value: 'Stress Relief', label: 'Stress Relief' },
+                                    { value: 'Rehabilitation', label: 'Rehabilitation' }
                                 ]}
                                 value={form.goals}
                                 onChange={(selected) => setForm({ ...form, goals: selected })}

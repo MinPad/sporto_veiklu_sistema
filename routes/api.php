@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MapboxController;
 use App\Http\Controllers\SpecialtyController;
 use App\Http\Controllers\GymReviewController;
+use App\Http\Controllers\RecommendationController;
 
 Route::post('/password/email', [PasswordResetController::class, 'sendResetLink']);
 Route::post('/password/reset', [PasswordResetController::class, 'resetPassword']);
@@ -116,3 +117,6 @@ Route::middleware('auth:api')->group(function () {
 });
 
 Route::get('/gyms/{gym}/reviews', [GymReviewController::class, 'index']);
+
+
+Route::middleware(['auth:api'])->get('/recommendations', [RecommendationController::class, 'index']);

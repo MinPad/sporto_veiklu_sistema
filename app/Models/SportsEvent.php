@@ -57,8 +57,10 @@ class SportsEvent extends Model
             throw new \Exception("This event is already full.");
         }
 
-        if (!$this->users()->where('user_id', $user->id)->exists()) {
-            $this->users()->attach($user->id);
+        if ($this->users()->where('user_id', $user->id)->exists()) {
+            $this->users()->updateExistingPivot($user->id, ['left_at' => null]);
+        } else {
+            $this->users()->attach($user->id, ['left_at' => null]);
             $this->increment('current_participants');
         }
     }
@@ -66,15 +68,17 @@ class SportsEvent extends Model
     public function removeUser(User $user)
     {
         if ($this->users()->where('user_id', $user->id)->exists()) {
-            $this->users()->detach($user->id);
+            $this->users()->updateExistingPivot($user->id, ['left_at' => now()]);
             $this->decrement('current_participants');
         }
     }
-    
 
     public function scopeUpcoming($query)
     {
-        return $query->where('start_date', '>', now());
+        return $query->where(function ($q) {
+            $q->whereNull('end_date')->whereDate('start_date', '>=', now())
+            ->orWhereNotNull('end_date')->whereDate('end_date', '>=', now());
+        });
     }
 
     public function scopeNotFull($query)
@@ -82,6 +86,15 @@ class SportsEvent extends Model
         return $query->where(function ($q) {
             $q->where('max_participants', '>', $this->current_participants)
               ->orWhereNull('max_participants');
+        });
+    }
+    public function scopePast($query)
+    {
+        return $query->where(function ($q) {
+            $q->whereNotNull('end_date')->whereDate('end_date', '<', now())
+              ->orWhere(function ($sub) {
+                  $sub->whereNull('end_date')->whereDate('start_date', '<', now());
+              });
         });
     }
 }

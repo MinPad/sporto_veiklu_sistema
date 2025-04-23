@@ -28,7 +28,14 @@ class SportEventResource extends JsonResource
             'goal_tags' => $this->goal_tags,
             'difficulty_level' => $this->difficulty_level,
 
-            'is_joined' => $request->user() ? $this->users->contains($request->user()->id) : false,
+            'is_joined' => $request->user()
+            ? $this->users()
+            ->where('user_id', $request->user()->id)
+            ->wherePivot('left_at', null)
+            ->exists()
+            : false,
+
+            'recommendation_score' => $this->recommendation_score,
 
             'participants' => UserResource::collection(
                 $this->whenLoaded('users')

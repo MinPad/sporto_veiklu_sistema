@@ -14,9 +14,8 @@ class SportEventController extends Controller
 
     public function index()
     {
-        // Eager load related data
-        $events = SportsEvent::with(['users', 'coaches', 'specialties'])->paginate(10);
-        return response()->json(SportEventResource::collection($events), 200);
+        $events = SportsEvent::upcoming()->paginate(6);
+        return SportEventResource::collection($events);
     }
     
     public function join(Request $request, $id)
@@ -70,10 +69,15 @@ class SportEventController extends Controller
     public function myEvents(Request $request)
     {
         $user = $request->user();
-        $events = $user->sportsEvents()->with(['coaches', 'specialties'])->get();
-
-        return response()->json(SportEventResource::collection($events), 200);
+    
+        $events = $user->sportsEvents()
+            ->with(['coaches', 'specialties'])
+            ->orderByDesc('start_date')
+            ->paginate(3);
+    
+        return SportEventResource::collection($events);
     }
+    
 
     public function delete(SportsEvent $sportsEvent)
     {

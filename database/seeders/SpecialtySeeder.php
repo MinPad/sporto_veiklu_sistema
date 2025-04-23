@@ -22,6 +22,13 @@ class SpecialtySeeder extends Seeder
             'Boxing',
             'Pilates',
             'Dance',
+            'Calisthenics',
+            'Functional Training',
+            'Powerlifting',
+            'HIIT',
+            'Cycling',
+            'Stretching / Mobility',
+            'Martial Arts',
         ];
 
         foreach ($specialties as $name) {

@@ -24,10 +24,14 @@ const MySportsEventsSection = () => {
             successTimeoutRef.current = null;
         }, 3000);
     };
+    const [pagination, setPagination] = useState({});
+    const [currentPage, setCurrentPage] = useState(1);
     const fetchEvents = () => {
-        axiosClient.get('/my-sports-events')
+        setLoading(true);
+        axiosClient.get(`/my-sports-events?page=${currentPage}`)
             .then(({ data }) => {
-                setEvents(data);
+                setEvents(data.data);
+                setPagination(data.meta);
                 setLoading(false);
             })
             .catch(error => {
@@ -38,7 +42,7 @@ const MySportsEventsSection = () => {
 
     useEffect(() => {
         fetchEvents();
-    }, []);
+    }, [currentPage]);
 
     const handleLeaveClick = (event) => {
         setEventToLeave(event);
@@ -119,10 +123,10 @@ const MySportsEventsSection = () => {
 
                                         {event.difficulty_level && (
                                             <span className={`inline-block rounded px-2 py-0.5 text-xs font-semibold ${event.difficulty_level === "Beginner"
-                                                    ? "bg-green-100 text-green-700"
-                                                    : event.difficulty_level === "Intermediate"
-                                                        ? "bg-yellow-100 text-yellow-800"
-                                                        : "bg-red-100 text-red-700"
+                                                ? "bg-green-100 text-green-700"
+                                                : event.difficulty_level === "Intermediate"
+                                                    ? "bg-yellow-100 text-yellow-800"
+                                                    : "bg-red-100 text-red-700"
                                                 }`}>
                                                 {event.difficulty_level}
                                             </span>
@@ -193,6 +197,30 @@ const MySportsEventsSection = () => {
                             </div>
                         </div>
                     ))}
+                    {pagination.total > pagination.per_page && (
+                        <div className="mt-2 pt-2 flex justify-center gap-2 border-t border-gray-100">
+
+                            {pagination.current_page > 1 && (
+                                <button
+                                    onClick={() => setCurrentPage(prev => prev - 1)}
+                                    className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                                >
+                                    Previous
+                                </button>
+                            )}
+                            <span className="px-4 py-2 text-sm text-gray-600">
+                                Page {pagination.current_page} of {pagination.last_page}
+                            </span>
+                            {pagination.current_page < pagination.last_page && (
+                                <button
+                                    onClick={() => setCurrentPage(prev => prev + 1)}
+                                    className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                                >
+                                    Next
+                                </button>
+                            )}
+                        </div>
+                    )}
                 </div>
             )}
 

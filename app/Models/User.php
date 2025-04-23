@@ -80,5 +80,16 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(GymReview::class);
     }
-
+    public function completedEvents()
+    {
+        return $this->sportsEvents()
+            ->wherePivot('left_at', null)
+            ->where(function ($q) {
+                $q->whereNotNull('end_date')->whereDate('end_date', '<', now())
+                  ->orWhere(function ($q2) {
+                      $q2->whereNull('end_date')->whereDate('start_date', '<', now());
+                  });
+            });
+    }
+    
 }

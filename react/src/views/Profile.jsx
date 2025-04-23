@@ -12,6 +12,7 @@ import SettingsList from '../components/settings/SettingsList.jsx';
 import PersonalizationSection from '../components/settings/PersonalizationSection.jsx';
 import PublicProfileSection from '../components/settings/PublicProfileSection.jsx';
 import MySportsEventsSection from '../components/settings/MySportsEventsSection.jsx';
+import RecommendedEventsSection from '../components/settings/RecommendedEventsSection.jsx';
 
 import { useStateContext } from '../contexts/ContexProvider';
 import { useLocation, useNavigationType } from 'react-router-dom';
@@ -29,9 +30,10 @@ const Profile = () => {
         { title: 'Personalization', id: 'personalization' },
         { title: 'Health Report', id: 'healthReport' },
         { title: 'My Sports Events', id: 'mySportsEvents' },
+        { title: 'Recommended for You', id: 'recommendedForYou' },
     ];
 
-    const [activeSetting, setActiveSetting] = useState('personalization');
+    const [activeSetting, setActiveSetting] = useState('recommendedForYou');
     const [currentAvatarUrl, setCurrentAvatarUrl] = useState('');
 
 
@@ -375,6 +377,9 @@ const Profile = () => {
                             )}
                             {activeSetting === 'mySportsEvents' && (
                                 <MySportsEventsSection />
+                            )}
+                            {activeSetting === 'recommendedForYou' && (
+                                <RecommendedEventsSection />
                             )}
                         </div>
                     </div>
