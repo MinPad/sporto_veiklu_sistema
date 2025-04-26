@@ -23,7 +23,12 @@ class SignupRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
+           'name' => [
+            'required',
+            'string',
+            'min:3',
+            'regex:/^[\pL\s\-]+$/u', 
+            ],
             'email' => 'required|email|string|unique:users,email',
             'password' => [
                 'required',
@@ -36,10 +41,12 @@ class SignupRequest extends FormRequest
     {
         return [
             'name.required' => 'Full name is required.',
+            'name.min' => 'Full name must be at least 3 characters.',
+            'name.regex' => 'Full name must contain only letters, spaces, or hyphens.',
             'email.required' => 'Email is required.',
             'email.unique' => 'This email is already registered.',
             'password.required' => 'Password is required.',
-            'password.confirmed' => 'Passwords do not match.'
+            'password.confirmed' => 'Passwords do not match.',
         ];
     }
 }

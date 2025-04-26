@@ -8,16 +8,20 @@ const axiosClient = axios.create({
 
 axiosClient.interceptors.request.use((config) => {
     const token = localStorage.getItem('TOKEN');
-
     const isPublicRequest = config.headers['X-Public-Request'] === 'true';
 
-    // not public
+    // console.log(`[REQUEST] ${config.method?.toUpperCase()} ${config.url}`, {
+    //     isPublicRequest,
+    //     hasToken: !!token,
+    // });
+
     if (!isPublicRequest && token && config.url !== '/refresh-token') {
         config.headers.Authorization = `Bearer ${token}`;
     }
 
     return config;
 });
+
 
 let isRefreshing = false;
 let refreshSubscribers = [];
@@ -32,11 +36,18 @@ function addRefreshSubscriber(callback) {
 }
 
 axiosClient.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        // console.log(`[RESPONSE] ${response.config.url} - ${response.status}`);
+        return response;
+    },
     (error) => {
         const { config, response } = error;
-
-        if (response && response.status === 401 && !config._retry) {
+        const isPublicRequest = config?.headers['X-Public-Request'] === 'true';
+        console.error(`[ERROR] ${config?.url} - ${response?.status}`, {
+            isPublicRequest,
+            response,
+        });
+        if (response && response.status === 401 && !config._retry && !isPublicRequest) {
             config._retry = true;
 
             const refreshToken = localStorage.getItem('REFRESH_TOKEN');
@@ -58,18 +69,28 @@ axiosClient.interceptors.response.use(
                         })
                         .catch((error) => {
                             console.error('Error in refresh token request:', error.response || error);
-                            console.log('Refresh failed - redirecting to login');
+                            console.log('Refresh failed');
+
+                            const isPublicRequest = config?.headers['X-Public-Request'] === 'true';
+
                             if (error.response && (
                                 error.response.status === 401 ||
                                 error.response.data?.message === 'Refresh token expired'
                             )) {
                                 localStorage.removeItem('TOKEN');
                                 localStorage.removeItem('REFRESH_TOKEN');
-                                router.push('/login');
+
+                                if (!isPublicRequest) {
+                                    console.log('Redirecting to login');
+                                    router.push('/login');
+                                } else {
+                                    console.log('Public request failed, no redirect.');
+                                }
                             }
 
                             return Promise.reject(error);
                         });
+
                 }
 
                 return new Promise((resolve) => {
@@ -79,7 +100,6 @@ axiosClient.interceptors.response.use(
                     });
                 });
             } else {
-                // No refresh token — logout guest
                 localStorage.removeItem('TOKEN');
                 localStorage.removeItem('REFRESH_TOKEN');
                 console.log('Redirecting to login');
@@ -87,9 +107,9 @@ axiosClient.interceptors.response.use(
             }
         }
 
-        // Optional: handle forbidden access
+        // Forbidden access (403)
         if (response && response.status === 403) {
-            history.push('/UnauthorizedPage');
+            router.push('/UnauthorizedPage');
         }
 
         return Promise.reject(error);

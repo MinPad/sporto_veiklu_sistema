@@ -6,13 +6,11 @@ export default function SuccessAlert({ message, duration = 3000, onClose }) {
     const [progressWidth, setProgressWidth] = useState('100%');
 
     useEffect(() => {
-        // Set initial width to 100% (reset it)
         setProgressWidth('100%');
 
-        // Let the DOM apply that, then start the animation to 0%
         const animate = setTimeout(() => {
             setProgressWidth('0%');
-        }, 10); // tiny delay lets the first width apply before shrinking
+        }, 10);
 
         const timer = setTimeout(() => {
             setVisible(false);

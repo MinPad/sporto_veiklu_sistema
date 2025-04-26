@@ -24,7 +24,7 @@ export default function Signup() {
         })
             .then(({ data }) => {
                 console.log(data);
-                navigate(`/login`);
+                navigate('/login', { state: { signupSuccess: true } });
             })
             .catch((error) => {
                 if (error.response) {

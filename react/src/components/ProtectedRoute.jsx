@@ -2,6 +2,7 @@ import { Navigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 
 const ProtectedRoute = ({ requiredRole, children }) => {
+    // console.log('ProtectedRoute rendered')
     const token = localStorage.getItem("TOKEN");
 
     if (!token) {

@@ -13,7 +13,7 @@ function RoutesWrapper() {
 export default function RouterWrapper() {
     return (
         <HistoryRouter history={history}>
-            <TokenGate />
+            {/* <TokenGate /> */}
             <Suspense fallback={<div className="p-8 text-center">Loading...</div>}>
                 <RoutesWrapper />
             </Suspense>

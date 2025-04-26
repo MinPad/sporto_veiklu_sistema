@@ -1,10 +1,11 @@
 import { LockClosedIcon } from '@heroicons/react/20/solid'
 import Header from '../components/Header'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axiosClient from '../axios';
 import { useStateContext } from '../contexts/ContexProvider';
 import UnauthorizedAlert from '../components/core/UnauthorizedAlert';
+import SuccessAlert from '../components/core/SuccessAlert';
 
 export default function Login() {
     const { setCurrentUser, setUserToken } = useStateContext();
@@ -15,6 +16,18 @@ export default function Login() {
     const location = useLocation();
     const navigate = useNavigate();
     const [showProtectedBanner, setShowProtectedBanner] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
+    const successTimeoutRef = useRef(null);
+    const showSuccessMessage = (msg) => {
+        setSuccessMessage(msg);
+        if (successTimeoutRef.current) {
+            clearTimeout(successTimeoutRef.current);
+        }
+        successTimeoutRef.current = setTimeout(() => {
+            setSuccessMessage('');
+            successTimeoutRef.current = null;
+        }, 3000);
+    };
 
     useEffect(() => {
         if (location.state?.fromProtected) {
@@ -25,8 +38,12 @@ export default function Login() {
             }, 4000);
 
             window.history.replaceState({}, document.title);
-
             return () => clearTimeout(timeout);
+        }
+
+        if (location.state?.signupSuccess) {
+            showSuccessMessage("Signup successful! You can now log in.");
+            window.history.replaceState({}, document.title);
         }
     }, [location.state]);
 
@@ -79,7 +96,13 @@ export default function Login() {
                     onClose={() => setShowProtectedBanner(false)}
                 />
             )}
-
+            {successMessage && (
+                <SuccessAlert
+                    key={successMessage}
+                    message={successMessage}
+                    onClose={() => setSuccessMessage('')}
+                />
+            )}
             <div className="flex min-h-full flex-1 justify-center px-6 py-12 lg:px-8">
                 <div className="w-full max-w-md p-4 bg-gray-100 border border-gray-300 rounded-lg shadow-lg sm:p-6 md:p-8 dark:bg-gray-800 dark:border-gray-700">
                     <div className="sm:mx-auto sm:w-full sm:max-w-sm">

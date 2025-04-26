@@ -14,6 +14,7 @@ import SearchFilterBar from "../components/core/SearchFilterBar";
 import FilterDrawerGym from '../components/core/FilterDrawerGym';
 
 export default function Gyms() {
+    // console.log('Gyms page loaded')
     const { cityId } = useParams();
     const [city, setCity] = useState(null);
     const [gyms, setGyms] = useState([]);
@@ -49,7 +50,11 @@ export default function Gyms() {
     useEffect(() => {
         const fetchSpecialties = async () => {
             try {
-                const { data } = await axiosClient.get('/specialties');
+                const { data } = await axiosClient.get('/specialties', {
+                    headers: {
+                        'X-Public-Request': 'true'
+                    }
+                });
                 const formattedSpecialties = Array.isArray(data)
                     ? data.map(spec => ({
                         value: spec.id,
@@ -76,7 +81,11 @@ export default function Gyms() {
             }
         }
 
-        axiosClient.get(`/cities/${cityId}`)
+        axiosClient.get(`/cities/${cityId}`, {
+            headers: {
+                'X-Public-Request': 'true'
+            }
+        })
             .then((cityRes) => setCity(cityRes.data))
             .catch((err) => console.error("Error fetching city:", err));
     }, [cityId]);
@@ -88,6 +97,9 @@ export default function Gyms() {
     const fetchGyms = (page = 1) => {
         setLoading(true);
         axiosClient.get(`/cities/${cityId}/gyms`, {
+            headers: {
+                'X-Public-Request': 'true'
+            },
             params: {
                 page,
                 per_page: 6,

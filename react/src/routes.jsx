@@ -122,8 +122,13 @@ const routes = [
     },
     {
         path: '/user/:userId/profile',
-        element: <UserProfile />,
+        element: (
+            <ProtectedRoute>
+                <UserProfile />
+            </ProtectedRoute>
+        ),
     },
+
     {
         path: '/cities/:cityId/gyms/:gymId/coaches',
         element: <Coaches />,

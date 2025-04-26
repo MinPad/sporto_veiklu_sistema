@@ -1,39 +1,38 @@
-import { useContext, createContext, useState } from "react";
-import lorem from '../assets/lorem.png';
-import react from '../assets/react.png';
-import laravel from '../assets/laravel.png';
-import { useEffect } from "react";
+import { useContext, createContext, useState, useEffect } from "react";
 import axiosClient from "../axios";
 import { jwtDecode } from "jwt-decode";
+
 const StateContext = createContext({
     currentUser: {},
     userToken: null,
-    // surveys: [],
-    toast: {
-        message: null,
-        show: false,
-    },
+    userRole: null,
+    toast: { message: null, show: false },
     setCurrentUser: () => { },
-    setUserToken: () => { }
-})
+    setUserToken: () => { },
+    showToast: () => { }
+});
 
 export const ContextProvider = ({ children }) => {
-    const [currentUser, setCurrentUser] = useState({})
+    const [currentUser, setCurrentUser] = useState({});
     const [userToken, _setUserToken] = useState(localStorage.getItem('TOKEN') || '');
-    const [toast, setToast] = useState({ message: '', show: false })
     const [userRole, setUserRole] = useState(null);
-    // const [surveys, setSurveys] = useState(tmpSurveys)
-    useEffect(() => {
-        if (userToken && !currentUser?.id) {
-            axiosClient.get('/user')
-                .then(({ data }) => setCurrentUser(data.data))
-                .catch((err) => {
-                    setCurrentUser({});
-                    setUserLoadError("Failed to load user data.");
-                    showToast("Oops! Could not load your profile. Please try again.");
-                });
-        }
-    }, [userToken]);
+    const [toast, setToast] = useState({ message: '', show: false });
+
+    const showToast = (message) => {
+        setToast({ message, show: true });
+        setTimeout(() => {
+            setToast({ message: '', show: false });
+        }, 5000);
+    };
+
+    const clearAuthData = () => {
+        localStorage.removeItem('TOKEN');
+        localStorage.removeItem('REFRESH_TOKEN');
+        _setUserToken('');
+        setUserRole(null);
+        setCurrentUser({});
+    };
+
     const setUserToken = (token) => {
         if (token) {
             localStorage.setItem("TOKEN", token);
@@ -41,18 +40,33 @@ export const ContextProvider = ({ children }) => {
                 const decoded = jwtDecode(token);
                 setUserRole(decoded.role || null);
             } catch (err) {
-                console.error("Invalid token format", err);
+                console.error("Invalid token format:", err);
                 setUserRole(null);
             }
             sessionStorage.removeItem('welcomeModalShown');
-
         } else {
-            localStorage.removeItem("TOKEN");
-            localStorage.removeItem("REFRESH_TOKEN");
-            setUserRole(null);
+            clearAuthData();
         }
         _setUserToken(token);
     };
+
+    useEffect(() => {
+        if (userToken && !currentUser?.id) {
+            axiosClient.get('/user', {
+                headers: {
+                    'Authorization': `Bearer ${userToken}`
+                }
+            })
+                .then(({ data }) => {
+                    setCurrentUser(data.data);
+                })
+                .catch((err) => {
+                    console.error("Failed to fetch user:", err);
+                    clearAuthData();
+                });
+        }
+    }, [userToken]);
+
     useEffect(() => {
         if (userToken && !userRole) {
             try {
@@ -63,15 +77,6 @@ export const ContextProvider = ({ children }) => {
             }
         }
     }, [userToken]);
-    // console.log("Decoded Token:", jwtDecode(userToken));
-
-    const showToast = (message) => {
-        setToast({ message, show: true })
-        setTimeout(() => {
-            setToast({ message: '', show: false })
-        }, 5000)
-    }
-    // console.log("currentUser", currentUser);
 
     return (
         <StateContext.Provider value={{
@@ -85,7 +90,7 @@ export const ContextProvider = ({ children }) => {
         }}>
             {children}
         </StateContext.Provider>
-    )
-}
+    );
+};
 
-export const useStateContext = () => useContext(StateContext)
+export const useStateContext = () => useContext(StateContext);
