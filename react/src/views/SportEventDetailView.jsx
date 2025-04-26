@@ -12,7 +12,7 @@ export default function SportEventDetailView() {
     const [event, setEvent] = useState(null);
     const [loading, setLoading] = useState(true);
     const [successMessage, setSuccessMessage] = useState('');
-
+    const [imageLoaded, setImageLoaded] = useState(false);
     useEffect(() => {
         setLoading(true);
         axiosClient.get(`/sports-events/${sporteventid}`)
@@ -62,7 +62,7 @@ export default function SportEventDetailView() {
     if (!event) {
         return <PageComponent title="Event Not Found">Could not load the event.</PageComponent>;
     }
-
+    console.log(event.coaches);
     return (
         <PageComponent
             title={event.name}
@@ -84,11 +84,20 @@ export default function SportEventDetailView() {
             <div className="container mx-auto px-4 space-y-16">
                 {/* Event Info */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-                    <img
-                        src={event.image_url || "/default-event.jpg"}
-                        alt={event.name}
-                        className="w-full h-64 md:h-72 object-cover rounded-2xl shadow-md"
-                    />
+                    <div className="relative w-full h-64 md:h-72 rounded-2xl overflow-hidden shadow-md">
+                        {/* Skeleton while loading */}
+                        {!imageLoaded && (
+                            <div className="absolute inset-0 bg-gray-200 animate-pulse"></div>
+                        )}
+                        {/* Image */}
+                        <img
+                            src={event.image_url ? event.image_url : "http://localhost:8000/storage/sports-events/placeholder-image.jpg"}
+                            alt={event.name || "Event Image"}
+                            className={`w-full h-full object-cover ${imageLoaded ? "opacity-100" : "opacity-0"} transition-opacity duration-500`}
+                            onLoad={() => setImageLoaded(true)}
+                        />
+                    </div>
+
                     <div>
                         <h2 className="text-2xl font-bold mb-3">{event.name}</h2>
                         <p className="text-gray-700 mb-1"><strong>Location:</strong> {event.location}</p>
@@ -103,9 +112,15 @@ export default function SportEventDetailView() {
                                 <span>${parseFloat(event.entry_fee || 0).toFixed(2)}</span>
                             )}
                         </p>
-                        <p className="text-gray-700 mb-1">
+                        <p className="text-gray-700 mb-1 flex items-center gap-2">
                             <strong>Participants:</strong> {event.current_participants} / {event.max_participants ?? "Unlimited"}
+                            {event.max_participants !== null && event.current_participants >= event.max_participants && (
+                                <span className="inline-block bg-gray-300 text-gray-700 text-xs font-medium px-2 py-0.5 rounded-full">
+                                    Full
+                                </span>
+                            )}
                         </p>
+
 
                         <div className="mt-3">
                             {event.difficulty_level && (
@@ -147,6 +162,25 @@ export default function SportEventDetailView() {
                                     ))}
                                 </div>
                             )}
+                            {event.is_joined ? (
+                                <TButton color="red" onClick={leaveEvent}>
+                                    Leave Event
+                                </TButton>
+                            ) : (
+                                !(
+                                    event.max_participants !== null &&
+                                    event.current_participants >= event.max_participants
+                                ) && (
+                                    <TButton
+                                        color="green"
+                                        onClick={() => joinEvent()}
+                                        className="w-full sm:w-auto"
+                                    >
+                                        Join Event
+                                    </TButton>
+                                )
+                            )}
+
                         </div>
                     </div>
                 </div>
@@ -169,15 +203,19 @@ export default function SportEventDetailView() {
                                         </p>
                                     </div>
                                     <p className="text-sm text-gray-600">
-                                        <strong>Specialty:</strong> {coach.specialty}
+                                        <strong>Specialty:</strong>{" "}
+                                        {coach.specialties?.length
+                                            ? coach.specialties.map((s) => s.name).join(", ")
+                                            : <em className="text-gray-400">None</em>}
                                     </p>
+
                                 </div>
                             ))}
                         </div>
                     )}
                 </div>
                 {/* Join / Leave Event */}
-                <div className="text-center">
+                {/* <div className="text-center">
                     {event.is_joined ? (
                         <TButton color="red" onClick={() => leaveEvent()}>
                             Leave Event
@@ -191,7 +229,7 @@ export default function SportEventDetailView() {
                             {event.is_full ? "Event Full" : "Join Event"}
                         </TButton>
                     )}
-                </div>
+                </div> */}
 
 
             </div>

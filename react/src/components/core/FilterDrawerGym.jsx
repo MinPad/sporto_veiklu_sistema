@@ -17,14 +17,15 @@ export default function FilterDrawerGym({
         }
     }, [isOpen, initialFilters]);
 
-    const toggleSpecialty = (specialtyName) => {
+    const toggleSpecialty = (specialtyValue) => {
         setLocalFilters((prev) => ({
             ...prev,
-            specialties: prev.specialties.includes(specialtyName)
-                ? prev.specialties.filter(s => s !== specialtyName)
-                : [...prev.specialties, specialtyName]
+            specialties: prev.specialties.includes(specialtyValue)
+                ? prev.specialties.filter(s => s !== specialtyValue)
+                : [...prev.specialties, specialtyValue]
         }));
     };
+
 
     const handleRatingChange = (e) => {
         setLocalFilters((prev) => ({
@@ -68,18 +69,19 @@ export default function FilterDrawerGym({
                     <div className="flex flex-wrap gap-2">
                         {availableSpecialties.map((spec) => (
                             <button
-                                key={spec}
-                                onClick={() => toggleSpecialty(spec)}
-                                className={`px-3 py-1 rounded-full text-sm border ${localFilters.specialties.includes(spec)
+                                key={spec.value}
+                                onClick={() => toggleSpecialty(spec.value)}
+                                className={`px-3 py-1 rounded-full text-sm border ${localFilters.specialties.includes(spec.value)
                                     ? "bg-indigo-500 text-white border-indigo-500"
                                     : "bg-gray-100 text-gray-700 border-gray-300"
                                     }`}
                             >
-                                {spec}
+                                {spec.label}
                             </button>
                         ))}
                     </div>
                 </div>
+
 
                 {/* Rating */}
                 <div className="mb-6">

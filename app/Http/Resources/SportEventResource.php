@@ -49,14 +49,19 @@ class SportEventResource extends JsonResource
             }),
 
             'coaches' => $this->coaches->map(function ($coach) {
-                return [
-                    'id' => $coach->id,
-                    'name' => $coach->name,
-                    'surname' => $coach->surname,
-                    'specialty' => $coach->specialty,
-                    'gym_id' => $coach->gym_id,
-                ];
+            return [
+            'id' => $coach->id,
+            'name' => $coach->name,
+            'surname' => $coach->surname,
+            'gym_id' => $coach->gym_id,
+            'specialties' => $coach->specialties->map(function ($spec) {
+            return [
+                'id' => $spec->id,
+                'name' => $spec->name,
+            ];
             }),
+            ];
+        }),
         ];
     }
 }

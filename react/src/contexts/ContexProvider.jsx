@@ -37,7 +37,6 @@ export const ContextProvider = ({ children }) => {
     const setUserToken = (token) => {
         if (token) {
             localStorage.setItem("TOKEN", token);
-
             try {
                 const decoded = jwtDecode(token);
                 setUserRole(decoded.role || null);
@@ -45,6 +44,7 @@ export const ContextProvider = ({ children }) => {
                 console.error("Invalid token format", err);
                 setUserRole(null);
             }
+            sessionStorage.removeItem('welcomeModalShown');
 
         } else {
             localStorage.removeItem("TOKEN");

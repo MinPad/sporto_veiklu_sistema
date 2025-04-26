@@ -40,7 +40,17 @@ class SportEventController extends Controller
                 }
             });
         }
-    
+        if ($request->filled('full_status')) {
+            if ($request->full_status === 'full') {
+                $query->whereNotNull('max_participants')
+                      ->whereColumn('current_participants', '>=', 'max_participants');
+            } elseif ($request->full_status === 'not_full') {
+                $query->where(function ($q) {
+                    $q->whereNull('max_participants')
+                      ->orWhereColumn('current_participants', '<', 'max_participants');
+                });
+            }
+        }
         $events = $query->paginate($request->get('per_page', 6));
     
         return SportEventResource::collection($events);

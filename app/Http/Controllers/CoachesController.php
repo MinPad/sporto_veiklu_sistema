@@ -77,7 +77,14 @@ class CoachesController extends Controller
                 $q->whereIn('specialties.id', $request->specialty_ids);
             });
         }
-    
+        if ($request->filled('search')) {
+            $search = strtolower($request->search);
+            $query->where(function ($q) use ($search) {
+                $q->whereRaw('LOWER(name) LIKE ?', ["%$search%"])
+                  ->orWhereRaw('LOWER(surname) LIKE ?', ["%$search%"]);
+            });
+        }
+        
         return CoachResource::collection(
             $query->paginate($request->get('per_page', 9))
         );

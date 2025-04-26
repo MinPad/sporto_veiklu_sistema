@@ -6,6 +6,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import LoadingDialog from "../components/core/LoadingDialog";
 import { geocodeAddress } from '../utils/geocoding';
 import Select from 'react-select';
+import { PhotoIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 
 export default function GymUpdate() {
     const { cityId, gymId } = useParams();
@@ -17,7 +18,9 @@ export default function GymUpdate() {
     const [openingHours, setOpeningHours] = useState('');
     const [imageUrl, setImageUrl] = useState('');
     const [image, setImage] = useState('');
+    const [errors, setErrors] = useState({});
     const [error, setError] = useState(null);
+
     const navigate = useNavigate();
 
     const [openingStart, setOpeningStart] = useState('');
@@ -119,7 +122,12 @@ export default function GymUpdate() {
             navigate(`/cities/${cityId}/gyms/`);
         } catch (err) {
             console.error("Error updating gym:", err);
-            setError("Error updating gym");
+
+            if (err.response?.status === 422) {
+                setErrors(err.response.data.errors || {});
+            } else {
+                setError(err.response?.data?.message || "An error occurred while updating the gym.");
+            }
         }
     };
 
@@ -127,10 +135,26 @@ export default function GymUpdate() {
     if (error) return <div>{error}</div>;
 
     return (
-        <PageComponent title="Update Gym">
+        <PageComponent title="Update Gym" buttons={
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto sm:ml-auto">
+                <TButton
+                    to={`/cities/${cityId}/gyms/`}
+                    className="flex items-center justify-center w-full sm:w-auto"
+                >
+                    <ArrowLeftIcon className="w-5 h-5 mr-2" />
+                    Back to City
+                </TButton>
+
+            </div>
+        }>
             {loading && <LoadingDialog />}
             {!loading && (
                 <form onSubmit={onSubmit}>
+                    {error && (
+                        <div className="bg-red-100 text-red-800 border border-red-400 rounded px-4 py-2 mb-4">
+                            {error}
+                        </div>
+                    )}
                     <div className="shadow sm:overflow-hidden sm:rounded-md">
                         <div className="space-y-6 bg-white px-4 py-5 sm:p-6">
                             {/* Image Upload */}
@@ -188,6 +212,9 @@ export default function GymUpdate() {
                                     placeholder="Gym Title"
                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                 />
+                                {errors.name && (
+                                    <p className="text-sm text-red-600 mt-1">{errors.name[0]}</p>
+                                )}
                             </div>
 
                             {/* Description */}
@@ -203,7 +230,11 @@ export default function GymUpdate() {
                                     maxLength={150}
                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                 ></textarea>
-                                {/* <div className="pl-1 text-sm text-gray-500">{gym.description.length}/150</div> */}
+                                <div className="pl-1 text-sm text-gray-500">{gym.description.length}/150</div>
+                                {errors.description && (
+                                    <p className="text-sm text-red-600 mt-1">{errors.description[0]}</p>
+                                )}
+
                             </div>
                             <div className="col-span-6 sm:col-span-3">
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -234,6 +265,10 @@ export default function GymUpdate() {
                                     maxLength={50}
                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                 />
+                                {errors.address && (
+                                    <p className="text-sm text-red-600 mt-1">{errors.address[0]}</p>
+                                )}
+
                             </div>
                             {/* Latitude
                             <div className="col-span-6 sm:col-span-3">
@@ -285,6 +320,9 @@ export default function GymUpdate() {
                                         onChange={(e) => setOpeningEnd(e.target.value)}
                                         className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                     />
+                                    {errors.opening_hours && (
+                                        <p className="text-sm text-red-600 mt-1">{errors.opening_hours[0]}</p>
+                                    )}
                                 </div>
                             </div>
                             {/* Is Free Checkbox */}
@@ -325,6 +363,9 @@ export default function GymUpdate() {
                                         placeholder="e.g. 29.99"
                                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                     />
+                                    {errors.monthly_fee && (
+                                        <p className="text-sm text-red-600 mt-1">{errors.monthly_fee[0]}</p>
+                                    )}
                                 </div>
                             )}
                         </div>

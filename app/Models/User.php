@@ -42,6 +42,7 @@ class User extends Authenticatable implements JWTSubject
         'preferred_workout_types',
         'experience_level',
         'personalization_updated_at',
+        'disable_welcome_modal',
     ];
 
     /**

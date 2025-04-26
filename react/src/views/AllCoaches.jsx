@@ -23,7 +23,7 @@ export default function AllCoaches() {
     const [loading, setLoading] = useState(true);
     const [pagination, setPagination] = useState({});
     const [currentPage, setCurrentPage] = useState(1);
-
+    const [availableSpecialties, setAvailableSpecialties] = useState([]);
     const [filters, setFilters] = useState({
         city: "",
         gym: "",
@@ -44,7 +44,18 @@ export default function AllCoaches() {
     useEffect(() => {
         fetchCoaches(currentPage);
     }, [currentPage, filters, searchQuery]);
+    useEffect(() => {
+        const fetchSpecialties = async () => {
+            try {
+                const { data } = await axiosClient.get('/specialties');
+                setAvailableSpecialties(data);
+            } catch (error) {
+                console.error('Error fetching specialties:', error);
+            }
+        };
 
+        fetchSpecialties();
+    }, []);
     const fetchCoaches = (page = 1) => {
         setLoading(true);
         axiosClient
@@ -262,13 +273,7 @@ export default function AllCoaches() {
                                         .map((c) => [c.gym.id, c.gym])
                                 ).values(),
                             ]}
-                            availableSpecialties={[
-                                ...new Map(
-                                    coaches
-                                        .flatMap(c => c.specialties || [])
-                                        .map(s => [s.id, s])
-                                ).values()
-                            ]}
+                            availableSpecialties={availableSpecialties}
                         />
                     </>
                 )}

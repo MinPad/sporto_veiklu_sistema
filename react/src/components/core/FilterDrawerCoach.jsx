@@ -6,7 +6,7 @@ export default function FilterDrawerCoach({
     onClose,
     onApply,
     initialFilters,
-    availableSpecialties,
+    availableSpecialties = [],
     onClear,
 }) {
     const [localFilters, setLocalFilters] = useState(initialFilters);
@@ -17,12 +17,12 @@ export default function FilterDrawerCoach({
         }
     }, [isOpen, initialFilters]);
 
-    const toggleSpecialty = (specId) => {
+    const toggleSpecialty = (specValue) => {
         setLocalFilters(prev => ({
             ...prev,
-            specialties: prev.specialties.includes(specId)
-                ? prev.specialties.filter(id => id !== specId)
-                : [...prev.specialties, specId],
+            specialties: prev.specialties.includes(specValue)
+                ? prev.specialties.filter(id => id !== specValue)
+                : [...prev.specialties, specValue],
         }));
     };
 
@@ -64,23 +64,23 @@ export default function FilterDrawerCoach({
                 <div className="mb-6">
                     <h3 className="font-semibold text-sm mb-2">Specialties</h3>
                     <div className="flex flex-wrap gap-2">
-                        {availableSpecialties.map((spec) => (
+                        {(availableSpecialties || []).map((spec) => (
                             <button
-                                key={spec.id}
-                                onClick={() => toggleSpecialty(spec.id)}
-                                className={`px-3 py-1 rounded-full text-sm border ${localFilters.specialties.includes(spec.id)
+                                key={spec.value}
+                                onClick={() => toggleSpecialty(spec.value)}
+                                className={`px-3 py-1 rounded-full text-sm border ${localFilters.specialties.includes(spec.value)
                                     ? "bg-indigo-500 text-white border-indigo-500"
                                     : "bg-gray-100 text-gray-700 border-gray-300"
                                     }`}
                             >
-                                {spec.name}
+                                {spec.label}
                             </button>
                         ))}
                     </div>
                 </div>
 
                 {/* Approval Status Filter */}
-                <div className="mb-6">
+                {/* <div className="mb-6">
                     <h3 className="font-semibold text-sm mb-2">Approval Status</h3>
                     <select
                         value={localFilters.approvalStatus}
@@ -91,14 +91,12 @@ export default function FilterDrawerCoach({
                         <option value="approved">Approved</option>
                         <option value="pending">Pending</option>
                     </select>
-                </div>
+                </div> */}
 
                 {/* Apply Button */}
                 <button
                     onClick={handleApplyFilters}
-                    disabled={
-                        JSON.stringify(localFilters) === JSON.stringify(initialFilters)
-                    }
+                    disabled={JSON.stringify(localFilters) === JSON.stringify(initialFilters)}
                     className="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded text-center text-sm font-semibold w-full mt-auto disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     Apply Filters

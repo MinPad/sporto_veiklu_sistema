@@ -34,6 +34,7 @@ export default function Gyms() {
     const [visibleGymCount, setVisibleGymCount] = useState(null);
     const mapSectionRef = useRef(null);
     const successTimeoutRef = useRef(null);
+    const [availableSpecialties, setAvailableSpecialties] = useState([]);
 
     const showSuccessMessage = (msg) => {
         setSuccessMessage(msg);
@@ -45,7 +46,27 @@ export default function Gyms() {
             successTimeoutRef.current = null;
         }, 3000);
     };
+    useEffect(() => {
+        const fetchSpecialties = async () => {
+            try {
+                const { data } = await axiosClient.get('/specialties');
+                const formattedSpecialties = Array.isArray(data)
+                    ? data.map(spec => ({
+                        value: spec.id,
+                        label: spec.name,
+                    }))
+                    : [];
+                setAvailableSpecialties(
+                    formattedSpecialties.sort((a, b) => a.label.localeCompare(b.label))
+                );
 
+            } catch (error) {
+                console.error('Error fetching specialties:', error);
+            }
+        };
+
+        fetchSpecialties();
+    }, []);
     useEffect(() => {
         const token = localStorage.getItem("TOKEN");
         if (token) {
@@ -268,7 +289,7 @@ export default function Gyms() {
                 onApply={(newFilters) => setFilters(newFilters)}
                 onClear={handleClearFilters}
                 initialFilters={filters}
-                availableSpecialties={[...new Set(gyms.flatMap(g => g.specialties?.map(s => s.name) || []))]}
+                availableSpecialties={availableSpecialties}
             />
         </PageComponent>
     );

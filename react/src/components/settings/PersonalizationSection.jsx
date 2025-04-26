@@ -188,7 +188,9 @@ const PersonalizationSection = ({
                         </div>
                         {/* Motivational Text */}
                         <div>
-                            <label htmlFor="motivation" className="block text-sm font-medium">Motivational Text / Greeting</label>
+                            <label htmlFor="motivation" className="block text-sm font-medium">
+                                Motivational Text / Greeting
+                            </label>
                             <textarea
                                 id="motivation"
                                 rows="3"
@@ -196,7 +198,12 @@ const PersonalizationSection = ({
                                 onChange={(e) => setMotivationalText(e.target.value)}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
                             />
+                            {/* ➡️ Add helper info */}
+                            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                This text will appear inside the Welcome Modal when you log in.
+                            </p>
                         </div>
+
                     </div>
                 </CollapsibleSection>
 

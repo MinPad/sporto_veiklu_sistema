@@ -22,13 +22,14 @@ class UserResource extends JsonResource
             'avatar_url' => $this->avatar ? asset('storage/' . $this->avatar) : null,
             'cover_photo_url' => $this->cover_photo ? asset('storage/' . $this->cover_photo) : null,
             'motivational_text' => $this->motivational_text,
-    
             'goal' => $this->goal,
             'height' => $this->height,
             'weight' => $this->weight,
             'experience_level' => $this->experience_level,
             'preferred_workout_types' => $this->preferred_workout_types,
             'personalization_updated_at' => $this->updated_at->toDateTimeString(),
+    
+            'disable_welcome_modal' => $this->disable_welcome_modal,
         ];
     }
     

@@ -19,6 +19,7 @@ export default function SportsEvents() {
         specialties: [],
         difficulty: '',
         goals: [],
+        fullStatus: '',
     });
     const [showDrawer, setShowDrawer] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
@@ -35,8 +36,6 @@ export default function SportsEvents() {
     }, []);
     useEffect(() => {
         const fetchFilterData = async () => {
-
-
             try {
                 const [specialtiesResponse, filterOptionsResponse] = await Promise.all([
                     axiosClient.get('/specialties'),
@@ -72,6 +71,7 @@ export default function SportsEvents() {
                 specialties: filters.specialties.length > 0 ? filters.specialties : undefined,
                 difficulty: filters.difficulty || undefined,
                 goals: filters.goals.length > 0 ? filters.goals : undefined,
+                full_status: filters.fullStatus || undefined,
             }
         })
             .then(({ data }) => {
@@ -92,11 +92,13 @@ export default function SportsEvents() {
     const activeFilterCount =
         (filters.specialties.length > 0 ? 1 : 0) +
         (filters.difficulty ? 1 : 0) +
-        (filters.goals.length > 0 ? 1 : 0);
+        (filters.goals.length > 0 ? 1 : 0) +
+        (filters.fullStatus ? 1 : 0);
 
     const handleClearFilters = () => {
-        setFilters({ specialties: [], difficulty: '', goals: [] });
+        setFilters({ specialties: [], difficulty: '', goals: [], fullStatus: '' });
     };
+
 
     const searchBar = (
         <SearchFilterBar

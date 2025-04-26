@@ -88,32 +88,34 @@ class GymController extends Controller
 
     public function store($cityId, CreateGymRequest $request)
     {
-    $this->authorize('create', Gym::class);
-    $city = City::findOrFail($cityId);
-    $data = $request->validated();
-
-    if ($request->hasFile('image')) {
-        $imagePath = $request->file('image')->store('gym-images', 'public');
-        $data['image_path'] = $imagePath;
+        $this->authorize('create', Gym::class);
+    
+        $city = City::findOrFail($cityId);
+        $data = $request->validated();
+    
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('gym-images', 'public');
+            $data['image_path'] = $imagePath;
+        } elseif ($request->filled('image_url')) {
+            $data['image_path'] = $request->input('image_url');
+        } else {
+            $data['image_path'] = asset('storage/gym-images/placeholder-gym-image.jpg');
+        }
+    
+        $data['latitude'] = $request->input('latitude');
+        $data['longitude'] = $request->input('longitude');
+        $data['is_free'] = $request->input('is_free', false);
+        $data['monthly_fee'] = $request->input('monthly_fee');
+    
+        $gym = Gym::create($data + ['city_id' => $city->id]);
+    
+        if ($request->has('specialties')) {
+            $gym->specialties()->attach($request->input('specialties'));
+        }
+    
+        return response()->json(new GymResource($gym), 201);
     }
-
-    elseif ($request->filled('image_url')) {
-        $data['image_path'] = $request->input('image_url'); // Could also fetch & store remotely
-    }
-    else {
-        $data['image_path'] = null;
-    }
-    $data['latitude'] = $request->input('latitude');
-    $data['longitude'] = $request->input('longitude');
-
-    $data['is_free'] = $request->input('is_free', false);
-    $data['monthly_fee'] = $request->input('monthly_fee');
-    $gym = Gym::create($data + ['city_id' => $city->id]);
-    if ($request->has('specialties')) {
-        $gym->specialties()->attach($request->input('specialties'));
-    }
-    return response()->json(new GymResource($gym), 201);
-    }
+    
 
     public function update(City $city, $gymId, Request $request)
     {

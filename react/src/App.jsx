@@ -1,14 +1,56 @@
-// App.jsx
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Modal from './components/Modal';
 import PageComponent from './components/PageComponent';
 import { useLocation } from "react-router-dom";
-import UnauthorizedModal from "./components/UnauthorizedModal";
+import { useStateContext } from "./contexts/ContexProvider";
+import axiosClient from './axios';
 
 export default function App() {
-  const [isModalOpen, setIsModalOpen] = useState(true); // Modal open by default
-  const closeModal = () => setIsModalOpen(false);
-  const location = useLocation();
+  const { currentUser, userToken } = useStateContext();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const welcomeModalShown = useRef(false); // <-- NEW: tracks session
+
+  useEffect(() => {
+    const decideModal = () => {
+      if (userToken) {
+        if (currentUser?.id !== undefined) {
+          if (!currentUser.disable_welcome_modal) {
+            if (!sessionStorage.getItem('welcomeModalShown')) {
+              setIsModalOpen(true);
+              sessionStorage.setItem('welcomeModalShown', 'true');
+            }
+          }
+        }
+      } else {
+        const guestDisabled = localStorage.getItem('disableWelcomeModal');
+        if (guestDisabled !== 'true') {
+          setIsModalOpen(true);
+        }
+      }
+    };
+
+    decideModal();
+  }, [currentUser, userToken]);
+
+
+  const closeModal = (disableForever = false) => {
+    setIsModalOpen(false);
+
+    if (userToken && currentUser?.id) {
+      if (disableForever) {
+        axiosClient.patch('/user/settings', {
+          disable_welcome_modal: true,
+        }).catch((err) => {
+          console.error('Failed to update user setting:', err);
+        });
+      }
+    } else {
+      if (disableForever) {
+        localStorage.setItem('disableWelcomeModal', 'true');
+      }
+    }
+  };
+
   return (
     <PageComponent title="Dashboard">
       {/* Welcome section */}
@@ -26,21 +68,7 @@ export default function App() {
         />
       </div>
 
-      {/* "Show Info" button */}
-      {/* <button
-        onClick={() => setIsModalOpen(true)}
-        className="bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg shadow-md px-6 py-2 mb-8"
-      >
-        Show Info
-      </button> */}
-
       <Modal isOpen={isModalOpen} closeModal={closeModal} />
-      {/* {isModalOpen && (
-        <UnauthorizedModal isOpen={isModalOpen} closeModal={closeModal} />
-      )} */}
     </PageComponent>
   );
 }
-
-
-

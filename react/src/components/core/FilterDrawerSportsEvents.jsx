@@ -103,6 +103,19 @@ export default function FilterDrawerSportsEvents({
                         <option value="Advanced">Advanced</option>
                     </select>
                 </div>
+                {/* Full Status */}
+                <div className="mb-6">
+                    <h3 className="font-semibold text-sm mb-2">Event Status</h3>
+                    <select
+                        value={localFilters.fullStatus}
+                        onChange={(e) => setLocalFilters(prev => ({ ...prev, fullStatus: e.target.value }))}
+                        className="w-full border rounded px-3 py-2 text-sm"
+                    >
+                        <option value="">All Events</option>
+                        <option value="not_full">Not Full</option>
+                        <option value="full">Full</option>
+                    </select>
+                </div>
 
                 {/* Goals */}
                 <div className="mb-6">

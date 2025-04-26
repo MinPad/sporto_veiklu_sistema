@@ -1,4 +1,4 @@
-import { LinkIcon, PhotoIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { LinkIcon, PhotoIcon, TrashIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { useState, useEffect } from 'react';
 import PageComponent from '../components/PageComponent';
 import TButton from '../components/core/TButton';
@@ -10,8 +10,10 @@ import Select from 'react-select';
 
 export default function GymView() {
     const { cityId } = useParams();
-    const [error, setError] = useState(null);
     const navigate = useNavigate();
+
+    const [errors, setErrors] = useState({});
+    const [error, setError] = useState(null);
 
     const [gym, setGym] = useState({
         name: "",
@@ -32,6 +34,8 @@ export default function GymView() {
         specialties: [],
     });
     const [allSpecialties, setAllSpecialties] = useState([]);
+    const [cityName, setCityName] = useState("");
+    const [loadingCity, setLoadingCity] = useState(true);
     useEffect(() => {
         axiosClient.get('/specialties')
             .then(({ data }) => {
@@ -43,6 +47,21 @@ export default function GymView() {
                 console.error("Failed to load specialties", error);
             });
     }, []);
+    useEffect(() => {
+        setLoadingCity(true);
+        axiosClient.get(`/cities/${cityId}`)
+            .then(({ data }) => {
+                setCityName(data.name);
+            })
+            .catch((error) => {
+                console.error("Failed to load city", error);
+            })
+            .finally(() => {
+                setLoadingCity(false);
+            });
+    }, [cityId]);
+
+
     const onSubmit = async (ev) => {
         ev.preventDefault();
         setError(null);
@@ -85,11 +104,14 @@ export default function GymView() {
             });
             navigate(`/cities/${cityId}/gyms`);
         } catch (error) {
-            setError(
-                error.response?.data?.message ||
-                "An error occurred while creating the gym."
-            );
-            console.error(error);
+            if (error.response?.status === 422) {
+                setErrors(error.response.data.errors || {});
+            } else {
+                setError(
+                    error.response?.data?.message ||
+                    "An error occurred while creating the gym."
+                );
+            }
         }
     };
     const handleImageChange = (e) => {
@@ -102,8 +124,24 @@ export default function GymView() {
     };
 
     return (
-        <PageComponent title="Create new Gym">
+        <PageComponent title={loadingCity ? "Loading..." : `Create new Gym in ${cityName}`} buttons={
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto sm:ml-auto">
+                <TButton
+                    to={`/cities/${cityId}/gyms/`}
+                    className="flex items-center justify-center w-full sm:w-auto"
+                >
+                    <ArrowLeftIcon className="w-5 h-5 mr-2" />
+                    Back to City
+                </TButton>
+
+            </div>
+        }>
             <form action="#" method="POST" onSubmit={onSubmit}>
+                {error && (
+                    <div className="bg-red-100 text-red-800 border border-red-400 rounded px-4 py-2 mb-4">
+                        {error}
+                    </div>
+                )}
                 <div className="shadow sm:overflow-hidden sm:rounded-md">
                     <div className="space-y-6 bg-white px-4 py-5 sm:p-6">
                         {/* Image Upload */}
@@ -139,7 +177,7 @@ export default function GymView() {
                             {/* Image URL input */}
                             <div className="mt-2">
                                 <label className="block text-sm font-medium text-gray-700">
-                                    Or enter an image URL
+                                    Enter an image URL
                                 </label>
                                 <input
                                     type="url"
@@ -153,7 +191,7 @@ export default function GymView() {
                             {/* Upload image file input */}
                             <div className="mt-2">
                                 <label className="block text-sm font-medium text-gray-700">
-                                    Upload Image
+                                    Or Upload an Image
                                 </label>
                                 <input
                                     type="file"
@@ -187,6 +225,9 @@ export default function GymView() {
                                 placeholder="Gym Title"
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                             />
+                            {errors.name && (
+                                <p className="text-sm text-red-600 mt-1">{errors.name[0]}</p>
+                            )}
                         </div>
                         {/* Description */}
                         <div className="col-span-6 sm:col-span-3">
@@ -208,6 +249,9 @@ export default function GymView() {
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                             ></textarea>
                             <div className="pl-1 text-sm text-gray-500">{gym.description.length}/150</div>
+                            {errors.description && (
+                                <p className="text-sm text-red-600 mt-1">{errors.description[0]}</p>
+                            )}
                         </div>
                         {/* Specialties Multi-Select */}
                         <div className="col-span-6 sm:col-span-3">
@@ -244,10 +288,13 @@ export default function GymView() {
                                     setGym({ ...gym, address: ev.target.value })
                                 }
                                 placeholder="Gym address"
-                                maxLength={50}
+                                maxLength={70}
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                             />
-                            <div className="text-sm text-gray-500 pl-1">{gym.address.length}/50</div>
+                            <div className="text-sm text-gray-500 pl-1">{gym.address.length}/70</div>
+                            {errors.address && (
+                                <p className="text-sm text-red-600 mt-1">{errors.address[0]}</p>
+                            )}
                         </div>
                         {/* Latitude */}
                         {/* <div className="col-span-6 sm:col-span-3">
@@ -306,6 +353,9 @@ export default function GymView() {
                                     className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                 />
                             </div>
+                            {errors.opening_hours && (
+                                <p className="text-sm text-red-600 mt-1">{errors.opening_hours[0]}</p>
+                            )}
                         </div>
                         {/* Pricing Section */}
                         <div className="col-span-6 sm:col-span-3">
@@ -345,6 +395,10 @@ export default function GymView() {
                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                 />
                             </div>
+
+                        )}
+                        {errors.monthly_fee && (
+                            <p className="text-sm text-red-600 mt-1">{errors.monthly_fee[0]}</p>
                         )}
                     </div>
                     <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">

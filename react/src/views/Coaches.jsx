@@ -28,6 +28,25 @@ export default function Coaches() {
         approvalStatus: 'all',
     });
     const [showDrawer, setShowDrawer] = useState(false);
+    const [availableSpecialties, setAvailableSpecialties] = useState([]);
+    useEffect(() => {
+        const fetchSpecialties = async () => {
+            try {
+                const { data } = await axiosClient.get('/specialties');
+                const formatted = (Array.isArray(data) ? data : data.data).map((s) => ({
+                    value: s.id,
+                    label: s.name,
+                }));
+                setAvailableSpecialties(formatted);
+            } catch (error) {
+                console.error('Failed to fetch specialties:', error);
+            }
+        };
+
+        fetchSpecialties();
+    }, []);
+
+
     useEffect(() => {
         const token = localStorage.getItem("TOKEN");
         if (token) {
@@ -63,7 +82,7 @@ export default function Coaches() {
             params.specialty_ids = filters.specialties;
         }
 
-        console.log("Fetching with params:", params);
+        // console.log("Fetching with params:", params);
 
         setLoading(true);
         axiosClient.get(`/cities/${cityId}/gyms/${gymId}/coaches`, { params })
@@ -79,7 +98,7 @@ export default function Coaches() {
             .finally(() => setLoading(false));
     };
     useEffect(() => {
-        console.log("Filters updated:", filters);
+        // console.log("Filters updated:", filters);
     }, [filters]);
 
 
@@ -259,15 +278,9 @@ export default function Coaches() {
                             onApply={(newFilters) => setFilters(newFilters)}
                             onClear={() => setFilters({ specialties: [], approvalStatus: 'all' })}
                             initialFilters={filters}
-                            availableSpecialties={[
-                                ...new Map(
-                                    coaches
-                                        .flatMap(c => c.specialties || [])
-                                        .map(s => [s.id, s])
-                                ).values()
-                            ]}
-
+                            availableSpecialties={availableSpecialties}
                         />
+
                     </>
                 )}
             </div>

@@ -13,6 +13,7 @@ import PersonalizationSection from '../components/settings/PersonalizationSectio
 import PublicProfileSection from '../components/settings/PublicProfileSection.jsx';
 import MySportsEventsSection from '../components/settings/MySportsEventsSection.jsx';
 import RecommendedEventsSection from '../components/settings/RecommendedEventsSection.jsx';
+import SettingsSection from '../components/settings/SettingsSection.jsx';
 
 import { useStateContext } from '../contexts/ContexProvider';
 import { useLocation, useNavigationType } from 'react-router-dom';
@@ -35,7 +36,9 @@ const Profile = () => {
 
     const [activeSetting, setActiveSetting] = useState('publicProfile');
     const [currentAvatarUrl, setCurrentAvatarUrl] = useState('');
-
+    const [userSettings, setUserSettings] = useState({
+        disable_welcome_modal: false,
+    });
 
     const navigate = useNavigate();
 
@@ -59,7 +62,8 @@ const Profile = () => {
 
     const [pendingSetting, setPendingSetting] = useState(null);
     const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
-
+    const [hasUnsavedSettings, setHasUnsavedSettings] = useState(false);
+    const settingsSectionRef = useRef(null);
     const location = useLocation();
     const navigationType = useNavigationType();
     const [nextLocation, setNextLocation] = useState(null);
@@ -94,9 +98,14 @@ const Profile = () => {
             setActiveSetting(setting.id);
         }
     };
-
+    const handleResetSettingsChanges = () => {
+        if (settingsSectionRef.current) {
+            settingsSectionRef.current.resetChanges();
+        }
+    };
     const handleConfirmLeave = () => {
         setShowUnsavedDialog(false);
+        handleResetSettingsChanges();
         setMotivationalText(currentUser?.motivational_text || '');
         setAvatar(null);
         setAvatarRemoved(false);
@@ -112,17 +121,21 @@ const Profile = () => {
                     ? JSON.parse(currentUser.goal).map(g => ({ label: g, value: g }))
                     : [],
         });
+        setHasUnsavedSettings(false);
+        setIsEditing(false);
 
         if (pendingSetting) {
             setActiveSetting(pendingSetting.id);
             setPendingSetting(null);
         }
         if (nextLocation && typeof nextLocation.retry === 'function') {
-            nextLocation.retry();
+            setTimeout(() => {
+                nextLocation.retry();
+            }, 0);
         }
-
         setNextLocation(null);
     };
+
 
     useEffect(() => {
         if (activeSetting === 'personalization' && avatarRemoved && !avatarPreviewRestored) {
@@ -147,6 +160,9 @@ const Profile = () => {
             setCurrentAvatarUrl(avatar_url || '');
             setOriginalAvatarUrl(avatar_url || '');
             setMotivationalText(motivational_text || '');
+            setUserSettings({
+                disable_welcome_modal: currentUser?.disable_welcome_modal || false,
+            });
             const parsedGoals = typeof goal === 'string' ? JSON.parse(goal) : goal || [];
             setForm(prev => ({
                 ...prev,
@@ -199,10 +215,16 @@ const Profile = () => {
     const handleSaveProfile = async (e) => {
         e.preventDefault();
         try {
-            await axiosClient.patch(`/users/${currentUser.id}`, {
+            const response = await axiosClient.patch(`/users/${currentUser.id}`, {
                 name,
                 email
             });
+
+            setCurrentUser(prev => ({
+                ...prev,
+                name,
+                email
+            }));
 
             showSuccessMessage('Public profile saved!');
             setIsEditing(false);
@@ -211,6 +233,7 @@ const Profile = () => {
             setError("Failed to save profile.");
         }
     };
+
 
     const handleDeleteClick = () => {
         setUserToDelete(userId);
@@ -279,10 +302,12 @@ const Profile = () => {
                 return hasUnsavedPersonalization;
             case 'publicProfile':
                 return hasUnsavedPublicProfile;
+            case 'settings':
+                return hasUnsavedSettings;
             default:
                 return false;
         }
-    }, [activeSetting, hasUnsavedPersonalization, hasUnsavedPublicProfile]);
+    }, [activeSetting, hasUnsavedPersonalization, hasUnsavedPublicProfile, hasUnsavedSettings]);
 
     useEffect(() => {
         const handleBeforeUnload = (e) => {
@@ -344,11 +369,20 @@ const Profile = () => {
                                 />
                             )}
                             {activeSetting === 'settings' && (
-                                <div>
-                                    <h2 className="text-xl font-semibold text-indigo-900">Settings</h2>
-                                    <p>Configure your application settings here.</p>
-                                </div>
+                                <SettingsSection
+                                    ref={settingsSectionRef}
+                                    userSettings={userSettings}
+                                    setUserSettings={setUserSettings}
+                                    showSuccessMessage={showSuccessMessage}
+                                    setCurrentUser={setCurrentUser}
+                                    hasUnsavedSettings={hasUnsavedSettings}
+                                    setHasUnsavedSettings={setHasUnsavedSettings}
+                                    isEditing={isEditing}
+                                    setIsEditing={setIsEditing}
+                                />
                             )}
+
+
                             {activeSetting === 'personalization' && (
                                 <PersonalizationSection
                                     handleSave={handleSavePersonalization}

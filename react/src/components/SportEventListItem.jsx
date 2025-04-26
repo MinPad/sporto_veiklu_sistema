@@ -134,8 +134,13 @@ export default function SportEventListItem({
                             <p>
                                 <strong>Entry Fee:</strong> {sportEvent.is_free ? "Free" : `$${sportEvent.entry_fee}`}
                             </p>
-                            <p>
+                            <p className="flex items-center gap-2">
                                 <strong>Participants:</strong> {sportEvent.current_participants} / {sportEvent.max_participants ?? "Unlimited"}
+                                {sportEvent.max_participants !== null && sportEvent.current_participants >= sportEvent.max_participants && (
+                                    <span className="inline-block bg-gray-300 text-gray-700 text-xs font-medium px-2 py-0.5 rounded-full">
+                                        Full
+                                    </span>
+                                )}
                             </p>
 
                             {sportEvent.difficulty_level && (

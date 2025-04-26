@@ -24,7 +24,7 @@ export default function CreateIndependentCoach() {
 
     useEffect(() => {
         axiosClient.get('/cities')
-            .then(({ data }) => setCities(data))
+            .then(({ data }) => setCities(Array.isArray(data) ? data : data.data))
             .catch(err => console.error("Error loading cities:", err));
 
         axiosClient.get('/specialties')
@@ -43,7 +43,7 @@ export default function CreateIndependentCoach() {
     useEffect(() => {
         if (selectedCity) {
             axiosClient.get(`/cities/${selectedCity}/gyms`)
-                .then(({ data }) => setGyms(data))
+                .then(({ data }) => setGyms(Array.isArray(data) ? data : data.data))
                 .catch(err => console.error("Error loading gyms:", err));
         } else {
             setGyms([]);

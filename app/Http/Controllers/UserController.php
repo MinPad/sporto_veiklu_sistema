@@ -90,32 +90,6 @@ class UserController extends Controller
         }
        
     }
-
-    // public function updatePersonalization(UpdateUserPersonalizationRequest $request, $id)
-    // {
-        
-    // $user = User::findOrFail($id);
-    // $this->authorize('update', $user);
-    
-    // if ($request->hasFile('avatar')) {
-    //     $avatarPath = $request->file('avatar')->store('avatars', 'public');
-    //     $user->avatar = $avatarPath;
-    // }
-
-    // if ($request->hasFile('cover_photo')) {
-    //     $coverPath = $request->file('cover_photo')->store('covers', 'public');
-    //     $user->cover_photo = $coverPath;
-    // }
-
-    // $user->motivational_text = $request->input('motivational_text', '');
-    
-    // if ($request->input('remove_avatar') === 'true') {
-    //     $user->avatar = null;
-    // }
-    // $user->save();
-
-    // return new UserResource($user);
-    // }
     public function updatePersonalization(UpdateUserPersonalizationRequest $request, $id)
     {
         $user = User::findOrFail($id);
@@ -148,4 +122,20 @@ class UserController extends Controller
     
         return new UserResource($user);
     }
+    public function updateSettings(Request $request)
+    {
+        $user = auth()->user();
+    
+        $request->validate([
+            'disable_welcome_modal' => 'required|boolean',
+        ]);
+    
+        $user->update([
+            'disable_welcome_modal' => $request->disable_welcome_modal,
+        ]);
+    
+        return new UserResource($user);
+    }
+    
+    
 }

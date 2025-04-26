@@ -50,6 +50,7 @@ Route::patch('/users/{user}', [UserController::class, 'update'])->middleware('au
 Route::delete('/users/{user}', [UserController::class, 'delete'])->middleware('auth:api');
 
 Route::post('/users/{id}/personalization', [UserController::class, 'updatePersonalization'])->middleware('auth:api');
+Route::patch('/user/settings', [UserController::class, 'updateSettings'])->middleware('auth:api');
 
 
 Route::get('/cities', [CityController::class, 'index']);
