@@ -25,8 +25,9 @@ class CoachResource extends JsonResource
                 'id' => $this->gym->id,
                 'name' => $this->gym->name,
                 'city_id' => $this->gym->city_id,
+                'cityName' => $this->gym->city->name ?? null,
             ] : null,
-
+                    
             'sportsEvents' => $this->sportsEvents->map(function ($event) {
                 return [
                     'id' => $event->id,

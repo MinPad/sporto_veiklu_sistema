@@ -92,7 +92,7 @@ export default function SportEventListItem({
     };
 
 
-    //  console.log('Event:', sportEvent.name, 'gym_id:', sportEvent.gym_id);
+    // console.log('Event:', sportEvent.name, 'gym_id:', sportEvent.gym_id);
     return (
         <>
             {successMessage && (

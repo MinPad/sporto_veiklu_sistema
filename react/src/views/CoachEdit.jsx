@@ -6,9 +6,8 @@ import LoadingDialog from "../components/core/LoadingDialog";
 import CoachForm from "../components/forms/CoachForm";
 
 export default function CoachEdit() {
-    const { coachId } = useParams();
     const navigate = useNavigate();
-
+    const { coachId, cityId, gymId } = useParams();
     const [loading, setLoading] = useState(true);
     const [coachData, setCoachData] = useState(null);
     const [error, setError] = useState(null);
@@ -28,10 +27,14 @@ export default function CoachEdit() {
 
     const handleUpdate = async (payload) => {
         return axiosClient.put(`/coaches/${coachId}`, payload).then(() => {
-            navigate("/coaches");
+            if (cityId && gymId) {
+                navigate(`/cities/${cityId}/gyms/${gymId}/coaches`);
+            } else {
+                console.log("Submitting payload:", payload);
+                navigate("/coaches");
+            }
         });
     };
-
     return (
         <PageComponent title={coachData ? `Edit Coach: ${coachData.name} ${coachData.surname}` : "Loading Coach..."}>
             {loading ? (

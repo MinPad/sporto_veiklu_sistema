@@ -4,12 +4,13 @@ import PageComponent from '../components/PageComponent';
 import TButton from '../components/core/TButton';
 import axiosClient from "../axios";
 import Select from 'react-select';
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 
 export default function CreateIndependentCoach() {
     const [cities, setCities] = useState([]);
     const [gyms, setGyms] = useState([]);
     const [selectedCity, setSelectedCity] = useState("");
-    const [error, setError] = useState({ __html: "" });
+    const [errors, setErrors] = useState({});
     const navigate = useNavigate();
     const [allSpecialties, setAllSpecialties] = useState([]);
 
@@ -51,7 +52,7 @@ export default function CreateIndependentCoach() {
 
     const onSubmit = async (ev) => {
         ev.preventDefault();
-        setError({ __html: "" });
+        setErrors({});
 
         // console.log("Submitting coach:", coach);
         const payload = {
@@ -64,18 +65,12 @@ export default function CreateIndependentCoach() {
             await axiosClient.post('/coaches', payload);
             navigate('/coaches');
         } catch (error) {
-            if (error.response) {
-                if (error.response.status === 422) {
-                    const finalErrors = Object.values(error.response.data.errors || {}).reduce(
-                        (accum, next) => [...accum, ...next],
-                        []
-                    );
-                    setError({ __html: finalErrors.join("<br>") });
-                } else {
-                    setError({ __html: error.response.data.message || "Error creating coach" });
-                }
+            if (error.response?.status === 422) {
+                setErrors(error.response.data.errors || {});
+            } else if (error.response?.data?.message) {
+                setErrors({ general: [error.response.data.message] });
             } else {
-                setError({ __html: "Unexpected error occurred. Please try again." });
+                setErrors({ general: ["Unexpected error occurred. Please try again."] });
             }
         }
     };
@@ -86,21 +81,24 @@ export default function CreateIndependentCoach() {
             <form onSubmit={onSubmit}>
                 <div className="shadow sm:rounded-md sm:overflow-hidden">
                     <div className="space-y-6 bg-white px-4 py-5 sm:p-6">
-                        {error.__html && (
-                            <div
-                                className="bg-red-100 text-red-800 border border-red-400 rounded px-4 py-2 mb-4"
-                                dangerouslySetInnerHTML={error}
-                            ></div>
+                        {errors.general && (
+                            <div className="bg-red-100 text-red-800 border border-red-400 rounded px-4 py-2 mb-4">
+                                {errors.general[0]}
+                            </div>
                         )}
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Coach Name</label>
                             <input
                                 type="text"
                                 value={coach.name}
+                                placeholder="Coach Name"
+                                maxLength={35}
                                 onChange={(e) => setCoach({ ...coach, name: e.target.value })}
                                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm sm:text-sm"
                                 required
                             />
+                            <div className="pl-1 text-sm text-gray-500">{coach.name.length}/35</div>
+                            {errors.name && <p className="text-sm text-red-600 mt-1">{errors.name[0]}</p>}
                         </div>
 
                         <div>
@@ -108,14 +106,18 @@ export default function CreateIndependentCoach() {
                             <input
                                 type="text"
                                 value={coach.surname}
+                                placeholder="Coach Surname"
+                                maxLength={35}
                                 onChange={(e) => setCoach({ ...coach, surname: e.target.value })}
                                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm sm:text-sm"
                                 required
                             />
+                            <div className="pl-1 text-sm text-gray-500">{coach.surname.length}/35</div>
+                            {errors.surname && <p className="text-sm text-red-600 mt-1">{errors.surname[0]}</p>}
                         </div>
 
                         {/* ✅ Multi-Select Specialties */}
-                        <div>
+                        <div className="col-span-6 sm:col-span-3">
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Specialties (multiple allowed)
                             </label>
@@ -125,7 +127,7 @@ export default function CreateIndependentCoach() {
                                 options={allSpecialties}
                                 value={coach.specialties}
                                 onChange={(selected) => setCoach({ ...coach, specialties: selected })}
-                                className="basic-multi-select"
+                                className="basic-multi-select w-full"
                                 classNamePrefix="select"
                                 placeholder="Select specialties"
                             />
@@ -165,7 +167,7 @@ export default function CreateIndependentCoach() {
                             </select>
                         </div>
 
-                        {/* Approval checkbox */}
+                        {/* Approval checkbox
                         <div>
                             <label className="inline-flex items-center text-sm">
                                 <input
@@ -176,10 +178,22 @@ export default function CreateIndependentCoach() {
                                 />
                                 <span className="ml-2">Is Approved</span>
                             </label>
-                        </div>
+                        </div> */}
                     </div>
 
-                    <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
+                    {/* <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
+                        <TButton type="submit">Save</TButton>
+                    </div> */}
+                    <div className="flex justify-between">
+                        <button
+                            type="button"
+                            onClick={() => navigate(-1)}
+                            className="flex items-center gap-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded shadow text-sm font-medium"
+                        >
+                            <ArrowLeftIcon className="w-4 h-4" />
+                            Back
+                        </button>
+
                         <TButton type="submit">Save</TButton>
                     </div>
                 </div>

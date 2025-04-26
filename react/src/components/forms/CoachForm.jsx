@@ -1,16 +1,20 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import Select from "react-select";
 import TButton from "../core/TButton";
 import axiosClient from "../../axios";
 import LoadingDialog from "../core/LoadingDialog";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+
 
 export default function CoachForm({ onSubmit, initialData = {}, submitText = "Save" }) {
     const [cities, setCities] = useState([]);
     const [gyms, setGyms] = useState([]);
     const [selectedCity, setSelectedCity] = useState("");
     const [allSpecialties, setAllSpecialties] = useState([]);
-    const [error, setError] = useState({ __html: "" });
+    const [errors, setErrors] = useState({});
     const [gymLoading, setGymLoading] = useState(false);
+    const navigate = useNavigate();
 
     const [coach, setCoach] = useState({
         name: "",
@@ -21,7 +25,7 @@ export default function CoachForm({ onSubmit, initialData = {}, submitText = "Sa
     });
 
     useEffect(() => {
-        axiosClient.get("/cities").then(({ data }) => setCities(data));
+        axiosClient.get("/cities").then(({ data }) => setCities(data.data || []));
         axiosClient.get("/specialties").then(({ data }) => {
             const formatted = (Array.isArray(data) ? data : data.data).map((s) => ({
                 value: s.id,
@@ -55,7 +59,7 @@ export default function CoachForm({ onSubmit, initialData = {}, submitText = "Sa
             setGymLoading(true);
             axiosClient.get(`/cities/${selectedCity}/gyms`)
                 .then(({ data }) => {
-                    setGyms(data);
+                    setGyms(data.data || []);
                     if (initialData.gymId) {
                         setCoach((prev) => ({ ...prev, gym_id: String(initialData.gymId) }));
                     }
@@ -68,7 +72,7 @@ export default function CoachForm({ onSubmit, initialData = {}, submitText = "Sa
 
     const handleSubmit = (ev) => {
         ev.preventDefault();
-        setError({ __html: "" });
+        setErrors({});
 
         const payload = {
             ...coach,
@@ -78,10 +82,9 @@ export default function CoachForm({ onSubmit, initialData = {}, submitText = "Sa
 
         onSubmit(payload).catch((err) => {
             if (err.response?.status === 422) {
-                const msgs = Object.values(err.response.data.errors).flat();
-                setError({ __html: msgs.join("<br>") });
+                setErrors(err.response.data.errors || {});
             } else {
-                setError({ __html: err.response?.data?.message || "Something went wrong" });
+                setErrors({ general: err.response?.data?.message || "Something went wrong" });
             }
         });
     };
@@ -90,11 +93,10 @@ export default function CoachForm({ onSubmit, initialData = {}, submitText = "Sa
         <form onSubmit={handleSubmit}>
             <div className="shadow sm:rounded-md sm:overflow-hidden">
                 <div className="space-y-6 bg-white px-4 py-5 sm:p-6">
-                    {error.__html && (
-                        <div
-                            className="bg-red-100 text-red-800 border border-red-400 rounded px-4 py-2 mb-4"
-                            dangerouslySetInnerHTML={error}
-                        />
+                    {errors.general && (
+                        <div className="bg-red-100 text-red-800 border border-red-400 rounded px-4 py-2 mb-4">
+                            {errors.general}
+                        </div>
                     )}
 
                     {/* Name */}
@@ -107,6 +109,7 @@ export default function CoachForm({ onSubmit, initialData = {}, submitText = "Sa
                             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm sm:text-sm"
                             required
                         />
+                        {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name[0]}</p>}
                     </div>
 
                     {/* Surname */}
@@ -119,6 +122,7 @@ export default function CoachForm({ onSubmit, initialData = {}, submitText = "Sa
                             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm sm:text-sm"
                             required
                         />
+                        {errors.surname && <p className="text-red-500 text-xs mt-1">{errors.surname[0]}</p>}
                     </div>
 
                     {/* Specialties */}
@@ -148,7 +152,7 @@ export default function CoachForm({ onSubmit, initialData = {}, submitText = "Sa
                             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm sm:text-sm"
                         >
                             <option value="">-- Select a City --</option>
-                            {cities.map((city) => (
+                            {Array.isArray(cities) && cities.map((city) => (
                                 <option key={city.id} value={city.id}>
                                     {city.name}
                                 </option>
@@ -171,16 +175,17 @@ export default function CoachForm({ onSubmit, initialData = {}, submitText = "Sa
                                 disabled={!selectedCity}
                             >
                                 <option value="">Independent (No Gym)</option>
-                                {gyms.map((gym) => (
+                                {Array.isArray(gyms) && gyms.map((gym) => (
                                     <option key={gym.id} value={gym.id}>
                                         {gym.name}
                                     </option>
                                 ))}
+
                             </select>
                         )}
                     </div>
 
-                    {/* Approved */}
+                    {/* Approved
                     <div>
                         <label className="inline-flex items-center text-sm">
                             <input
@@ -193,10 +198,22 @@ export default function CoachForm({ onSubmit, initialData = {}, submitText = "Sa
                             />
                             <span className="ml-2">Is Approved</span>
                         </label>
-                    </div>
+                    </div> */}
                 </div>
-
+                {/* 
                 <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
+                    <TButton type="submit">{submitText}</TButton>
+                </div> */}
+                <div className="flex justify-between">
+                    <button
+                        type="button"
+                        onClick={() => navigate(-1)}
+                        className="flex items-center gap-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded shadow text-sm font-medium"
+                    >
+                        <ArrowLeftIcon className="w-4 h-4" />
+                        Back
+                    </button>
+
                     <TButton type="submit">{submitText}</TButton>
                 </div>
             </div>

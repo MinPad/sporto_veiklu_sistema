@@ -27,6 +27,7 @@ class GymResource extends JsonResource
         'longitude' => $this->longitude,  
         'isFree' => $this->is_free,
         'monthlyFee' => $this->monthly_fee,
+        'reviews_avg_rating' => $this->reviews_avg_rating,
         'specialties' => $this->specialties->map(function ($spec) {
             return [
                 'id' => $spec->id,

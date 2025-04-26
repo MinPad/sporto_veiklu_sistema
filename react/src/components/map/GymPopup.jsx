@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { getDirectionsUrl } from "../../utils/geo";
 import axiosClient from "../../axios";
+
 const GymPopup = ({ gym, userLocation }) => {
     const [directionsUrl, setDirectionsUrl] = useState(null);
     const [travelInfo, setTravelInfo] = useState(null);
@@ -11,11 +12,9 @@ const GymPopup = ({ gym, userLocation }) => {
         const lat = parseFloat(gym.latitude);
         const lng = parseFloat(gym.longitude);
 
-        // 1. Build directions URL
         const url = getDirectionsUrl(userLocation.lat, userLocation.lng, lat, lng);
         setDirectionsUrl(url);
 
-        // 2. Fetch distance/duration
         axiosClient
             .get(`/mapbox/distance`, {
                 params: {
@@ -70,6 +69,15 @@ const GymPopup = ({ gym, userLocation }) => {
                     ➤ Get Directions
                 </a>
             )}
+            <a
+                href={`/cities/${gym.cityId}/gyms/${gym.id}/details`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded hover:bg-indigo-200 inline-block"
+            >
+                🔍 View Details
+            </a>
+
         </div>
 
     );

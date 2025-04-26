@@ -1,41 +1,29 @@
 import PageComponent from '../components/PageComponent';
 import SportEventListItem from '../components/SportEventListItem';
 import LoadingDialog from "../components/core/LoadingDialog";
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useEffect, useState } from 'react';
 import axiosClient from "../axios";
 import { jwtDecode } from "jwt-decode";
 
+import SearchFilterBar from "../components/core/SearchFilterBar";
+import FilterDrawerSportsEvents from '../components/core/FilterDrawerSportsEvents';
+
 export default function SportsEvents() {
     const [sportsEvents, setSportsEvents] = useState([]);
-    const [filteredSportsEvents, setFilteredSportsEvents] = useState([]);
     const [pagination, setPagination] = useState({});
     const [loading, setLoading] = useState(true);
     const [isAdmin, setIsAdmin] = useState(false);
     const [isGuest, setIsGuest] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
-
-    const onDeleteClick = (sportEventId) => {
-        const updated = sportsEvents.filter(e => e.id !== sportEventId);
-        setSportsEvents(updated);
-        setFilteredSportsEvents(updated);
-    };
-
-    const onJoinClick = (id, updatedParticipants) => {
-        const updated = sportsEvents.map(e =>
-            e.id === id ? { ...e, current_participants: updatedParticipants, is_joined: !e.is_joined } : e
-        );
-        setSportsEvents(updated);
-        setFilteredSportsEvents(updated);
-    };
-
-    const onLeaveClick = (id, updatedParticipants) => {
-        const updated = sportsEvents.map(e =>
-            e.id === id ? { ...e, current_participants: updatedParticipants } : e
-        );
-        setSportsEvents(updated);
-        setFilteredSportsEvents(updated);
-    };
+    const [filters, setFilters] = useState({
+        specialties: [],
+        difficulty: '',
+        goals: [],
+    });
+    const [showDrawer, setShowDrawer] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [availableSpecialties, setAvailableSpecialties] = useState([]);
+    const [availableGoals, setAvailableGoals] = useState([]);
 
     useEffect(() => {
         const token = localStorage.getItem("TOKEN");
@@ -44,48 +32,85 @@ export default function SportsEvents() {
             if (role === "Admin") setIsAdmin(true);
             if (role === "Admin" || role === "User") setIsGuest(false);
         }
-        fetchSportsEvents();
     }, []);
+    useEffect(() => {
+        const fetchFilterData = async () => {
+
+
+            try {
+                const [specialtiesResponse, filterOptionsResponse] = await Promise.all([
+                    axiosClient.get('/specialties'),
+                    axiosClient.get('/sports-events/filter-options'),
+                ]);
+                // console.log('Specialties fetched:', specialtiesResponse.data);
+                setAvailableSpecialties(specialtiesResponse.data);
+                setAvailableGoals(filterOptionsResponse.data.goals);
+            } catch (error) {
+                console.error('Error fetching filter options:', error);
+            }
+        };
+
+        fetchFilterData();
+    }, []);
+
+    useEffect(() => {
+        fetchSportsEvents(currentPage);
+    }, [currentPage]);
+
+    useEffect(() => {
+        fetchSportsEvents(1);
+    }, [filters, searchQuery]);
 
     const fetchSportsEvents = (page = 1) => {
         setLoading(true);
-        axiosClient.get(`/sports-events?page=${page}`)
+
+        axiosClient.get('/sports-events', {
+            params: {
+                page,
+                per_page: 6,
+                search: searchQuery || undefined,
+                specialties: filters.specialties.length > 0 ? filters.specialties : undefined,
+                difficulty: filters.difficulty || undefined,
+                goals: filters.goals.length > 0 ? filters.goals : undefined,
+            }
+        })
             .then(({ data }) => {
                 setSportsEvents(data.data || []);
-                setFilteredSportsEvents(data.data || []);
                 setPagination(data.meta || {});
-                setLoading(false);
+                setCurrentPage(page);
             })
             .catch((error) => {
-                console.error("Error fetching sportsEvents:", error);
-                setLoading(false);
-            });
+                console.error("Error fetching sports events:", error);
+            })
+            .finally(() => setLoading(false));
     };
 
     const handleSearchChange = (ev) => {
-        const query = ev.target.value.toLowerCase();
-        setSearchQuery(query);
-        const filtered = sportsEvents.filter(e =>
-            e.name.toLowerCase().startsWith(query)
-        );
-        setFilteredSportsEvents(filtered);
+        setSearchQuery(ev.target.value);
+    };
+
+    const activeFilterCount =
+        (filters.specialties.length > 0 ? 1 : 0) +
+        (filters.difficulty ? 1 : 0) +
+        (filters.goals.length > 0 ? 1 : 0);
+
+    const handleClearFilters = () => {
+        setFilters({ specialties: [], difficulty: '', goals: [] });
     };
 
     const searchBar = (
-        <div className="relative w-full max-w-xs">
-            <input
-                type="text"
-                value={searchQuery}
-                onChange={handleSearchChange}
-                placeholder="Search sportsEvents..."
-                className="p-2 pl-10 border border-gray-300 rounded-lg w-full"
-            />
-            <MagnifyingGlassIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-500" />
-        </div>
+        <SearchFilterBar
+            value={searchQuery}
+            onChange={handleSearchChange}
+            onFilterClick={() => setShowDrawer(true)}
+            placeholder="Search sports events..."
+            showFilter={true}
+            filterCount={activeFilterCount}
+        />
     );
 
     return (
-        <PageComponent title="SportsEvents" searchBar={searchBar}>
+        <PageComponent title="Sports Events" searchBar={searchBar}>
             {loading ? (
                 <div className="flex justify-center items-center h-40">
                     <LoadingDialog />
@@ -93,45 +118,70 @@ export default function SportsEvents() {
             ) : (
                 <>
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3">
-                        {(filteredSportsEvents || []).map(sportEvent => (
-                            <SportEventListItem
-                                key={sportEvent.id}
-                                sportEvent={sportEvent}
-                                onDeleteClick={onDeleteClick}
-                                onJoinClick={onJoinClick}
-                                onLeaveClick={onLeaveClick}
-                                isAdmin={isAdmin}
-                                isGuest={isGuest}
-                            />
-                        ))}
+                        {sportsEvents.length === 0 ? (
+                            <div className="col-span-full text-center text-gray-500 italic mt-12">
+                                No sports events found.
+                            </div>
+                        ) : (
+                            sportsEvents.map((sportEvent) => (
+                                <SportEventListItem
+                                    key={sportEvent.id}
+                                    sportEvent={sportEvent}
+                                    onDeleteClick={() => { }}
+                                    onJoinClick={() => { }}
+                                    onLeaveClick={() => { }}
+                                    isAdmin={isAdmin}
+                                    isGuest={isGuest}
+                                />
+                            ))
+                        )}
                     </div>
 
                     {/* Pagination Controls */}
                     {pagination.total > pagination.per_page && (
-                        <div className="mt-6 flex justify-center gap-2">
-                            {pagination.current_page > 1 && (
+                        <div className="mt-6 flex justify-center">
+                            <div className="flex items-center gap-4 bg-white px-4 py-2 rounded shadow-sm border border-gray-200">
                                 <button
-                                    onClick={() => fetchSportsEvents(pagination.current_page - 1)}
-                                    className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                    disabled={pagination.current_page <= 1}
+                                    className={`px-4 py-2 rounded ${pagination.current_page <= 1
+                                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                        : "bg-gray-200 hover:bg-gray-300"
+                                        }`}
                                 >
                                     Previous
                                 </button>
-                            )}
-                            <span className="px-4 py-2 text-sm text-gray-600">
-                                Page {pagination.current_page} of {pagination.last_page}
-                            </span>
-                            {pagination.current_page < pagination.last_page && (
+
+                                <span className="text-sm text-gray-700 whitespace-nowrap">
+                                    Page {pagination.current_page} of {pagination.last_page}
+                                </span>
+
                                 <button
-                                    onClick={() => fetchSportsEvents(pagination.current_page + 1)}
-                                    className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, pagination.last_page))}
+                                    disabled={pagination.current_page >= pagination.last_page}
+                                    className={`px-4 py-2 rounded ${pagination.current_page >= pagination.last_page
+                                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                        : "bg-gray-200 hover:bg-gray-300"
+                                        }`}
                                 >
                                     Next
                                 </button>
-                            )}
+                            </div>
                         </div>
                     )}
                 </>
             )}
+
+            <FilterDrawerSportsEvents
+                isOpen={showDrawer}
+                onClose={() => setShowDrawer(false)}
+                onApply={(newFilters) => setFilters(newFilters)}
+                onClear={handleClearFilters}
+                initialFilters={filters}
+                availableSpecialties={availableSpecialties}
+                availableGoals={availableGoals}
+            />
+
         </PageComponent>
     );
 }

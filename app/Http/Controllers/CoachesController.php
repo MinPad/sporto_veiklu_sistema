@@ -19,29 +19,70 @@ use Illuminate\Support\Str;
 class CoachesController extends Controller
 {
     use AuthorizesRequests;
-    public function index($cityId, $gymId)
+
+    public function index(Request $request, $cityId, $gymId)
     {
         $city = City::find($cityId);
         if (!$city) {
             return response()->json(['message' => 'City not found'], 404);
         }
+    
         $gym = Gym::find($gymId);
-    
-        if (!$gym) {
-            return response()->json(['message' => 'There is no gym with that index in the city'], 404);
+        if (!$gym || $gym->city_id != $city->id) {
+            return response()->json(['message' => 'Gym not found in this city'], 404);
         }
     
-        if ($gym->city_id != $city->id) {
-            return response()->json(['message' => 'There is no gym with that index in the city'], 404);
+        $query = $gym->coaches()->with(['gym', 'specialties']);
+    
+        if ($request->filled('approval_status')) {
+            if ($request->approval_status === 'approved') {
+                $query->where('is_approved', true);
+            } elseif ($request->approval_status === 'pending') {
+                $query->where('is_approved', false);
+            }
         }
     
-        return response()->json(CoachResource::collection($gym->coaches), 200);
+        if ($request->has('specialty_ids') && is_array($request->specialty_ids) && count($request->specialty_ids) > 0) {
+            $query->whereHas('specialties', function ($q) use ($request) {
+                $q->whereIn('specialties.id', $request->specialty_ids);
+            });
+        }
+    
+        if ($request->filled('search')) {
+            $search = strtolower($request->search);
+            $query->whereRaw("LOWER(CONCAT(name, ' ', surname)) LIKE ?", ["%$search%"]);
+        }
+    
+        return CoachResource::collection(
+            $query->paginate($request->get('per_page', 9))
+        );
     }
-    public function indexAll()
+    
+    public function indexAll(Request $request)
     {
-        $coaches = Coach::with('gym')->get(); // if you want gym info too
-        return response()->json(CoachResource::collection($coaches), 200);
+        $query = Coach::with(['gym.city', 'specialties']);
+    
+        if ($request->filled('city_id')) {
+            $query->whereHas('gym', function ($q) use ($request) {
+                $q->where('city_id', $request->city_id);
+            });
+        }
+    
+        if ($request->filled('gym_id')) {
+            $query->where('gym_id', $request->gym_id);
+        }
+    
+        if ($request->filled('specialty_ids')) {
+            $query->whereHas('specialties', function ($q) use ($request) {
+                $q->whereIn('specialties.id', $request->specialty_ids);
+            });
+        }
+    
+        return CoachResource::collection(
+            $query->paginate($request->get('per_page', 9))
+        );
     }
+    
     public function showSingle(Coach $coach)
     {
         $this->authorize('view', $coach);
@@ -162,19 +203,18 @@ class CoachesController extends Controller
         }
         return response()->json(new CoachResource($coach), 200);
     }
-    public function updateCoach(Request $request, Coach $coach)
+    public function updateCoach(UpdateCoachRequest  $request, Coach $coach)
     {
         $this->authorize('update', $coach);
-    
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'surname' => 'required|string|max:255',
-            'is_approved' => 'boolean',
-            'gym_id' => 'nullable|exists:gyms,id',
-            'specialties' => 'array',
-            'specialties.*' => 'integer|exists:specialties,id',
-        ]);
-    
+
+        $validated = $request->validated();
+                
+    if (!empty($validated['gym_id'])) {
+        $gym = \App\Models\Gym::find($validated['gym_id']);
+        if (!$gym) {
+            return response()->json(['message' => 'Selected gym not found'], 404);
+        }
+    }
         $coach->update($validated);
     
         if ($request->has('specialties')) {

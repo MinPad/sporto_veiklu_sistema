@@ -26,18 +26,21 @@ class UpdateCoachRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => ['nullable', 'string' ,'min:2', 'max:255', 'regex:/^[\pL\d\- ]*$/u'],
-            'surname' => ['nullable', 'string' ,'min:2', 'max:255', 'regex:/^[\pL\d\.\- ]*$/u'],
-            'specialty' => ['nullable', 'string' ,'min:2', 'max:255', 'regex:/^[\pL\d\.\- ]*$/u']
+            'name' => ['required', 'string', 'min:2', 'max:255', 'regex:/^[\pL\s\'\-]+$/u'],
+            'surname' => ['required', 'string', 'min:2', 'max:255', 'regex:/^[\pL\s\'\-]+$/u'],
+            'specialties' => ['nullable', 'array'],
+            'specialties.*' => ['exists:specialties,id'],
+            'gym_id' => ['nullable', 'exists:gyms,id'],
         ];
     }
 
     public function messages()
     {
         return [
-            'name.regex' => 'Detected not allowed symbols in the name field',
-            'surname.regex' => 'Detected not allowed symbols in the surname field',
-            'specialty.regex' => 'Detected not allowed symbols in the surname field'
+            'name.required' => 'The coach name is required.',
+            'surname.required' => 'The coach surname is required.',
+            'name.regex' => 'Name may only contain letters, spaces, hyphens (-), and apostrophes (\').',
+            'surname.regex' => 'Surname may only contain letters, spaces, hyphens (-), and apostrophes (\').',
         ];
     }
 }

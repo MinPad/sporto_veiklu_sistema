@@ -14,22 +14,28 @@ class RecommendationController extends Controller
     {
         $this->recommendationService = $recommendationService;
     }
+
     public function index(Request $request)
     {
         $user = $request->user();
-    
+
         $allEvents = $this->recommendationService
                           ->getRecommendationsQueryForUser($user)
-                          ->with(['coaches', 'specialties']) // eager load if needed
-                          ->get(); // ⛔ no pagination here!
-    
+                          ->with(['coaches', 'specialties'])
+                          ->get();
+
         $scored = $this->recommendationService
                        ->scoreEventsForUser($allEvents, $user);
-    
-        $sorted = $scored->sortByDesc('recommendation_score')->values();
-    
+
+        $filtered = $scored->filter(function ($event) {
+            return $event->recommendation_score >= 1 && !$event->is_joined;
+        })->values();
+
+        $sorted = $filtered->sortByDesc('recommendation_score')->values();
+
         $perPage = 3;
         $page = $request->input('page', 1);
+
         $paginated = new \Illuminate\Pagination\LengthAwarePaginator(
             $sorted->forPage($page, $perPage),
             $sorted->count(),
@@ -37,10 +43,7 @@ class RecommendationController extends Controller
             $page,
             ['path' => $request->url(), 'query' => $request->query()]
         );
-    
+
         return SportEventResource::collection($paginated);
     }
-    
-    
-    
 }

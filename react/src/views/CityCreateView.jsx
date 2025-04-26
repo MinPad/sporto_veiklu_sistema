@@ -1,4 +1,4 @@
-import { LinkIcon, PhotoIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { LinkIcon, PhotoIcon, TrashIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import PageComponent from '../components/PageComponent';
@@ -61,14 +61,22 @@ export default function CityCreateView() {
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                             />
                         </div>
-                        {/* Error Message */}
                         {error && (
                             <div className="text-red-500 text-sm">
                                 {error}
                             </div>
                         )}
                     </div>
-                    <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
+                    <div className="flex justify-between">
+                        <button
+                            type="button"
+                            onClick={() => navigate(-1)}
+                            className="flex items-center gap-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded shadow text-sm font-medium"
+                        >
+                            <ArrowLeftIcon className="w-4 h-4" />
+                            Back
+                        </button>
+
                         <TButton type="submit">Save</TButton>
                     </div>
                 </div>

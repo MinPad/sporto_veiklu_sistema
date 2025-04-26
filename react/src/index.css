@@ -7,3 +7,18 @@ body {
 .hover\:text-white {
     transition: color 0.3s ease-in-out;
 }
+.react-select__control {
+    @apply border border-gray-300 rounded-md shadow-sm min-h-[38px] px-2 py-[2px] text-sm focus-within:ring-indigo-500 focus-within:border-indigo-500;
+}
+
+.react-select__multi-value {
+    @apply bg-indigo-100 text-indigo-800 text-sm rounded px-1;
+}
+
+.react-select__placeholder {
+    @apply text-gray-400 text-sm;
+}
+
+.react-select__menu {
+    @apply text-sm;
+}

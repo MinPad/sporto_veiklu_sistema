@@ -18,6 +18,7 @@ Route::post('/password/reset', [PasswordResetController::class, 'resetPassword']
 
 
 Route::get('/sports-events', [SportEventController::class, 'index']);
+Route::get('/sports-events/filter-options', [SportEventController::class, 'filterOptions']);
 Route::get('/sports-events/{id}', [SportEventController::class, 'show']);
 Route::middleware('auth:api')->post('/sports-events/{id}/join', [SportEventController::class, 'join']);
 Route::middleware('auth:api')->get('/my-sports-events', [SportEventController::class, 'myEvents']);

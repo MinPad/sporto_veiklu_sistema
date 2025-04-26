@@ -84,10 +84,10 @@ const routes = [
             </ProtectedRoute>
         ),
     },
-    {
-        path: '/gyms',
-        element: <Gyms />,
-    },
+    // {
+    //     path: '/gyms',
+    //     element: <Gyms />,
+    // },
     {
         path: '/cities/:cityId/gyms',
         element: <Gyms />,

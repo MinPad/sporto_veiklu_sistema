@@ -11,9 +11,18 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 class CityController extends Controller
 {
     use AuthorizesRequests;
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(CityResource::collection(City::all()), 200);
+        $query = City::query();
+    
+        if ($request->filled('search')) {
+            $search = strtolower($request->search);
+            $query->whereRaw("LOWER(name) LIKE ?", ["%$search%"]);
+        }
+    
+        $cities = $query->paginate($request->get('per_page', 9));
+    
+        return CityResource::collection($cities);
     }
     public function store(CreateCityRequest $request)
     {

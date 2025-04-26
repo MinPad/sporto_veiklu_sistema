@@ -21,14 +21,49 @@ use App\Policies\UserPolicy;
 class GymController extends Controller
 {
     use AuthorizesRequests;
-    public function index($cityId, User $manager = null)
+    public function index(Request $request, $cityId)
     {
-    $city = City::find($cityId);
-    if (!$city) {
-        return response()->json(['message' => 'City not found'], 404);
+        $city = City::find($cityId);
+    
+        if (!$city) {
+            return response()->json(['message' => 'City not found'], 404);
+        }
+    
+        $query = $city->gyms()
+            ->with('city')
+            ->withAvg('reviews', 'rating');
+    
+        if ($request->filled('specialties')) {
+            $query->whereHas('specialties', function ($q) use ($request) {
+                $q->whereIn('specialties.name', $request->specialties);
+            });
+        }
+    
+        if ($request->filled('min_rating')) {
+            $query->whereHas('reviews', function ($q) use ($request) {
+                $q->havingRaw('AVG(reviews.rating) >= ?', [$request->min_rating]);
+            });
+        }
+    
+        if ($request->filled('pricing')) {
+            if ($request->pricing === 'free') {
+                $query->where('is_free', true);
+            } elseif ($request->pricing === 'paid') {
+                $query->where('is_free', false);
+            }
+        }
+    
+        if ($request->filled('search')) {
+            $search = strtolower($request->search);
+            $query->whereRaw("LOWER(name) LIKE ?", ["%$search%"]);
+        }
+    
+        return GymResource::collection(
+            $query->paginate($request->get('per_page', 6))
+        );
     }
-    return response()->json(GymResource::collection($city->gyms()->with('city')->get()), 200);
-    }
+    
+    
     public function getGymById($gymId)
     {
         $gym = Gym::with('city')->find($gymId);

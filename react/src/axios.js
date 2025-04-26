@@ -1,21 +1,21 @@
 import axios from 'axios';
 import router from './router';
 
-// Assuming this file is part of a component
 const axiosClient = axios.create({
     baseURL: 'http://localhost:8000/api',
     withCredentials: true,
-    // headers: {
-    //     'Content-Type': 'application/json',
-    //     'Accept': 'application/json',
-    // }
 });
 
 axiosClient.interceptors.request.use((config) => {
     const token = localStorage.getItem('TOKEN');
-    if (token && config.url !== '/refresh-token') {
+
+    const isPublicRequest = config.headers['X-Public-Request'] === 'true';
+
+    // not public
+    if (!isPublicRequest && token && config.url !== '/refresh-token') {
         config.headers.Authorization = `Bearer ${token}`;
     }
+
     return config;
 });
 
@@ -30,18 +30,17 @@ function onRefreshed(token) {
 function addRefreshSubscriber(callback) {
     refreshSubscribers.push(callback);
 }
+
 axiosClient.interceptors.response.use(
     (response) => response,
     (error) => {
         const { config, response } = error;
 
-        // Token expired & hasn't retried yet
         if (response && response.status === 401 && !config._retry) {
             config._retry = true;
 
             const refreshToken = localStorage.getItem('REFRESH_TOKEN');
             if (refreshToken) {
-                // Try refresh
                 if (!isRefreshing) {
                     isRefreshing = true;
                     return axiosClient.post('/refresh-token', {}, {
@@ -80,15 +79,15 @@ axiosClient.interceptors.response.use(
                     });
                 });
             } else {
-                // ❗ No refresh token → just logout and redirect
+                // No refresh token — logout guest
                 localStorage.removeItem('TOKEN');
                 localStorage.removeItem('REFRESH_TOKEN');
-                console.log('Redirecting to login')
+                console.log('Redirecting to login');
                 router.push('/login');
             }
         }
 
-        // Optional: catch 403
+        // Optional: handle forbidden access
         if (response && response.status === 403) {
             history.push('/UnauthorizedPage');
         }
@@ -96,7 +95,5 @@ axiosClient.interceptors.response.use(
         return Promise.reject(error);
     }
 );
-
-
 
 export default axiosClient;

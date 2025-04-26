@@ -29,7 +29,7 @@ class CreateCityRequest extends FormRequest
                 'string', 
                 'min:5', 
                 'max:255', 
-                'regex:/^[\pL\d\- ]*$/u', 
+                'regex:/^[\pL\s\-]+$/u',
                 Rule::unique('cities'),
             ],
         ];
@@ -39,7 +39,8 @@ class CreateCityRequest extends FormRequest
     public function messages()
     {
         return [
-            'name.unique' => 'A city with this name already exists',
+            'name.unique' => 'A city with this name already exists.',
+            'name.regex' => 'The city name must contain only letters, spaces, or hyphens.',
         ];
     }
 }

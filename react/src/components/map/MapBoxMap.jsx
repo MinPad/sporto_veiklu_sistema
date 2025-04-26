@@ -196,6 +196,7 @@ const MapBoxMap = ({ gyms, cityId, selectedDistance, onVisibleGymCountChange }) 
                     const props = e.features[0].properties;
 
                     const gym = {
+                        id: props.id,
                         name: props.name,
                         city: props.cityName,
                         description: props.description,
@@ -203,6 +204,7 @@ const MapBoxMap = ({ gyms, cityId, selectedDistance, onVisibleGymCountChange }) 
                         image_url: props.image_url,
                         latitude: props.latitude,
                         longitude: props.longitude,
+                        cityId: cityId,
                     };
 
                     if (activePopup) activePopup.remove();

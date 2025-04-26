@@ -33,7 +33,7 @@ const Profile = () => {
         { title: 'Recommended for You', id: 'recommendedForYou' },
     ];
 
-    const [activeSetting, setActiveSetting] = useState('recommendedForYou');
+    const [activeSetting, setActiveSetting] = useState('publicProfile');
     const [currentAvatarUrl, setCurrentAvatarUrl] = useState('');
 
 

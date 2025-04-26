@@ -75,8 +75,6 @@ export default function Login() {
             {showProtectedBanner && (
                 <UnauthorizedAlert
                     message="You must be logged in to view that page."
-                    // actionLabel="Go to Homepage"
-                    // actionLink="/"
                     type="warning"
                     onClose={() => setShowProtectedBanner(false)}
                 />
@@ -91,11 +89,13 @@ export default function Login() {
                     </div>
 
                     {error.__html && (
-                        <div
-                            className="bg-red-500 rounded py-2 px-3 text-white"
-                            dangerouslySetInnerHTML={error}
-                        ></div>
+                        <div className="bg-red-500 rounded py-2 px-3 text-white text-sm space-y-1">
+                            {error.__html.split("<br>").map((msg, idx) => (
+                                <div key={idx}>{msg}</div>
+                            ))}
+                        </div>
                     )}
+
                     <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
                         <form onSubmit={onSubmit} className="mt-8 space-y-6" action="#" method="POST">
                             <input type="hidden" name="remember" defaultValue="true" />

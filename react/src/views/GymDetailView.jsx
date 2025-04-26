@@ -67,7 +67,7 @@ export default function GymDetailView() {
         Promise.all([fetchGym, fetchCoaches, fetchReviews])
             .then(([gymRes, coachRes, reviewRes]) => {
                 setGym(gymRes.data);
-                setCoaches(coachRes.data);
+                setCoaches(coachRes.data?.data || []); // ensures .slice works correctly
                 setReviews(reviewRes.data);
                 if (currentUser?.id) {
                     const alreadyReviewed = reviewRes.data.some(r => r.user_id === currentUser.id);
@@ -138,6 +138,7 @@ export default function GymDetailView() {
     const averageRating = reviews.length
         ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
         : 0;
+    // console.log("averageRating:", averageRating);
     const renderStars = (rating) => {
         const fullStars = Math.floor(rating);
         const hasHalfStar = rating % 1 >= 0.5;
@@ -263,19 +264,22 @@ export default function GymDetailView() {
                                                 </p>
                                             </div>
                                             <p className="text-sm text-gray-600">
-                                                <strong>Specialty:</strong> {coach.specialty}
+                                                <strong>Specialty:</strong> {coach.specialties?.length
+                                                    ? coach.specialties.map(s => s.name).join(', ')
+                                                    : <em className="text-gray-400">None</em>}
                                             </p>
                                         </div>
                                     ))}
                                 </div>
-                                <div className="flex justify-center">
-                                    <TButton to={`/cities/${cityId}/gyms/${gymId}/coaches`} className="flex items-center px-4">
-                                        <UserGroupIcon className="w-5 h-5 mr-2" />
-                                        View All Coaches
-                                    </TButton>
-                                </div>
+
                             </>
                         )}
+                        <div className="flex justify-center">
+                            <TButton to={`/cities/${cityId}/gyms/${gymId}/coaches`} className="flex items-center px-4">
+                                <UserGroupIcon className="w-5 h-5 mr-2" />
+                                View All Coaches
+                            </TButton>
+                        </div>
                     </div>
 
                     {/* Reviews */}

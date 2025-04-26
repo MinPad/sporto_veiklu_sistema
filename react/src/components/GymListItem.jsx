@@ -10,10 +10,15 @@ export default function GymListItem({ gym, onDeleteClick, isAdmin, cityId, onSuc
     const [showFullDescription, setShowFullDescription] = useState(false);
     const [isDialogOpen, setIsDialogOpen] = useState(false); // For confirmation dialog
     const [gymToDelete, setGymToDelete] = useState(null);
+    const averageRating = gym.reviews_avg_rating
+        ? parseFloat(gym.reviews_avg_rating)
+        : 0;
 
     const toggleDescription = () => {
         setShowFullDescription(!showFullDescription);
     };
+    // console.log("averageRating:", averageRating);
+
 
     const handleDeleteClick = () => {
         setGymToDelete(gym.id);
@@ -55,7 +60,12 @@ export default function GymListItem({ gym, onDeleteClick, isAdmin, cityId, onSuc
                         />
                         <div className="mt-4">
                             <div className="flex items-center gap-2">
-                                <h4 className="text-lg font-bold">{gym.name}</h4>
+                                <div className="flex items-center gap-2">
+                                    <h4 className="text-lg font-bold">{gym.name}</h4>
+                                    {averageRating > 0 && (
+                                        <span className="text-yellow-600 text-sm font-semibold">⭐ {averageRating.toFixed(1)}</span>
+                                    )}
+                                </div>
                                 {gym.isFree ? (
                                     <span className="bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded-full">
                                         Free

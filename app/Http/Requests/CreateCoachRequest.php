@@ -25,8 +25,8 @@ class CreateCoachRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => ['required', 'string', 'min:2', 'max:255'],
-            'surname' => ['required', 'string', 'min:2', 'max:255'],
+            'name' => ['required', 'string', 'min:2', 'max:255', 'regex:/^[\pL\s\'\-]+$/u'],
+            'surname' => ['required', 'string', 'min:2', 'max:255', 'regex:/^[\pL\s\'\-]+$/u'],
             // 'specialty' => [
             //     'required',
             //     'string',
@@ -55,6 +55,8 @@ class CreateCoachRequest extends FormRequest
         return [
             'name.required' => 'The coach name is required.',
             'surname.required' => 'The coach surname is required.',
+            'name.regex' => "Name may only contain letters, spaces, hyphens (-), and apostrophes (').",
+            'surname.regex' => "Surname may only contain letters, spaces, hyphens (-), and apostrophes (').",
             // 'specialty.required' => 'The coach specialty is required.',
             // 'specialty.unique' => 'A coach with this name, surname, and specialty already exists in this gym.',
         ];

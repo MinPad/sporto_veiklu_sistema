@@ -3,19 +3,22 @@ import PageComponent from "../components/PageComponent";
 import LoadingDialog from "../components/core/LoadingDialog";
 import axiosClient from "../axios";
 import { jwtDecode } from "jwt-decode";
-import { EnvelopeIcon, PlusCircleIcon, TrashIcon, EyeIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { EnvelopeIcon, TrashIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import TButton from "../components/core/TButton";
 import ConfirmationDialog from "../components/core/ConfirmationDialog";
 
 export default function Users() {
-    const [users, setUsers] = useState([]); // Original users from the API
-    const [filteredUsers, setFilteredUsers] = useState([]); // Filtered users based on search
+    const [users, setUsers] = useState([]);
+    const [filteredUsers, setFilteredUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isAdmin, setIsAdmin] = useState(false);
-    const [searchQuery, setSearchQuery] = useState(""); // State to store the search query
+    const [searchQuery, setSearchQuery] = useState("");
 
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [userToDelete, setUserToDelete] = useState(null);
+
+    const [pagination, setPagination] = useState({});
+    const [currentPage, setCurrentPage] = useState(1);
 
     useEffect(() => {
         const token = localStorage.getItem("TOKEN");
@@ -26,23 +29,37 @@ export default function Users() {
             }
         }
 
-        fetchUsers();
-    }, []);
+        fetchUsers(currentPage);
+    }, [currentPage]);
 
-    // Fetch users from the API
-    const fetchUsers = () => {
+    const fetchUsers = (page = 1) => {
         setLoading(true);
-        axiosClient.get("/users")
+        axiosClient.get(`/users?page=${page}`)
             .then(({ data }) => {
-                setUsers(data);
-                setFilteredUsers(data); // Set filteredUsers to all users initially
-                setLoading(false);
+                const userList = data.data || [];
+                const meta = data.meta || {};
+                setUsers(userList);
+                setFilteredUsers(userList);
+                setPagination(meta);
             })
             .catch(error => {
                 console.error("Error fetching users:", error);
-                setLoading(false);
-            });
+            })
+            .finally(() => setLoading(false));
     };
+
+    const handleSearchChange = (ev) => {
+        const query = ev.target.value;
+        setSearchQuery(query);
+
+        const filtered = users.filter(user =>
+            user.name.toLowerCase().includes(query.toLowerCase()) ||
+            user.email.toLowerCase().includes(query.toLowerCase()) ||
+            user.id.toString().includes(query)
+        );
+        setFilteredUsers(filtered);
+    };
+
     const handleDeleteClick = (userId) => {
         setUserToDelete(userId);
         setIsDialogOpen(true);
@@ -51,35 +68,25 @@ export default function Users() {
     const confirmDelete = () => {
         axiosClient.delete(`users/${userToDelete}`)
             .then(() => {
-                setUsers((prevUsers) => prevUsers.filter(user => user.id !== userToDelete));
-                setFilteredUsers((prevUsers) => prevUsers.filter(user => user.id !== userToDelete));
+                const updated = filteredUsers.filter(user => user.id !== userToDelete);
+                setFilteredUsers(updated);
+                setUsers(prev => prev.filter(user => user.id !== userToDelete));
                 setIsDialogOpen(false);
                 setUserToDelete(null);
             })
-            .catch((error) => {
+            .catch(error => {
                 console.error("Error deleting user:", error);
                 setIsDialogOpen(false);
             });
     };
-    // console.log("users", users);
-    const handleSearchChange = (ev) => {
-        const query = ev.target.value;
-        setSearchQuery(query);
 
-        const filtered = users.filter(user =>
-            user.name.toLowerCase().startsWith(query.toLowerCase()) ||
-            user.email.toLowerCase().startsWith(query.toLowerCase()) ||
-            user.id.toString().startsWith(query)
-        );
-        setFilteredUsers(filtered);
-    };
     const searchBar = (
         <div className="relative w-full sm:w-[340px]">
             <input
                 type="text"
                 value={searchQuery}
                 onChange={handleSearchChange}
-                placeholder="Search users by name, email and id..."
+                placeholder="Search users by name, email, or ID"
                 className="p-2 pl-10 border border-gray-300 rounded-lg w-full text-sm"
             />
             <MagnifyingGlassIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-500" />
@@ -91,39 +98,52 @@ export default function Users() {
             title="Users"
             searchBar={searchBar}
         >
-
             <div className="container mx-auto py-4">
-                {loading && <LoadingDialog />}
-
-                {!loading && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {filteredUsers.map((user) => (
-                            <div
-                                key={user.id}
-                                className="w-full max-w-md p-4 bg-gray-100 border border-gray-300 rounded-lg shadow-lg sm:p-4 md:p-6 dark:bg-gray-800 dark:border-gray-700"
-                            >
-                                <h3 className="text-lg font-semibold text-gray-700">
-                                    <span className="text-blue-500">{"ID " + user.id}</span>
-                                    <span className="mx-2 text-gray-500">|</span>
-                                    <span className="text-gray-900 font-medium">{"Name: " + user.name}</span>
-                                </h3>
-                                <div className="flex justify-between items-center mt-2">
-                                    <a href={`mailto:${user.email}`} className="flex items-center text-blue-500 hover:text-blue-700">
-                                        <EnvelopeIcon className="h-5 w-5 mr-2" /> {user.email}
-                                    </a>
-                                    {isAdmin && (
-                                        <TButton
-                                            onClick={() => handleDeleteClick(user.id)}
-                                            circle
-                                            link
-                                            color="red"
-                                        >
-                                            <TrashIcon className="w-5 h-5" />
-                                        </TButton>
-                                    )}
+                {loading ? (
+                    <LoadingDialog />
+                ) : (
+                    <>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {filteredUsers.length === 0 ? (
+                                <div className="col-span-full text-center text-gray-500 italic mt-12">
+                                    No users found.
                                 </div>
-                            </div>
-                        ))}
+                            ) : (
+                                filteredUsers.map((user) => (
+                                    <div
+                                        key={user.id}
+                                        className="bg-white border border-gray-200 rounded-2xl shadow-md p-4 flex flex-col justify-between transition-transform duration-300 ease-in-out hover:shadow-lg hover:scale-[1.02]"
+                                    >
+                                        <div>
+                                            <h3 className="text-lg font-bold text-gray-800 mb-2">
+                                                ID {user.id} | <span className="text-gray-900 font-medium">{user.name}</span>
+                                            </h3>
+                                            <a
+                                                href={`mailto:${user.email}`}
+                                                className="flex items-center text-sm text-blue-600 hover:underline"
+                                            >
+                                                <EnvelopeIcon className="h-5 w-5 mr-2 text-blue-500" />
+                                                {user.email}
+                                            </a>
+                                        </div>
+
+                                        {isAdmin && (
+                                            <div className="mt-4 flex justify-end">
+                                                <TButton
+                                                    onClick={() => handleDeleteClick(user.id)}
+                                                    circle
+                                                    link
+                                                    color="red"
+                                                >
+                                                    <TrashIcon className="w-5 h-5" />
+                                                </TButton>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))
+                            )}
+                        </div>
+
                         <ConfirmationDialog
                             isOpen={isDialogOpen}
                             onClose={() => setIsDialogOpen(false)}
@@ -131,7 +151,40 @@ export default function Users() {
                             message="Are you sure you want to delete this user? This action cannot be undone."
                             onConfirm={confirmDelete}
                         />
-                    </div>
+
+                        {/* Pagination Controls */}
+                        {filteredUsers.length > 0 && pagination.total > pagination.per_page && (
+                            <div className="mt-6 flex justify-center">
+                                <div className="flex items-center gap-4 bg-white px-4 py-2 rounded shadow-sm border border-gray-200">
+                                    <button
+                                        onClick={() => setCurrentPage(prev => prev - 1)}
+                                        disabled={pagination.current_page <= 1}
+                                        className={`px-4 py-2 rounded transition ${pagination.current_page <= 1
+                                            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                            : "bg-gray-200 hover:bg-gray-300"
+                                            }`}
+                                    >
+                                        Previous
+                                    </button>
+
+                                    <span className="text-sm text-gray-700 whitespace-nowrap">
+                                        Page {pagination.current_page} of {pagination.last_page}
+                                    </span>
+
+                                    <button
+                                        onClick={() => setCurrentPage(prev => prev + 1)}
+                                        disabled={pagination.current_page >= pagination.last_page}
+                                        className={`px-4 py-2 rounded transition ${pagination.current_page >= pagination.last_page
+                                            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                            : "bg-gray-200 hover:bg-gray-300"
+                                            }`}
+                                    >
+                                        Next
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
         </PageComponent>

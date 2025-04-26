@@ -1,40 +1,41 @@
 import PageComponent from '../components/PageComponent';
 import GymListItem from '../components/GymListItem';
 import LoadingDialog from "../components/core/LoadingDialog";
-import { PlusCircleIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { PlusCircleIcon } from '@heroicons/react/24/outline';
 import TButton from '../components/core/TButton';
 import { useEffect, useState, useRef } from 'react';
 import { useParams } from "react-router-dom";
 import axiosClient from "../axios";
 import { jwtDecode } from "jwt-decode";
 
-import MapView from '../components/MapView';
 import MapBoxMap from '../components/map/MapBoxMap';
-
 import SuccessAlert from '../components/core/SuccessAlert';
+import SearchFilterBar from "../components/core/SearchFilterBar";
+import FilterDrawerGym from '../components/core/FilterDrawerGym';
 
 export default function Gyms() {
     const { cityId } = useParams();
     const [city, setCity] = useState(null);
-
     const [gyms, setGyms] = useState([]);
-    const [loading, setLoading] = useState(true); // Loading state
+    const [pagination, setPagination] = useState({});
+    const [loading, setLoading] = useState(true);
     const [isAdmin, setIsAdmin] = useState(false);
-
     const [searchQuery, setSearchQuery] = useState("");
-    const [filteredGyms, setFilteredGyms] = useState([]);
-
+    const [filters, setFilters] = useState({
+        specialties: [],
+        minRating: 0,
+        pricing: 'all',
+    });
+    const [currentPage, setCurrentPage] = useState(1);
     const [showMap, setShowMap] = useState(false);
-    const mapSectionRef = useRef(null);
-
-    const [selectedDistance, setSelectedDistance] = useState(0); // 0 = show all
-    const [visibleGymCount, setVisibleGymCount] = useState(null);
-
-
+    const [showDrawer, setShowDrawer] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
+    const [selectedDistance, setSelectedDistance] = useState(0);
+    const [visibleGymCount, setVisibleGymCount] = useState(null);
+    const mapSectionRef = useRef(null);
     const successTimeoutRef = useRef(null);
+
     const showSuccessMessage = (msg) => {
-        // console.log("SUCCESS ALERT TRIGGERED:", msg);
         setSuccessMessage(msg);
         if (successTimeoutRef.current) {
             clearTimeout(successTimeoutRef.current);
@@ -44,15 +45,6 @@ export default function Gyms() {
             successTimeoutRef.current = null;
         }, 3000);
     };
-    const onDeleteClick = (gymId) => {
-        const updatedGyms = gyms.filter(gym => gym.id !== gymId);
-        setGyms(updatedGyms);
-        setFilteredGyms(updatedGyms);
-    };
-
-    // useEffect(() => {
-    //     document.title = "Gyms | System of Sports Activities";
-    // }, []);
 
     useEffect(() => {
         const token = localStorage.getItem("TOKEN");
@@ -63,29 +55,37 @@ export default function Gyms() {
             }
         }
 
-        Promise.all([
-            axiosClient.get(`cities/${cityId}/gyms`),
-            axiosClient.get(`/cities/${cityId}`)
-        ])
-            .then(([gymsRes, cityRes]) => {
-                setGyms(gymsRes.data);
-                setFilteredGyms(gymsRes.data);
-                setCity(cityRes.data);
-            })
-            .catch((err) => {
-                console.error("Error fetching gyms or city:", err);
-            })
-            .finally(() => setLoading(false));
+        axiosClient.get(`/cities/${cityId}`)
+            .then((cityRes) => setCity(cityRes.data))
+            .catch((err) => console.error("Error fetching city:", err));
     }, [cityId]);
 
-    const handleSearchChange = (ev) => {
-        const query = ev.target.value;
-        setSearchQuery(query);
+    useEffect(() => {
+        fetchGyms(currentPage);
+    }, [currentPage, filters, searchQuery, cityId]);
 
-        const filtered = gyms.filter(gym =>
-            gym.name.toLowerCase().startsWith(query.toLowerCase())
-        );
-        setFilteredGyms(filtered);
+    const fetchGyms = (page = 1) => {
+        setLoading(true);
+        axiosClient.get(`/cities/${cityId}/gyms`, {
+            params: {
+                page,
+                per_page: 6,
+                specialties: filters.specialties.length > 0 ? filters.specialties : undefined,
+                min_rating: filters.minRating > 0 ? filters.minRating : undefined,
+                pricing: filters.pricing !== 'all' ? filters.pricing : undefined,
+                search: searchQuery || undefined,
+            }
+        })
+            .then(({ data }) => {
+                setGyms(data.data || []);
+                setPagination(data.meta || {});
+            })
+            .catch((err) => console.error("Error fetching gyms:", err))
+            .finally(() => setLoading(false));
+    };
+
+    const handleSearchChange = (ev) => {
+        setSearchQuery(ev.target.value);
     };
 
     const handleToggleMap = () => {
@@ -99,17 +99,34 @@ export default function Gyms() {
             return newVal;
         });
     };
+
+    const handleClearFilters = () => {
+        setFilters({
+            specialties: [],
+            minRating: 0,
+            pricing: 'all'
+        });
+    };
+
+    const onDeleteClick = (gymId) => {
+        const updatedGyms = gyms.filter(gym => gym.id !== gymId);
+        setGyms(updatedGyms);
+    };
+
+    const activeFilterCount =
+        (filters.specialties.length > 0 ? 1 : 0) +
+        (filters.minRating > 0 ? 1 : 0) +
+        (filters.pricing !== 'all' ? 1 : 0);
+
     const searchBar = (
-        <div className="relative w-full sm:max-w-xs">
-            <input
-                type="text"
-                value={searchQuery}
-                onChange={handleSearchChange}
-                placeholder="Search gyms..."
-                className="p-2 pl-10 border border-gray-300 rounded-lg w-full text-sm"
-            />
-            <MagnifyingGlassIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-500" />
-        </div>
+        <SearchFilterBar
+            value={searchQuery}
+            onChange={handleSearchChange}
+            onFilterClick={() => setShowDrawer(true)}
+            placeholder="Search gyms..."
+            showFilter={true}
+            filterCount={activeFilterCount}
+        />
     );
 
     return (
@@ -135,29 +152,20 @@ export default function Gyms() {
                 </div>
             ) : (
                 <>
-                    {/* Show Map Button */}
-                    {!showMap && (
+                    {/* Map Toggle */}
+                    {gyms.length > 0 && (
                         <div className="flex justify-end px-4 mb-4">
                             <button
                                 onClick={handleToggleMap}
                                 className="w-full sm:w-auto px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded shadow text-sm transition"
                             >
-                                Show Map
+                                {showMap ? 'Hide Map' : 'Show Map'}
                             </button>
                         </div>
                     )}
 
                     {showMap && (
                         <>
-                            <div className="flex justify-end px-4 mb-2">
-                                <button
-                                    onClick={handleToggleMap}
-                                    className="w-full sm:w-auto px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded shadow text-sm transition"
-                                >
-                                    Hide Map
-                                </button>
-                            </div>
-
                             <div className="flex flex-col sm:flex-row justify-between px-4 mb-2 gap-2 sm:items-center">
                                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                                     <label className="text-sm font-medium text-gray-700">Distance filter:</label>
@@ -172,6 +180,7 @@ export default function Gyms() {
                                         <option value={5}>Within 5 km</option>
                                     </select>
                                 </div>
+
                                 <p className="text-sm text-gray-600">
                                     {visibleGymCount !== null
                                         ? `${visibleGymCount} gym${visibleGymCount !== 1 ? "s" : ""} shown`
@@ -184,7 +193,7 @@ export default function Gyms() {
                                 className="transition-all duration-300 ease-in-out overflow-hidden rounded-lg"
                             >
                                 <MapBoxMap
-                                    gyms={filteredGyms}
+                                    gyms={gyms}
                                     cityId={cityId}
                                     selectedDistance={selectedDistance}
                                     onVisibleGymCountChange={setVisibleGymCount}
@@ -193,7 +202,7 @@ export default function Gyms() {
                         </>
                     )}
 
-                    {/* Success Alert */}
+
                     {successMessage && (
                         <div className="mb-4 px-4">
                             <SuccessAlert message={successMessage} />
@@ -202,20 +211,65 @@ export default function Gyms() {
 
                     {/* Gym Cards */}
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3">
-                        {filteredGyms.map((gym) => (
-                            <GymListItem
-                                key={gym.id}
-                                gym={gym}
-                                onDeleteClick={onDeleteClick}
-                                isAdmin={isAdmin}
-                                cityId={cityId}
-                                onSuccess={showSuccessMessage}
-                            />
-                        ))}
+                        {gyms.length === 0 ? (
+                            <div className="col-span-full text-center text-gray-500 italic mt-12">
+                                There are no gyms to display.
+                            </div>
+                        ) : (
+                            gyms.map((gym) => (
+                                <GymListItem
+                                    key={gym.id}
+                                    gym={gym}
+                                    onDeleteClick={onDeleteClick}
+                                    isAdmin={isAdmin}
+                                    cityId={cityId}
+                                    onSuccess={showSuccessMessage}
+                                />
+                            ))
+                        )}
                     </div>
+
+                    {/* Pagination */}
+                    {pagination.total > pagination.per_page && (
+                        <div className="mt-6 flex justify-center">
+                            <div className="flex items-center gap-4 bg-white px-4 py-2 rounded shadow-sm border border-gray-200">
+                                <button
+                                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                    disabled={pagination.current_page <= 1}
+                                    className={`px-4 py-2 rounded ${pagination.current_page <= 1
+                                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                        : "bg-gray-200 hover:bg-gray-300"
+                                        }`}
+                                >
+                                    Previous
+                                </button>
+                                <span className="text-sm text-gray-700 whitespace-nowrap">
+                                    Page {pagination.current_page} of {pagination.last_page}
+                                </span>
+                                <button
+                                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, pagination.last_page))}
+                                    disabled={pagination.current_page >= pagination.last_page}
+                                    className={`px-4 py-2 rounded ${pagination.current_page >= pagination.last_page
+                                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                        : "bg-gray-200 hover:bg-gray-300"
+                                        }`}
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </>
             )}
+
+            <FilterDrawerGym
+                isOpen={showDrawer}
+                onClose={() => setShowDrawer(false)}
+                onApply={(newFilters) => setFilters(newFilters)}
+                onClear={handleClearFilters}
+                initialFilters={filters}
+                availableSpecialties={[...new Set(gyms.flatMap(g => g.specialties?.map(s => s.name) || []))]}
+            />
         </PageComponent>
     );
-
 }

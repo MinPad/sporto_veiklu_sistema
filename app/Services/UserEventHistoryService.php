@@ -25,10 +25,15 @@ class UserEventHistoryService
             ->limit($limit)
             ->get();
 
-        $gymFrequency = $history->groupBy('gym_id')->map->count()->sortDesc();
+        $gymFrequency = $history->groupBy('gym_id')->map->count()->sortDesc()->mapWithKeys(fn($val, $key) => [(int)$key => $val]);
         $activityTypes = $history->groupBy('activity_type')->map->count()->sortDesc();
         $goalTags = $history->pluck('goal_tags')->flatten()->countBy()->sortDesc();
-
+        // \Log::info("[HISTORY EVENTS FETCHED]", [
+        //     'user_id' => $user->id,
+        //     'event_ids' => $history->pluck('id')->all(),
+        //     'gym_ids' => $history->pluck('gym_id')->all(),
+        //     'raw_goal_tags' => $history->pluck('goal_tags')->all(),
+        // ]);
         return [
             'gym_frequency' => $gymFrequency,       
             'activity_types' => $activityTypes,      

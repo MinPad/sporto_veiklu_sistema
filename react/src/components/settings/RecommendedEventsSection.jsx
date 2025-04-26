@@ -31,7 +31,6 @@ const RecommendedEventsSection = () => {
         }, 3000);
     };
     const [showFullAlert, setShowFullAlert] = useState(false);
-
     useEffect(() => {
         setLoading(true);
         axiosClient.get(`/recommendations?page=${currentPage}`)
@@ -55,24 +54,20 @@ const RecommendedEventsSection = () => {
             day: 'numeric'
         });
     };
-    // console.log(`Event: ${event.name}, Score: ${event.recommendation_score}`);
+    const visibleEvents = events.filter(
+        event => !event.is_joined && event.recommendation_score >= 1
+    );
 
     return (
         <div>
-            {showFullAlert && (
-                <UnauthorizedAlert
-                    message="This event is already full."
-                    onClose={() => setShowFullAlert(false)}
-                    type="warning"
-                />
-            )}
             <h2 className="text-2xl font-semibold text-indigo-900 mb-6">Recommended for You</h2>
 
             {loading ? (
                 <p className="text-gray-500">Loading recommendations...</p>
-            ) : events.length === 0 ? (
+            ) : visibleEvents.length === 0 ? (
                 <div className="bg-white p-6 rounded-xl shadow text-center text-gray-600">
-                    You’ve already joined all the matching events or there are no suitable recommendations.
+                    We couldn't find good matches based on your preferences.<br />
+                    Try updating your goals or check back later.
                 </div>
             ) : (
                 <div className="grid gap-4">
@@ -83,14 +78,20 @@ const RecommendedEventsSection = () => {
                             onClose={() => setSuccessMessage('')}
                         />
                     )}
-                    {events.map(event => {
+                    {showFullAlert && (
+                        <UnauthorizedAlert
+                            message="This event is already full. Try a different one!"
+                            onClose={() => setShowFullAlert(false)}
+                        />
+                    )}
+
+                    {visibleEvents.map(event => {
                         const match = getMatchStrength(event.recommendation_score);
                         const isFull = event.max_participants !== null && event.current_participants >= event.max_participants;
-
+                        // { console.log(`Event: ${event.name}, Score: ${event.recommendation_score}`) }
                         return (
                             <div key={event.id} className="bg-white rounded-2xl shadow p-6 transition hover:shadow-md">
                                 <div className="w-full flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
-                                    {/* Left Side: Event Info */}
                                     <div className="border-l-4 border-indigo-500 pl-4 w-full">
                                         <div className="flex items-center flex-wrap gap-2 mb-1">
                                             <h3 className="font-bold text-lg">{event.name}</h3>
@@ -180,23 +181,34 @@ const RecommendedEventsSection = () => {
                                         color="indigo"
                                         disabled={isFull}
                                         onClick={() => {
-                                            const isFull = event.max_participants !== null && event.current_participants >= event.max_participants;
                                             if (isFull) {
                                                 setShowFullAlert(true);
                                                 setTimeout(() => setShowFullAlert(false), 4000);
                                                 return;
                                             }
-
                                             axiosClient
                                                 .post(`/sports-events/${event.id}/join`)
                                                 .then((response) => {
                                                     showSuccessMessage(response.data.message);
-                                                })
-                                                .catch((error) => {
-                                                    alert(error.response?.data?.message || "An error occurred.");
-                                                });
-                                        }}
 
+                                                    setEvents((prev) => {
+                                                        const updated = prev.filter(e => e.id !== event.id);
+                                                        if (updated.length < 3 && pagination.current_page < pagination.last_page) {
+                                                            axiosClient.get(`/recommendations?page=${pagination.current_page + 1}`)
+                                                                .then((res) => {
+                                                                    const additional = res.data.data.filter(
+                                                                        e => !e.is_joined && e.recommendation_score >= 1
+                                                                    );
+                                                                    setEvents([...updated, ...additional]);
+                                                                    setPagination(res.data.meta);
+                                                                });
+                                                        } else {
+                                                            return updated;
+                                                        }
+                                                        return updated;
+                                                    });
+                                                })
+                                        }}
                                         className="w-full sm:w-auto text-center"
                                     >
                                         Join
@@ -207,26 +219,34 @@ const RecommendedEventsSection = () => {
                     })}
 
                     {pagination.total > pagination.per_page && (
-                        <div className="mt-2 pt-2 flex justify-center gap-2 border-t border-gray-100">
-                            {pagination.current_page > 1 && (
+                        <div className="mt-4 pt-4 flex justify-center border-t border-gray-100">
+                            <div className="flex items-center gap-4 bg-white px-4 py-2 rounded shadow-sm border border-gray-200">
                                 <button
                                     onClick={() => setCurrentPage(prev => prev - 1)}
-                                    className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                                    disabled={pagination.current_page <= 1}
+                                    className={`px-4 py-2 rounded transition ${pagination.current_page <= 1
+                                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                        : "bg-gray-200 hover:bg-gray-300"
+                                        }`}
                                 >
                                     Previous
                                 </button>
-                            )}
-                            <span className="px-4 py-2 text-sm text-gray-600">
-                                Page {pagination.current_page} of {pagination.last_page}
-                            </span>
-                            {pagination.current_page < pagination.last_page && (
+
+                                <span className="text-sm text-gray-700 whitespace-nowrap">
+                                    Page {pagination.current_page} of {pagination.last_page}
+                                </span>
+
                                 <button
                                     onClick={() => setCurrentPage(prev => prev + 1)}
-                                    className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                                    disabled={pagination.current_page >= pagination.last_page}
+                                    className={`px-4 py-2 rounded transition ${pagination.current_page >= pagination.last_page
+                                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                        : "bg-gray-200 hover:bg-gray-300"
+                                        }`}
                                 >
                                     Next
                                 </button>
-                            )}
+                            </div>
                         </div>
                     )}
                 </div>

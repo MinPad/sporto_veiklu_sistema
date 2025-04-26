@@ -54,7 +54,27 @@ const MySportsEventsSection = () => {
 
         axiosClient.post(`/sports-events/${eventToLeave.id}/leave`)
             .then(() => {
-                setEvents(prev => prev.filter(e => e.id !== eventToLeave.id));
+                setEvents((prevEvents) => {
+                    const updated = prevEvents.filter(e => e.id !== eventToLeave.id);
+
+                    if (updated.length === 0 && pagination.current_page > 1) {
+                        setCurrentPage(prev => prev - 1);
+                        return prevEvents;
+                    }
+
+                    if (updated.length < 3 && pagination.current_page < pagination.last_page) {
+                        axiosClient.get(`/my-sports-events?page=${pagination.current_page + 1}`)
+                            .then((res) => {
+                                const extra = res.data.data;
+                                setEvents([...updated, ...extra]);
+                                setPagination(res.data.meta);
+                            });
+                        return updated;
+                    }
+
+                    return updated;
+                });
+
                 setIsDialogOpen(false);
                 setEventToLeave(null);
                 showSuccessMessage("You have successfully left the event.");
@@ -66,9 +86,10 @@ const MySportsEventsSection = () => {
             });
     };
 
-    if (loading) {
-        return <p className="text-gray-500">Loading your events...</p>;
-    }
+
+    // if (loading) {
+    //     return <p className="text-gray-500">Loading your events...</p>;
+    // }
     const formatDate = (dateStr, locale = 'en-US') => {
         if (!dateStr) return null;
 
@@ -97,7 +118,9 @@ const MySportsEventsSection = () => {
                 />
             )}
             <h2 className="text-2xl font-semibold text-indigo-900 mb-6">My Joined Events</h2>
-            {events.length === 0 ? (
+            {loading ? (
+                <p className="text-gray-500">Loading your joined events...</p>
+            ) : events.length === 0 ? (
                 <div className="bg-white p-6 rounded-xl shadow text-center text-gray-600">
                     You haven’t joined any events yet.
                 </div>
@@ -198,29 +221,37 @@ const MySportsEventsSection = () => {
                         </div>
                     ))}
                     {pagination.total > pagination.per_page && (
-                        <div className="mt-2 pt-2 flex justify-center gap-2 border-t border-gray-100">
-
-                            {pagination.current_page > 1 && (
+                        <div className="mt-4 pt-4 flex justify-center border-t border-gray-100">
+                            <div className="flex items-center gap-4 bg-white px-4 py-2 rounded shadow-sm border border-gray-200">
                                 <button
                                     onClick={() => setCurrentPage(prev => prev - 1)}
-                                    className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                                    disabled={pagination.current_page <= 1}
+                                    className={`px-4 py-2 rounded transition ${pagination.current_page <= 1
+                                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                        : "bg-gray-200 hover:bg-gray-300"
+                                        }`}
                                 >
                                     Previous
                                 </button>
-                            )}
-                            <span className="px-4 py-2 text-sm text-gray-600">
-                                Page {pagination.current_page} of {pagination.last_page}
-                            </span>
-                            {pagination.current_page < pagination.last_page && (
+
+                                <span className="text-sm text-gray-700 whitespace-nowrap">
+                                    Page {pagination.current_page} of {pagination.last_page}
+                                </span>
+
                                 <button
                                     onClick={() => setCurrentPage(prev => prev + 1)}
-                                    className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                                    disabled={pagination.current_page >= pagination.last_page}
+                                    className={`px-4 py-2 rounded transition ${pagination.current_page >= pagination.last_page
+                                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                        : "bg-gray-200 hover:bg-gray-300"
+                                        }`}
                                 >
                                     Next
                                 </button>
-                            )}
+                            </div>
                         </div>
                     )}
+
                 </div>
             )}
 
