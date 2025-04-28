@@ -61,7 +61,6 @@ class AuthController extends Controller
     public function refresh()
     {
     try {
-        // Use the token from the Authorization header OR from the request body
         $token = request()->bearerToken() ?? request('refreshToken');
         
         if (!$token) {
@@ -69,7 +68,6 @@ class AuthController extends Controller
         }
 
         // \Log::info('Received Token for Refresh:', ['token' => $token]);
-        // Manually set the token for refreshing
         // $newAccessToken = auth()->setToken($newRefreshToken)->refresh();
 
         $newAccessToken = auth()->setToken($token)->refresh();

@@ -38,13 +38,14 @@ class UserController extends Controller
     }
     public function current()
     {
-    try {
-        $user = auth()->user();
-        return new UserResource($user);
-    } catch (Exception $e) {
-        return response()->json(['message' => 'Unable to fetch user data'], 500);
+        try {
+            $user = auth()->user();
+            return (new UserResource($user))->response()->setStatusCode(200);
+        } catch (Exception $e) {
+            return response()->json(['message' => 'Unable to fetch user data'], 500);
+        }
     }
-    }
+    
     public function update($id, Request $request)
     {
         // logger('Update method hit');
@@ -134,7 +135,7 @@ class UserController extends Controller
             'disable_welcome_modal' => $request->disable_welcome_modal,
         ]);
     
-        return new UserResource($user);
+        return (new UserResource($user))->response()->setStatusCode(200);
     }
     
     

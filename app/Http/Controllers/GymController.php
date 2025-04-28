@@ -155,6 +155,7 @@ class GymController extends Controller
     
     public function delete(City $city, Gym $gym)
     {
+        $this->authorize('delete', $gym);
         if($city->id != $gym->city_id) return response(['message' => 'Resource not found'], 404);
         $gym->delete();
         return response('', 204);
