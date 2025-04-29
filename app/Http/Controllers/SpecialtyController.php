@@ -5,9 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Specialty;
 use Illuminate\Http\Request;
 use App\Http\Resources\SpecialtyResource;
-
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 class SpecialtyController extends Controller
 {
+    use AuthorizesRequests;
     public function index()
     {
         return response()->json(SpecialtyResource::collection(Specialty::all()), 200);
@@ -15,6 +16,8 @@ class SpecialtyController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorize('create', Specialty::class);
+
         $request->validate([
             'name' => 'required|string|unique:specialties,name|max:255',
         ]);
@@ -28,6 +31,7 @@ class SpecialtyController extends Controller
 
     public function destroy($id)
     {
+        $this->authorize('create', Specialty::class);
         $specialty = Specialty::findOrFail($id);
         $specialty->delete();
 

@@ -125,7 +125,8 @@ class CoachesController extends Controller
         return response()->json(new CoachResource($coach), 200);
 
     } catch (ModelNotFoundException $e) {
-        return response()->json(['message' => 'Coach with this id doesn\'t exist'], 404);
+        return response()->json(['message' => 'There is no coach with that index'], 404);
+
     }
     }
 
