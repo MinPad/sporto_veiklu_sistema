@@ -317,6 +317,197 @@ class GymControllerTest extends TestCase
             'id' => $gym->id,
         ]);
     }
+    #[Test]
+    public function it_filters_gyms_by_specialty()
+    {
+        $city = City::factory()->create();
+        $specialty = \App\Models\Specialty::factory()->create(['name' => 'Yoga']);
+    
+        $gym = Gym::factory()->create(['city_id' => $city->id]);
+        $gym->specialties()->attach($specialty);
+    
+        $response = $this->getJson("/api/cities/{$city->id}/gyms?specialties[]=Yoga");
+    
+        $response->assertStatus(200);
+        $response->assertJsonCount(1, 'data');
+        $response->assertJsonPath('data.0.name', $gym->name);
+    }
+    #[Test]
+    public function it_filters_gyms_by_min_rating()
+    {
+        $city = City::factory()->create();
+    
+        $gym1 = Gym::factory()->create(['city_id' => $city->id]);
+        $gym2 = Gym::factory()->create(['city_id' => $city->id]);
+    
+        \App\Models\GymReview::factory()->create(['gym_id' => $gym1->id, 'rating' => 5]);
+        \App\Models\GymReview::factory()->create(['gym_id' => $gym2->id, 'rating' => 3]);
+    
+        $response = $this->getJson("/api/cities/{$city->id}/gyms");
+        $response->assertStatus(200);
+        
+        $data = $response->json('data');
+        $this->assertNotEmpty($data);
+        $this->assertTrue(
+            collect($data)->contains(function ($gym) {
+                return $gym['reviews_avg_rating'] >= 4;
+            })
+        );
+        
+        $response->assertJsonPath('data.0.id', $gym1->id);
+    }
+    #[Test]
+    public function admin_can_create_gym_with_image_url()
+    {
+        $admin = User::factory()->create(['role' => 'Admin']);
+        $token = auth()->login($admin);
+        $city = City::factory()->create();
+    
+        $payload = [
+            'name' => 'Gym With URL Image',
+            'address' => '123 Online St',
+            'description' => 'Image from URL!',
+            'opening_hours' => '06:00 - 22:00',
+            'latitude' => 54.7,
+            'longitude' => 25.2,
+            'is_free' => false,
+            'monthly_fee' => 29.99,
+            'image_url' => 'https://example.com/image.jpg',
+        ];
+    
+        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+                         ->postJson("/api/cities/{$city->id}/gyms", $payload);
+    
+        $response->assertStatus(201);
+        $response->assertJsonPath('name', 'Gym With URL Image');
+    }
+    #[Test]
+    public function it_filters_gyms_by_pricing_free()
+    {
+        $city = City::factory()->create();
+    
+        Gym::factory()->create([
+            'city_id' => $city->id,
+            'name' => 'Free Gym',
+            'is_free' => true,
+        ]);
+    
+        Gym::factory()->create([
+            'city_id' => $city->id,
+            'name' => 'Paid Gym',
+            'is_free' => false,
+        ]);
+    
+        $response = $this->getJson("/api/cities/{$city->id}/gyms?pricing=free");
+    
+        $response->assertStatus(200);
+        $response->assertJsonCount(1, 'data');
+        $response->assertJsonPath('data.0.name', 'Free Gym');
+    }
+    
+    #[Test]
+    public function it_filters_gyms_by_pricing_paid()
+    {
+        $city = City::factory()->create();
+    
+        Gym::factory()->create([
+            'city_id' => $city->id,
+            'name' => 'Free Gym',
+            'is_free' => true,
+        ]);
+    
+        Gym::factory()->create([
+            'city_id' => $city->id,
+            'name' => 'Paid Gym',
+            'is_free' => false,
+        ]);
+    
+        $response = $this->getJson("/api/cities/{$city->id}/gyms?pricing=paid");
+    
+        $response->assertStatus(200);
+        $response->assertJsonCount(1, 'data');
+        $response->assertJsonPath('data.0.name', 'Paid Gym');
+    }
+    #[Test]
+    public function admin_can_create_gym_with_fallback_image()
+    {
+        $admin = User::factory()->create(['role' => 'Admin']);
+        $token = auth()->login($admin);
+    
+        $city = City::factory()->create();
+    
+        $payload = [
+            'name' => 'Fallback Image Gym',
+            'address' => 'No Image St',
+            'description' => 'No image provided.',
+            'opening_hours' => '06:00 - 23:00',
+            'latitude' => 54.68,
+            'longitude' => 25.28,
+            'is_free' => true,
+        ];
+    
+        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+                         ->postJson("/api/cities/{$city->id}/gyms", $payload);
+    
+        $response->assertStatus(201);
+        $response->assertJsonPath('name', 'Fallback Image Gym');
+    
+        $this->assertDatabaseHas('gyms', [
+            'name' => 'Fallback Image Gym',
+            'city_id' => $city->id,
+        ]);
+    }
+    #[Test]
+    public function it_returns_404_if_city_not_found_in_index()
+    {
+        $response = $this->getJson('/api/cities/9999/gyms');
+    
+        $response->assertStatus(404);
+        $response->assertJson([
+            'message' => 'City not found',
+        ]);
+    }
+    #[Test]
+    public function it_returns_404_if_city_not_found_in_show()
+    {
+        $gym = Gym::factory()->create();
+    
+        $response = $this->getJson('/api/cities/9999/gyms/' . $gym->id);
+    
+        $response->assertStatus(404);
+        $response->assertJson([
+            'message' => 'City not found',
+        ]);
+    }
+    #[Test]
+    public function it_returns_404_when_storing_gym_in_nonexistent_city()
+    {
+        $admin = User::factory()->create(['role' => 'Admin']);
+        $token = auth()->login($admin);
+    
+        $payload = [
+            'name' => 'Missing City Gym',
+            'address' => 'Nowhere St',
+            'description' => 'City does not exist',
+            'opening_hours' => '06:00 - 22:00',
+            'latitude' => 54.6,
+            'longitude' => 25.3,
+            'is_free' => true,
+        ];
+    
+        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+                         ->postJson('/api/cities/9999/gyms', $payload);
+    
+        $response->assertStatus(404);
+    }
+    
+    
+    
+    
+            
+    
+    
+    
     
     
     

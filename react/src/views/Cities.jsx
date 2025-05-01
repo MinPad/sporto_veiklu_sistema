@@ -22,7 +22,7 @@ export default function Cities() {
 
     const { userRole } = useStateContext();
     const isAdmin = userRole === 'Admin';
-
+    // console.log(userRole);
     useEffect(() => {
         fetchCities(currentPage);
     }, [currentPage]);

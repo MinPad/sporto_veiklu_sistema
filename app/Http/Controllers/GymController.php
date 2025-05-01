@@ -40,9 +40,8 @@ class GymController extends Controller
         }
     
         if ($request->filled('min_rating')) {
-            $query->whereHas('reviews', function ($q) use ($request) {
-                $q->havingRaw('AVG(reviews.rating) >= ?', [$request->min_rating]);
-            });
+            $query->withAvg('reviews', 'rating')
+                  ->having('reviews_avg_rating', '>=', $request->min_rating);
         }
     
         if ($request->filled('pricing')) {
@@ -71,7 +70,7 @@ class GymController extends Controller
         if (!$gym) {
           return response()->json(['message' => 'Gym not found'], 404);
         }
-
+        $this->authorize('view', $gym);
         return response()->json(new GymResource($gym), 200);
     }
 

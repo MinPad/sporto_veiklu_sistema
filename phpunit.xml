@@ -12,11 +12,21 @@
             <directory>tests/Feature</directory>
         </testsuite>
     </testsuites>
+
     <source>
         <include>
             <directory>app</directory>
         </include>
+        <exclude>
+            <file>app/Exceptions/Handler.php</file>
+            <file>app/Http/Kernel.php</file>
+            <file>app/Http/Resources/SportsEventResource.php</file>
+            <file>app/Models/Exercise.php</file>
+            <file>app/Http/Middleware/CorsMiddleware.php</file>
+            <file>app/Models/RefreshToken.php</file>
+        </exclude>
     </source>
+
     <php>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>

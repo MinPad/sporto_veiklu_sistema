@@ -1,24 +1,22 @@
-import { Navigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
+import { Navigate, useLocation } from "react-router-dom";
+import { useStateContext } from "../contexts/ContexProvider";
 
 const ProtectedRoute = ({ requiredRole, children }) => {
-    // console.log('ProtectedRoute rendered')
-    const token = localStorage.getItem("TOKEN");
+    const { userToken, userRole } = useStateContext();
+    const location = useLocation();
 
-    if (!token) {
-        return <Navigate to="/login" replace state={{ fromProtected: true }} />;
+    if (!userToken) {
+        return (
+            <Navigate
+                to="/login"
+                replace
+                state={{ fromProtected: true, from: location.pathname }}
+            />
+        );
     }
 
-    try {
-        const decodedToken = jwtDecode(token);
-        const userRole = decodedToken.role;
-
-        if (requiredRole && userRole !== requiredRole) {
-            return <Navigate to="/UnauthorizedPage" replace />;
-        }
-    } catch (error) {
-        console.error("Invalid token:", error);
-        return <Navigate to="/login" replace state={{ fromProtected: true }} />;
+    if (requiredRole && userRole !== requiredRole) {
+        return <Navigate to="/UnauthorizedPage" replace />;
     }
 
     return children;

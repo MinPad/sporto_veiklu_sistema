@@ -13,7 +13,7 @@ class GymPolicy
      */
     public function viewAny(User $user): bool
     {
-        //
+        return true;
     }
 
     /**
@@ -21,7 +21,7 @@ class GymPolicy
      */
     public function view(User $user, Gym $gym): bool
     {
-        //
+        return true;
     }
 
     /**

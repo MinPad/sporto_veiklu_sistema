@@ -13,6 +13,44 @@ use App\Http\Controllers\SpecialtyController;
 use App\Http\Controllers\GymReviewController;
 use App\Http\Controllers\RecommendationController;
 
+use App\Models\User;
+use App\Models\SportEvent;
+use Illuminate\Support\Facades\Hash;
+Route::post('/test/create-user', function (\Illuminate\Http\Request $request) {
+    $email = $request->get('email', 'admin@gmail.com');
+    $password = $request->get('password', 'Admin123!');
+    $role = $request->get('role', 'User');
+
+    $user = \App\Models\User::updateOrCreate(
+        ['email' => $email],
+        [
+            'name' => 'Test User',
+            'password' => Hash::make($password),
+            'role' => $role,
+        ]
+    );
+
+    return response()->json(['user' => $user]);
+});
+Route::post('/test/create-event', function (\Illuminate\Http\Request $request) {
+    $gym = \App\Models\Gym::firstOrFail(); // Will throw 500 if no gyms exist
+
+    $event = \App\Models\SportEvent::create([
+        'name' => $request->get('name', 'Test Event'),
+        'description' => 'E2E test event',
+        'location' => 'Test Location',
+        'entry_fee' => 0,
+        'is_free' => true,
+        'start_date' => now()->addDays(1),
+        'end_date' => now()->addDays(2),
+        'max_participants' => 10,
+        'gym_id' => $gym->id,
+    ]);
+
+    return response()->json(['event' => $event]);
+});
+
+
 Route::post('/password/email', [PasswordResetController::class, 'sendResetLink']);
 Route::post('/password/reset', [PasswordResetController::class, 'resetPassword']);
 

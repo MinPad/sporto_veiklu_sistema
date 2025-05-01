@@ -45,9 +45,19 @@ class AuthController extends Controller
         ], 422);
     }
 
-    $token = auth()->attempt($credentials);
-    $refreshToken = auth()->setTTL(config('jwt.refresh_ttl'))->attempt($credentials);
+    // $token = auth()->attempt($credentials);
+    // $refreshToken = auth()->setTTL(config('jwt.refresh_ttl'))->attempt($credentials);
+$token = auth()->attempt($credentials);
 
+if (!$token) {
+    return response()->json([
+        'errors' => [
+            'login' => ['Incorrect email or password.']
+        ]
+    ], 422);
+}
+
+$refreshToken = auth()->setToken($token)->refresh();
     return response()->json([
         'success' => true,
         'message' => 'Login successful',

@@ -34,6 +34,7 @@ export default function SportEventListItem({
             successTimeoutRef.current = null;
         }, 3000);
     };
+    const [isJoined, setIsJoined] = useState(sportEvent.is_joined);
     const [showUnauthorized, setShowUnauthorized] = useState(false);
     const toggleDescription = () => {
         setShowFullDescription(!showFullDescription);
@@ -46,6 +47,7 @@ export default function SportEventListItem({
         axiosClient
             .post(`/sports-events/${sportEvent.id}/leave`)
             .then((response) => {
+                setIsJoined(false);
                 setLeaveDialogOpen(false);
                 showSuccessMessage(response.data.message);
                 if (typeof onJoinClick === "function") {
@@ -81,6 +83,7 @@ export default function SportEventListItem({
         axiosClient
             .post(`/sports-events/${sportEvent.id}/join`)
             .then((response) => {
+                setIsJoined(true);
                 showSuccessMessage(response.data.message);
                 if (typeof onJoinClick === "function") {
                     onJoinClick(sportEvent.id, response.data.event.current_participants);
@@ -110,13 +113,14 @@ export default function SportEventListItem({
                     onClose={() => setShowUnauthorized(false)}
                 />
             )}
-            <div className="relative group h-[470px]">
+            <div className="relative group h-[470px]" data-testid={`event-card-${sportEvent.id}`}>
                 <div className="flex flex-col justify-between h-full py-4 px-6 shadow-lg bg-white hover:bg-gray-50 rounded-lg transition cursor-pointer">
 
                     {/* Clickable area */}
                     <Link
                         to={`/sports-events/${sportEvent.id}/details`}
                         className="flex-1 block hover:no-underline"
+                        data-testid={`event-details-link-${sportEvent.id}`}
                     >
                         <h4 className="mt-4 text-lg font-bold flex items-center gap-2">
                             {sportEvent.name}
@@ -221,8 +225,12 @@ export default function SportEventListItem({
                             </>
                         )}
 
-                        {sportEvent.is_joined ? (
-                            <TButton color="red" onClick={() => setLeaveDialogOpen(true)}>
+                        {isJoined ? (
+                            <TButton
+                                color="red"
+                                onClick={() => setLeaveDialogOpen(true)}
+                                data-testid={`leave-button-${sportEvent.id}`}
+                            >
                                 Leave Event
                             </TButton>
                         ) : (
@@ -231,10 +239,12 @@ export default function SportEventListItem({
                                 icon={<UserGroupIcon />}
                                 onClick={joinEvent}
                                 disabled={sportEvent.isFull}
+                                data-testid={`join-button-${sportEvent.id}`}
                             >
                                 {sportEvent.isFull ? "Event Full" : "Join Event"}
                             </TButton>
                         )}
+
                     </div>
 
                     {/* Modals */}
@@ -256,4 +266,5 @@ export default function SportEventListItem({
             </div>
         </>
     );
+
 }

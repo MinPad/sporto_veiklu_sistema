@@ -68,12 +68,14 @@ export default function Login() {
                     setUserToken(token);
                     localStorage.setItem('TOKEN', token);
                     localStorage.setItem('REFRESH_TOKEN', refreshToken);
-                    navigate(`/`);
+                    const from = location.state?.from || '/';
+                    navigate(from);
                 } else {
                     console.error("No token received from API");
                 }
             })
             .catch((error) => {
+                console.error('Login failed:', error);
                 if (error.response && error.response.status === 422) {
                     const finalErrors = Object.values(error.response.data.errors).reduce(
                         (accum, next) => [...accum, ...next],
