@@ -8,6 +8,7 @@ import UnauthorizedAlert from '../components/core/UnauthorizedAlert';
 import SuccessAlert from '../components/core/SuccessAlert';
 
 export default function Login() {
+
     const { setCurrentUser, setUserToken } = useStateContext();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -52,7 +53,7 @@ export default function Login() {
     const onSubmit = (ev) => {
         ev.preventDefault();
         setError({ __html: "" });
-
+        console.log({ email, password });
         axiosClient
             .post("/login", {
                 email,

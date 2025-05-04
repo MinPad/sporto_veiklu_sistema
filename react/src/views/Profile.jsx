@@ -29,7 +29,7 @@ const Profile = () => {
         { title: 'Public Profile', id: 'publicProfile' },
         { title: 'Settings', id: 'settings' },
         { title: 'Personalization', id: 'personalization' },
-        { title: 'Health Report', id: 'healthReport' },
+        // { title: 'Health Report', id: 'healthReport' },
         { title: 'My Sports Events', id: 'mySportsEvents' },
         { title: 'Recommended for You', id: 'recommendedForYou' },
     ];

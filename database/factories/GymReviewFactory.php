@@ -14,10 +14,10 @@ class GymReviewFactory extends Factory
     public function definition()
     {
         return [
-            'user_id' => User::factory(),
-            'gym_id' => Gym::factory(),
+            'user_id' => User::inRandomOrder()->first()->id,
+            'gym_id' => Gym::inRandomOrder()->first()->id,
             'rating' => $this->faker->numberBetween(1, 5),
-            'comment' => $this->faker->optional()->sentence,
+            'comment' => $this->faker->sentence(),
         ];
     }
 }

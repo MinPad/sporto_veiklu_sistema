@@ -18,7 +18,7 @@ export default function TButton({
         "border",
         "border-2",
         "border-transparent",
-        "transition-all", // Add transition for smooth hover effect
+        "transition-all",
     ];
 
     if (link) {

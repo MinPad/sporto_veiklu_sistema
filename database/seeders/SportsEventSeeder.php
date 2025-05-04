@@ -33,7 +33,7 @@ class SportsEventSeeder extends Seeder
             'Martial Arts' => ['Endurance', 'Weight Loss', 'Discipline'],
         ];
     
-        SportsEvent::factory()->count(5)->create()->each(function ($event) use ($goalMap) {
+        SportsEvent::factory()->count(17)->create()->each(function ($event) use ($goalMap) {
             $specialties = Specialty::inRandomOrder()->take(rand(1, 2))->get();
             $event->specialties()->attach($specialties->pluck('id'));
     

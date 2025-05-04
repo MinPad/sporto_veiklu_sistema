@@ -35,13 +35,12 @@ class GymController extends Controller
     
         if ($request->filled('specialties')) {
             $query->whereHas('specialties', function ($q) use ($request) {
-                $q->whereIn('specialties.name', $request->specialties);
+                $q->whereIn('specialties.id', $request->specialties);
             });
         }
     
         if ($request->filled('min_rating')) {
-            $query->withAvg('reviews', 'rating')
-                  ->having('reviews_avg_rating', '>=', $request->min_rating);
+            $query->having('reviews_avg_rating', '>=', $request->min_rating);
         }
     
         if ($request->filled('pricing')) {
@@ -61,6 +60,7 @@ class GymController extends Controller
             $query->paginate($request->get('per_page', 6))
         );
     }
+    
     
     
     public function getGymById($gymId)

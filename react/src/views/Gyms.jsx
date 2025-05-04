@@ -104,7 +104,7 @@ export default function Gyms() {
                 page,
                 per_page: 6,
                 specialties: filters.specialties.length > 0 ? filters.specialties : undefined,
-                min_rating: filters.minRating > 0 ? filters.minRating : undefined,
+                min_rating: Number(filters.minRating) > 0 ? Number(filters.minRating) : undefined,
                 pricing: filters.pricing !== 'all' ? filters.pricing : undefined,
                 search: searchQuery || undefined,
             }
