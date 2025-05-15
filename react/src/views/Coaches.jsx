@@ -12,7 +12,7 @@ import FilterDrawerCoach from '../components/core/FilterDrawerCoach';
 import SearchFilterBar from "../components/core/SearchFilterBar";
 export default function Coaches() {
     const { cityId, gymId } = useParams();
-
+    const [gym, setGym] = useState(null);
     const [coaches, setCoaches] = useState([]);
     const [filteredCoaches, setFilteredCoaches] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -46,7 +46,17 @@ export default function Coaches() {
         fetchSpecialties();
     }, []);
 
+    useEffect(() => {
+        if (!gymId) return;
 
+        axiosClient.get(`/cities/${cityId}/gyms/${gymId}`, {
+            headers: {
+                'X-Public-Request': 'true'
+            }
+        })
+            .then((res) => setGym(res.data))
+            .catch((err) => console.error("Error fetching gym:", err));
+    }, [cityId, gymId]);
     useEffect(() => {
         const token = localStorage.getItem("TOKEN");
         if (token) {
@@ -141,7 +151,7 @@ export default function Coaches() {
 
     return (
         <PageComponent
-            title="Coaches"
+            title={gym ? `Coaches in "${gym.name}"` : "Loading Coaches..."}
             searchBar={searchBar}
             buttons={
                 <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto sm:ml-auto">

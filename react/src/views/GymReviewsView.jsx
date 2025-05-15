@@ -95,7 +95,7 @@ export default function GymReviewsView() {
                         <ArrowLeftIcon className="w-5 h-5 mr-2" />
                         Back to Gym
                     </TButton>
-
+                    {/* 
                     {currentUser && !reviews.some(r => r.user_id === currentUser.id) && (
                         <TButton
                             color="green"
@@ -105,7 +105,7 @@ export default function GymReviewsView() {
                             <ChatBubbleLeftRightIcon className="w-5 h-5 mr-2" />
                             {showReviewForm ? "Hide Review Form" : "Leave a Review"}
                         </TButton>
-                    )}
+                    )} */}
                 </div>
             }
         >

@@ -324,10 +324,10 @@ class GymControllerTest extends TestCase
         $specialty = \App\Models\Specialty::factory()->create(['name' => 'Yoga']);
     
         $gym = Gym::factory()->create(['city_id' => $city->id]);
-        $gym->specialties()->attach($specialty);
+        $gym->specialties()->attach($specialty->id);
     
-        $response = $this->getJson("/api/cities/{$city->id}/gyms?specialties[]=Yoga");
-    
+        $response = $this->getJson("/api/cities/{$city->id}/gyms?specialties[]={$specialty->id}");
+
         $response->assertStatus(200);
         $response->assertJsonCount(1, 'data');
         $response->assertJsonPath('data.0.name', $gym->name);
